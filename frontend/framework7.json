@@ -1,0 +1,19 @@
+{
+  "cwd": "C:\\Users\\wuest\\Documents\\Projects\\mba-svelte",
+  "type": [
+    "pwa"
+  ],
+  "name": "Central Toolkit",
+  "framework": "svelte",
+  "template": "single-view",
+  "bundler": "vite",
+  "cssPreProcessor": "scss",
+  "theming": {
+    "customColor": true,
+    "color": "#ff8300",
+    "darkTheme": false,
+    "iconFonts": true,
+    "fillBars": true
+  },
+  "customBuild": false
+}

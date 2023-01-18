@@ -1,0 +1,199 @@
+<script>
+  import {
+    theme,
+    Page,
+    Navbar,
+    NavRight,
+    Link,
+    Block,
+    BlockTitle,
+    List,
+    ListItem,
+    Icon,
+    Searchbar,
+  } from "framework7-svelte";
+
+  import { Central } from "../js/central";
+
+  let central = new Central();
+
+  let devices = []; /* = [
+    {
+      associated_device: "CNG0AP01FK",
+      associated_device_mac: "80:8d:b7:aa:aa:aa",
+      associated_device_name: "IAP-315",
+      authentication_type: "",
+      band: 5,
+      channel: "124 (80 MHz)",
+      client_type: "WIRELESS",
+      connected_device_type: "AP",
+      connection: "802.11ac, 802.11k, 802.11v",
+      encryption_method: "WPA2_PSK",
+      failure_stage: "",
+      group_id: 2,
+      group_name: "Home-AP-Group",
+      health: 96,
+      ht_type: 5,
+      ip_address: "192.168.0.126",
+      label_id: [],
+      labels: [],
+      last_connection_time: 1674028811000,
+      macaddr: "30:ab:6a:aa:aa:aa",
+      manufacturer: "SAMSUNG ELECTRO-MECHANICS(THAILAND)",
+      maxspeed: 866,
+      name: "SM-N986B",
+      network: "WLAN-Aruba",
+      os_type: "Samsung Android",
+      phy_type: 1,
+      radio_mac: "80:8d:b7:2a:aa:b0",
+      radio_number: 0,
+      signal_db: -39,
+      signal_strength: 5,
+      site: "BBN-Home",
+      snr: 53,
+      speed: 866,
+      swarm_id: "a782cddd014c475d49bfb5fef62f5b312e358026137b1be38f",
+      usage: 716730,
+      user_role: "WLAN-Aruba",
+      username: "--",
+      vlan: 1,
+    },
+    {
+      associated_device: "CN8BSW01FK",
+      associated_device_mac: "54:80:28:aa:aa:50",
+      associated_device_name: "Aruba-2930F-8G-PoEP-2SFPP",
+      authentication_type: "",
+      band: "NA",
+      channel: "NA",
+      client_type: "WIRED",
+      connected_device_type: "SWITCH",
+      connection: "NA",
+      encryption_method: "NA",
+      failure_stage: "NA",
+      group_id: 38,
+      group_name: "SW-Template",
+      interface_mac: "54:80:28:aa:aa:59",
+      interface_port: "7",
+      ip_address: "192.168.0.75",
+      label_id: [],
+      labels: [],
+      last_connection_time: 1672885200000,
+      macaddr: "00:1a:e8:aa:aa:aa",
+      manufacturer: "Unify Software and Solutions GmbH & Co. KG",
+      name: "00:1a:e8:aa:aa:aa",
+      network: "NA",
+      os_type: "--",
+      site: "BBN-Home",
+      snr: "NA",
+      user_role: "unauthenticated",
+      username: "--",
+      vlan: 1,
+    },
+  ];*/
+
+  function onPageInit() {
+    Promise.all([
+      central.listAccessPoints(),
+      central.listGateways(),
+      central.listSwitches(),
+    ]).then((deviceLists) => {
+      console.log(deviceLists);
+      devices = [
+        ...deviceLists[0].aps,
+        ...deviceLists[1].gateways,
+        ...deviceLists[2].switches,
+      ];
+    });
+    // central.listAccessPoints().then((deviceList) => {
+    //   console.log(deviceList);
+    //   devices = deviceList.aps;
+    // });
+  }
+</script>
+
+<Page on:pageInit={onPageInit}>
+  <Navbar title="Clients" backLink="Back"
+    ><NavRight>
+      <!---->
+      <Link
+        iconIos="f7:line_horizontal_3_decrease"
+        iconAurora="f7:line_horizontal_3_decrease"
+        iconMd="material:filter_list"
+        panelOpen="right"
+      />
+      <Link
+        searchbarEnable=".searchbar-device"
+        iconIos="f7:search"
+        iconAurora="f7:search"
+        iconMd="material:search"
+        disabled={!devices.length}
+      />
+    </NavRight>
+    <Searchbar
+      class="searchbar-device"
+      expandable
+      searchContainer=".search-list"
+      searchIn=".item-title"
+      disableButton={!theme.aurora}
+    />
+  </Navbar>
+  <BlockTitle>Clients</BlockTitle>
+  <List class="search-list">
+    {#if !devices.length}
+      {#each [{ ios: "material:cable", aurora: "material:cable", md: "material:cable" }, { ios: "material:cable", aurora: "material:cable", md: "material:cable" }, { ios: "f7:wifi", aurora: "f7:wifi", md: "material:wifi" }, { ios: "f7:wifi", aurora: "f7:wifi", md: "material:wifi" }, { ios: "material:gate", aurora: "material:gate", md: "material:gate" }, { ios: "material:gate", aurora: "material:gate", md: "material:gate" }].sort((a, b) => 0.5 - Math.random()) as icon}
+        <ListItem
+          class={theme.ios
+            ? "skeleton-text skeleton-effect-pulse"
+            : "skeleton-text skeleton-effect-wave"}
+          footer="00:00:00:00:00:00 - 192.168.10.100"
+          title="Name of Device"
+          header="CN20304050 - Access Point"
+          href="#"
+        >
+          <!-- <i slot="media" class="icon demo-list-icon" /> -->
+          <!-- logo_windows logo_android logo_ios logo_macos logo_google-->
+          {#if true}
+            <Icon
+              slot="media"
+              ios={icon.ios}
+              aurora={icon.aurora}
+              md={icon.md}
+            />
+          {/if}
+        </ListItem>
+      {/each}
+    {/if}
+    {#each devices as device}
+      <ListItem
+        header={`${device.group_name}`}
+        title={device.name ? device.name : device.macaddr}
+        footer={`${device.serial} – ${device.macaddr}`}
+        href="/device-details/"
+        routeProps={{ device: device }}
+      >
+        {#if device?.switch_type}
+          <Icon
+            slot="media"
+            ios="material:cable"
+            aurora="material:cable"
+            md="material:cable"
+          />
+        {:else if device?.ap_deployment_mode}
+          <Icon
+            slot="media"
+            ios="f7:wifi"
+            aurora="f7:wifi"
+            md="material:wifi"
+          />
+        {:else}
+          <Icon
+            slot="media"
+            ios="material:gate"
+            aurora="material:gate"
+            md="material:gate"
+          />
+        {/if}
+      </ListItem>
+    {/each}
+  </List>
+</Page>
