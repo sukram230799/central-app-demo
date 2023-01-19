@@ -1,0 +1,7 @@
+version: '3.3'
+
+services:
+  mba-svelte:
+    build: .
+    ports:
+      - '127.0.0.1:26799:26799'
