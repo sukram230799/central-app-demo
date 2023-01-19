@@ -18,7 +18,7 @@ RUN npm install
 # If you are building your code for production
 # RUN npm ci --only=production
 
-COPY --from=client /usr/app/client/www/ ./
+COPY --from=client /usr/app/client/www/ ./www/
 COPY ./backend/server.js ./
 
 EXPOSE 26799
