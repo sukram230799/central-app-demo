@@ -97,10 +97,14 @@
     <ListItem link="/firmware/" title="Firmware" />
     <ListItem link="/clients/" title="Clients" />
     <ListItem link="/devices/" title="Devices" />
+    <ListItem link="/troubleshooting/" title="Troubleshooting" />
+  </List>
+
+  <BlockTitle>Settings</BlockTitle>
+  <List>
     <ListItem link="/settings/camera/" title="Camera Settings" />
     <ListItem link="/settings/central/" title="Central Settings" />
   </List>
-
   <!-- <BlockTitle>Modals</BlockTitle>
   <Block strong>
     <Row>

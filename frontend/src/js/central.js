@@ -407,5 +407,11 @@ export class Central {
     return groups.responseBody;
   }
   getAllGroups = this.listGroups;
+
+  async listTroubleshootingCommands({ device_type }) {
+    let troubleshootingCommands = await this.get('troubleshooting/v1/commands', { params: { device_type } });
+    console.log(troubleshootingCommands);
+    return troubleshootingCommands.responseBody;
+  }
 }
 
