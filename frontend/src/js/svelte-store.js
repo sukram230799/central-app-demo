@@ -69,8 +69,10 @@ const selectedFilterDefaults = {
     additionalFields: ['usage', 'manufacturer', 'signal_db'],
 };
 
-const selectedFilter = writable(localStorage.selectedFilter ? JSON.parse(localStorage.selectedFilter) : { ...selectedFilterDefaults });
-selectedFilter.subscribe((value) => localStorage.selectedFilter = JSON.stringify(value));
+const selectedFilterStore = writable(localStorage.selectedFilter ? JSON.parse(localStorage.selectedFilter) : { ...selectedFilterDefaults });
+selectedFilterStore.subscribe((value) => localStorage.selectedFilter = JSON.stringify(value));
+
+const selectedSortingOrderStore = writable('');
 
 const selectedSortingOrder = writable('');
 
@@ -81,8 +83,8 @@ export {
     currentAccount as currentAccountStore,
     selectedFilterNames,
     selectedFilterDefaults,
-    selectedFilter,
-    selectedSortingOrder,
+    selectedFilterStore as selectedFilterStore,
+    selectedSortingOrderStore as selectedSortingOrderStore,
     timeRanges,
 };
 

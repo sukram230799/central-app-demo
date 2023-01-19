@@ -32,10 +32,10 @@
   import routes from "../js/routes";
   import store from "../js/store";
   import {
-    selectedFilter,
+    selectedFilterStore,
     selectedFilterDefaults,
     selectedFilterNames,
-    selectedSortingOrder,
+    selectedSortingOrderStore,
     timeRanges,
   } from "../js/svelte-store";
 
@@ -95,7 +95,7 @@
   }
 
   function deleteFilterChip(filterId) {
-    selectedFilter.update((value) => {
+    selectedFilterStore.update((value) => {
       value[filterId] = selectedFilterDefaults[filterId];
       return value;
     });
@@ -138,7 +138,7 @@
             <select
               name="selectedSortingOrder"
               multiple
-              bind:value={$selectedSortingOrder}
+              bind:value={$selectedSortingOrderStore}
             >
               {#each Object.entries(selectedFilterNames) as [id, name]}
                 <option value={id}>{name}</option>
@@ -148,7 +148,7 @@
         </List>
         <BlockTitle>Filter</BlockTitle>
         <Block noHairlines={true}>
-          {#each Object.entries($selectedFilter) as [filterId, value]}
+          {#each Object.entries($selectedFilterStore) as [filterId, value]}
             <!--{#if value && !(Array.isArray(value) && !value.length) && !(filterId === "clientStatus" && value === "connected") && !(filterId === "clientType" && value === "both")}-->
             {#if value != selectedFilterDefaults[filterId] && !(Array.isArray(value) && arrayIsEqual(value, selectedFilterDefaults[filterId]))}
               <Chip
@@ -165,7 +165,7 @@
             label={selectedFilterNames.clientType}
             id="filterClientType"
             type="select"
-            bind:value={$selectedFilter.clientType}
+            bind:value={$selectedFilterStore.clientType}
             placeholder="Please choose..."
           >
             <option value="both">Both</option>
@@ -176,7 +176,7 @@
             label={selectedFilterNames.group}
             id="filterGroup"
             type="select"
-            bind:value={$selectedFilter.group}
+            bind:value={$selectedFilterStore.group}
             placeholder="Pease choose..."
           >
             <option value="0">Group 0</option>
@@ -189,7 +189,7 @@
             label={selectedFilterNames.label}
             id="filterLabel"
             type="select"
-            bind:value={$selectedFilter.label}
+            bind:value={$selectedFilterStore.label}
             placeholder="Pease choose..."
           >
             <option value="0">Label 0</option>
@@ -202,7 +202,7 @@
             label={selectedFilterNames.site}
             id="filterSite"
             type="select"
-            bind:value={$selectedFilter.site}
+            bind:value={$selectedFilterStore.site}
             placeholder="Pease choose..."
           >
             <option value="0">Site 0</option>
@@ -218,7 +218,7 @@
             <span slot="input">
               <Range
                 id="filterTimeRange"
-                bind:value={$selectedFilter.timeRange}
+                bind:value={$selectedFilterStore.timeRange}
                 min={0}
                 max={4}
                 label={true}
@@ -234,7 +234,7 @@
             label={selectedFilterNames.clientStatus}
             id="filterClientStatus"
             type="select"
-            bind:value={$selectedFilter.clientStatus}
+            bind:value={$selectedFilterStore.clientStatus}
             placeholder="Please choose..."
           >
             <option value="CONNECTED">Connected</option>
@@ -244,35 +244,35 @@
             label={selectedFilterNames.network}
             id="filterNetworkName"
             type="text"
-            bind:value={$selectedFilter.network}
+            bind:value={$selectedFilterStore.network}
             placeholder="CorporateWiFi"
           />
           <ListInput
             label={selectedFilterNames.serial}
             id="filterSerial"
             type="text"
-            bind:value={$selectedFilter.serial}
+            bind:value={$selectedFilterStore.serial}
             placeholder="CN102030"
           />
           <ListInput
             label={selectedFilterNames.swarmId}
             id="filterSwarmId"
             type="text"
-            bind:value={$selectedFilter.swarmId}
+            bind:value={$selectedFilterStore.swarmId}
             placeholder="Swarm Id"
           />
           <ListInput
             label={selectedFilterNames.clusterId}
             id="filterClusterId"
             type="text"
-            bind:value={$selectedFilter.clusterId}
+            bind:value={$selectedFilterStore.clusterId}
             placeholder="Mobility Controller Serial"
           />
           <ListInput
             label={selectedFilterNames.band}
             id="filterBand"
             type="select"
-            bind:value={$selectedFilter.band}
+            bind:value={$selectedFilterStore.band}
             placeholder="Please choose..."
           >
             <option value="">All</option>
@@ -284,13 +284,13 @@
             label={selectedFilterNames.stackId}
             id="filterStackId"
             type="text"
-            bind:value={$selectedFilter.stackId}
+            bind:value={$selectedFilterStore.stackId}
             placeholder="Switch Stack Id"
           />
           <ListInput
             label={selectedFilterNames.osType}
             id="filterOSType"
-            bind:value={$selectedFilter.osType}
+            bind:value={$selectedFilterStore.osType}
             placeholder="Samsung Android"
           />
           <ListItem
@@ -299,7 +299,11 @@
             smartSelect
             smartSelectParams={{ openIn: "popover" }}
           >
-            <select name="field" multiple bind:value={$selectedFilter.field}>
+            <select
+              name="field"
+              multiple
+              bind:value={$selectedFilterStore.field}
+            >
               {#if !"wired"}
                 <option value="name">Name</option>
                 <option value="ip_address">IP Address</option>
@@ -341,7 +345,7 @@
             <select
               name="field"
               multiple
-              bind:value={$selectedFilter.additionalFields}
+              bind:value={$selectedFilterStore.additionalFields}
             >
               <option value="usage">Usage</option>
               <option value="manufacturer">Manufacturer</option>

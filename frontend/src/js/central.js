@@ -1,7 +1,5 @@
-// import { credentials } from './svelte-store.js';
-// const axios = require('axios');
 import axios from 'axios';
-import { currentAccountStore, accountsStore, selectedFilter, selectedFilterDefaults, timeRanges } from './svelte-store.js';
+import { currentAccountStore, accountsStore, selectedFilterStore, selectedFilterDefaults, timeRanges } from './svelte-store.js';
 
 // const proxy = `${window.location.origin}/api-proxy`;
 // const proxy = `http://localhost:26799/api-proxy`;
@@ -15,7 +13,7 @@ export class Central {
   constructor() {
     this.filters = selectedFilterDefaults;
     currentAccountStore.subscribe((value) => this.account = value);
-    selectedFilter.subscribe((value) => this.filters = value);
+    selectedFilterStore.subscribe((value) => this.filters = value);
     this.proxy = `${window.location.origin}/api-proxy`;
 
   }
