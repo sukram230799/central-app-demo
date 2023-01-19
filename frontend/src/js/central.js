@@ -89,6 +89,8 @@ export class Central {
 
                 return value;
             });
+    } else {
+      throw { name: 'TokenNotUpdated', message: 'Token could not be updated.' };
         }
 
         // return credentialResponse.data.responseBody.access_token;
