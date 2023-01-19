@@ -2,7 +2,7 @@ const express = require('express');
 const webpush = require('web-push');
 const bodyparser = require('body-parser');
 const axios = require('axios').default;
-var cors = require('cors')
+var cors = require('cors');
 
 
 const vapidDetails = {
@@ -45,7 +45,7 @@ function sendNotifications(subscriptions) {
 subs = {};
 
 const app = express();
-app.use(cors())
+// app.use(cors());
 app.use(bodyparser.json());
 app.use(express.static('www'));
 
@@ -91,7 +91,7 @@ app.post('/api-proxy', async (request, response) => {
         centralResponse = await axios.request({
             // baseURL: request.body.baseURL,
             url: request.body.url,
-            body: request.body.body,
+            data: request.body.data,
             headers: request.body.headers,
             params: request.body.params,
             method: request.body.method,

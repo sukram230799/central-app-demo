@@ -13,8 +13,7 @@ export class Central {
     account;
     constructor() {
         currentAccountStore.subscribe((value) => this.account = value);
-        this.proxy = window.location.hostname === 'localhost' ?
-            "http://localhost:26799/api-proxy" : `${window.location.origin}/api-proxy`;
+    this.proxy = `${window.location.origin}/api-proxy`;
 
     }
 

@@ -46,6 +46,15 @@ module.exports = async function () {
     server: {
       host: true,
       port: 25799,
+      proxy: {
+        '/api-proxy': {
+          target: 'http://localhost:26799',
+          changeOrigin: true,
+          configure: (proxy, options) => {
+            // proxy will be an instance of 'http-proxy'
+          },
+        },
+      },
     },
   }
 };
