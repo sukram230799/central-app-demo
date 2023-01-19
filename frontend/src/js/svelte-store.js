@@ -82,7 +82,7 @@ const siteCacheStore = writable(localStorage.sites ? JSON.parse(localStorage.sit
 siteCacheStore.subscribe((value) => localStorage.sites = JSON.stringify(value));
 const siteStore = derived([siteCacheStore], ([$siteCacheStore]) => $siteCacheStore.sites);
 
-const labelCacheStore = writable(localStorage.lables ? JSON.parse(localStorage.lables) : { labels: [] });
+const labelCacheStore = writable(localStorage.labels ? JSON.parse(localStorage.labels) : { labels: [] });
 labelCacheStore.subscribe((value) => localStorage.labels = JSON.stringify(value));
 const labelStore = derived([labelCacheStore], ([$labelCacheStore]) => $labelCacheStore.labels);
 

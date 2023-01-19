@@ -342,7 +342,7 @@
                 <option value="speed">Speed</option>
                 <option value="usage">Usage</option>
                 <option value="health">Health</option>
-                <option value="labels">Lables</option>
+                <option value="labels">Labels</option>
                 <option value="site">Site</option>
                 <option value="signal_strength">Signal Strength</option>
                 <option value="signal_db">Signal dB</option>
