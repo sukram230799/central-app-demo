@@ -1,7 +1,7 @@
 // import { credentials } from './svelte-store.js';
 // const axios = require('axios');
 import axios from 'axios';
-import { currentAccountStore, accountsStore } from './svelte-store.js';
+import { currentAccountStore, accountsStore, selectedFilter, selectedFilterDefaults, timeRanges } from './svelte-store.js';
 
 // const proxy = `${window.location.origin}/api-proxy`;
 // const proxy = `http://localhost:26799/api-proxy`;
@@ -11,8 +11,11 @@ export class Central {
 
   proxy;
   account;
+  filters;
   constructor() {
+    this.filters = selectedFilterDefaults;
     currentAccountStore.subscribe((value) => this.account = value);
+    selectedFilter.subscribe((value) => this.filters = value);
     this.proxy = `${window.location.origin}/api-proxy`;
 
   }
@@ -247,6 +250,30 @@ export class Central {
     });
     console.log(clients);
     return clients.responseBody;
+  }
+
+  async listUnifiedClientsFiltered() {
+    // debugger;
+    let params = {
+      group: this.filters.group, site: this.filters.site, label: this.filters.label,
+      client_status: this.filters.clientStatus, network: this.filters.network,
+      serial: this.filters.serial, swarm_id: this.filters.swarmId, cluster_id: this.filters.clusterId, band: this.filters.band,
+      stack_id: this.filters.stackId, os_type: this.filters.osType,
+
+      client_type: this.filters.clientType,
+      timerange: timeRanges[this.filters.timeRange],
+
+      show_manufacturer: 'manufacturer' in this.filters.additionalFields,
+      show_usage: 'usage' in this.filters.additionalFields,
+      show_signal_db: 'signal_db' in this.filters.additionalFields,
+    }
+    if (this.filters.clientType === 'both') {
+      return {
+        ... await this.listUnifiedClients({ ...params, client_type: 'WIRED' }),
+        ... await this.listUnifiedClients({ ...params, client_type: 'WIRELESS' })
+      };
+    }
+    return await this.listUnifiedClients(params);
   }
 
   async listAccessPoints() {

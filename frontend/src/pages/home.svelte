@@ -61,6 +61,12 @@
     <NavTitle sliding>Central Toolkit</NavTitle>
     <NavRight>
       <Link
+        iconIos="f7:line_horizontal_3_decrease"
+        iconAurora="f7:line_horizontal_3_decrease"
+        iconMd="material:filter_list"
+        panelOpen="right"
+      />
+      <Link
         searchbarEnable=".searchbar-demo"
         iconIos="f7:search"
         iconAurora="f7:search"

@@ -17,6 +17,7 @@
 
   let central = new Central();
 
+  let loaded = false;
   let clients = []; /* = [
     {
       associated_device: "CNG0AP01FK",
@@ -92,27 +93,28 @@
   ];*/
 
   function onPageInit() {
-    Promise.all([
-      central.listUnifiedClients({
-        client_type: "WIRELESS",
-        show_manufacturer: true,
-        show_signal_db: true,
-        show_usage: true,
-      }),
-      central.listUnifiedClients({
-        client_type: "WIRED",
-        show_manufacturer: true,
-        show_signal_db: true,
-        show_usage: true,
-      }),
-    ]).then((clientLists) => {
-      console.log(clientLists);
-      clients = [...clientLists[0].clients, ...clientLists[1].clients];
-    });
-    // central.listUnifiedClients({ client_type: null }).then((clientList) => {
-    //   console.log(clientList);
-    //   clients = clientList.clients;
+    // Promise.all([
+    //   central.listUnifiedClients({
+    //     client_type: "WIRELESS",
+    //     show_manufacturer: true,
+    //     show_signal_db: true,
+    //     show_usage: true,
+    //   }),
+    //   central.listUnifiedClients({
+    //     client_type: "WIRED",
+    //     show_manufacturer: true,
+    //     show_signal_db: true,
+    //     show_usage: true,
+    //   }),
+    // ]).then((clientLists) => {
+    //   console.log(clientLists);
+    //   clients = [...clientLists[0].clients, ...clientLists[1].clients];
     // });
+    central.listUnifiedClientsFiltered().then((clientList) => {
+      console.log(clientList);
+      clients = clientList.clients;
+      loaded = true;
+    });
   }
 </script>
 
@@ -144,7 +146,7 @@
   </Navbar>
   <BlockTitle>Clients</BlockTitle>
   <List class="search-list">
-    {#if !clients.length}
+    {#if !loaded}
       {#each [{ ios: "f7:logo_android", aurora: "f7:logo_android", md: "material:android" }, { ios: "f7:logo_ios", aurora: "f7:logo_ios", md: "f7:logo_ios" }, { ios: "f7:logo_windows", aurora: "f7:logo_windows", md: "f7:logo_windows" }, { ios: "f7:logo_macos", aurora: "f7:logo_macos", md: "f7:logo_macos" }, { ios: "f7:logo_google", aurora: "f7:logo_google", md: "f7:logo_google" }, { ios: "f7:wifi", aurora: "f7:wifi", md: "material:wifi" }, { ios: "material:cable", aurora: "material:cable", md: "material:cable" }].sort((a, b) => 0.5 - Math.random()) as icon}
         <ListItem
           class={theme.ios
@@ -245,5 +247,8 @@
         {/if}
       </ListItem>
     {/each}
+    {#if loaded && !clients.length}
+      <ListItem>No entries</ListItem>
+    {/if}
   </List>
 </Page>
