@@ -112,7 +112,7 @@
 </script>
 
 <Page on:pageInit={onPageInit}>
-  <Navbar title="Clients" backLink="Back"
+  <Navbar title="Devices" backLink="Back"
     ><NavRight>
       <!---->
       <Link
@@ -137,7 +137,7 @@
       disableButton={!theme.aurora}
     />
   </Navbar>
-  <BlockTitle>Clients</BlockTitle>
+  <BlockTitle>Devices</BlockTitle>
   <List class="search-list">
     {#if !devices.length}
       {#each [{ ios: "material:cable", aurora: "material:cable", md: "material:cable" }, { ios: "material:cable", aurora: "material:cable", md: "material:cable" }, { ios: "f7:wifi", aurora: "f7:wifi", md: "material:wifi" }, { ios: "f7:wifi", aurora: "f7:wifi", md: "material:wifi" }, { ios: "material:gate", aurora: "material:gate", md: "material:gate" }, { ios: "material:gate", aurora: "material:gate", md: "material:gate" }].sort((a, b) => 0.5 - Math.random()) as icon}

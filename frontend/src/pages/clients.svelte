@@ -117,8 +117,8 @@
 </script>
 
 <Page on:pageInit={onPageInit}>
-  <Navbar title="Clients" backLink="Back"
-    ><NavRight>
+  <Navbar title="Clients" backLink="Back">
+    <NavRight>
       <!---->
       <Link
         iconIos="f7:line_horizontal_3_decrease"

@@ -1,31 +1,36 @@
 <script>
-    import {
-        f7,
-        f7ready,
-        App,
-        Panel,
-        Views,
-        View,
-        Popup,
-        Page,
-        Navbar,
-        Toolbar,
-        NavRight,
-        Link,
-        Block,
-        BlockTitle,
-        LoginScreen,
-        LoginScreenTitle,
-        List,
-        ListItem,
-        ListInput,
-        ListButton,
-        BlockFooter,
-    } from "framework7-svelte";
+  import {
+    theme,
+    f7,
+    f7ready,
+    App,
+    Panel,
+    Views,
+    View,
+    Popup,
+    Page,
+    Navbar,
+    Toolbar,
+    NavRight,
+    Link,
+    Block,
+    BlockTitle,
+    LoginScreen,
+    LoginScreenTitle,
+    List,
+    ListItem,
+    ListInput,
+    ListButton,
+    BlockFooter,
+    Searchbar,
+  } from "framework7-svelte";
+  import { Central } from "../js/central";
 
-    export let client;
+  export let client;
 
-    /*
+  const central = new Central();
+
+  /*
     client = {
         associated_device: "CNG0AP01FK",
         associated_device_mac: "80:8d:b7:aa:aa:aa",
@@ -99,91 +104,189 @@
         vlan: 1,
     }; */
 
-    console.log(client);
+  console.log(client);
 
-    let handledEntriesWireless = {
-        "Client Info": {
-            name: "Name",
-            ip_address: "IP",
-            macaddr: "MAC",
-            os_type: "OS Type",
-            manufacturer: "Manufacturer",
-            client_type: "Client Type",
-        },
-        "Wireless Info": {
-            network: "Network",
-            connection: "Connection",
-            encryption_method: "Encryption",
-            channel: "Channel",
-            band: { title: "Band", unit: "GHz" },
-            signal_db: "Signal dB",
-            signal_strength: "Signal Strength",
-            snr: "SNR",
-            speed: "Speed",
-            maxspeed: "Speed (max)",
-        },
-        Role: {
-            user_role: "User Role",
-            username: "Username",
-            vlan: "VLAN",
-        },
-        "AP Info": {
-            connected_device_type: "Type",
-            associated_device: "Device",
-            associated_device_name: "Name",
-            associated_device_mac: "MAC",
-            group_name: "Group",
-            radio_mac: "Radio MAC",
-            radio_number: "Radio Number",
-        },
-    };
+  let handledEntriesWireless = {
+    "Client Info": {
+      name: "Name",
+      ip_address: "IP",
+      macaddr: "MAC",
+      os_type: "OS Type",
+      manufacturer: "Manufacturer",
+      client_type: "Client Type",
+    },
+    "Wireless Info": {
+      network: "Network",
+      connection: "Connection",
+      encryption_method: "Encryption",
+      channel: "Channel",
+      band: { title: "Band", unit: "GHz" },
+      signal_db: "Signal dB",
+      signal_strength: "Signal Strength",
+      snr: "SNR",
+      speed: "Speed",
+      maxspeed: "Speed (max)",
+    },
+    Role: {
+      user_role: "User Role",
+      username: "Username",
+      vlan: "VLAN",
+    },
+    "AP Info": {
+      connected_device_type: "Type",
+      associated_device: "Device",
+      associated_device_name: "Name",
+      associated_device_mac: "MAC",
+      group_name: "Group",
+      radio_mac: "Radio MAC",
+      radio_number: "Radio Number",
+    },
+  };
 
-    let handledEntriesWired = {
-        "Client Info": {
-            name: "Name",
-            ip_address: "IP",
-            macaddr: "MAC",
-            os_type: "OS Type",
-            manufacturer: "Manufacturer",
-            client_type: "Client Type",
-        },
-        Role: {
-            user_role: "User Role",
-            username: "Username",
-            vlan: "VLAN",
-        },
-        "Switch Info": {
-            connected_device_type: "Type",
-            associated_device: "Device",
-            associated_device_name: "Name",
-            associated_device_mac: "MAC",
-            group_name: "Group",
-            interface_mac: "Interface MAC",
-            interface_port: "Interface Port",
-        },
-    };
+  let handledEntriesWired = {
+    "Client Info": {
+      name: "Name",
+      ip_address: "IP",
+      macaddr: "MAC",
+      os_type: "OS Type",
+      manufacturer: "Manufacturer",
+      client_type: "Client Type",
+    },
+    Role: {
+      user_role: "User Role",
+      username: "Username",
+      vlan: "VLAN",
+    },
+    "Switch Info": {
+      connected_device_type: "Type",
+      associated_device: "Device",
+      associated_device_name: "Name",
+      associated_device_mac: "MAC",
+      group_name: "Group",
+      interface_mac: "Interface MAC",
+      interface_port: "Interface Port",
+    },
+  };
+
+  let disconnectToast;
+
+  async function disconnectClient() {
+    f7.dialog.confirm(
+      `Disconnect the following client?<br>${
+        client.name ? "Name: " + client.name + ",<br>" : ""
+      }MAC: ${client.macaddr},<br>IP: ${client.ip_address}`,
+      "Disconnect Client?",
+      async () => {
+        f7.preloader.show();
+        let result = await central.disconnectUser({
+          serial: client.associated_device,
+          disconnect_user_mac: client.macaddr,
+        });
+        for (let i = 0; i < 10; i++) {
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          let status = await central.getStatus({
+            task_id: result.task_id,
+          });
+          if (status.state !== "QUEUED") {
+            if (status.state === "SUCCESS") {
+              disconnectToast = f7.toast.create({
+                text: `Client disconnected`,
+                closeTimeout: 2000,
+              });
+              disconnectToast.open();
+            }
+            f7.preloader.hide();
+            break;
+          }
+        }
+      }
+    );
+  }
+
+  let ledBlinking = false;
+  let ledToast;
+
+  async function blinkLED() {
+    f7.preloader.show();
+    let result;
+    console.log(`LED Blink, current state ${ledBlinking ? "On" : "Off"}`);
+
+    if (!ledBlinking)
+      result = await central.blinkLEDOn({ serial: client.associated_device });
+    else
+      result = await central.blinkLEDOff({ serial: client.associated_device });
+
+    for (let i = 0; i < 10; i++) {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      let status = await central.getStatus({
+        task_id: result.task_id,
+      });
+      if (status.state !== "QUEUED") {
+        if (status.state === "SUCCESS") {
+          ledBlinking = !ledBlinking;
+          ledToast = f7.toast.create({
+            text: `Led turned ${ledBlinking ? "on" : "off"}`,
+            closeTimeout: 2000,
+          });
+          ledToast.open();
+        }
+        f7.preloader.hide();
+        break;
+      }
+    }
+  }
 </script>
 
 <Page>
-    <Navbar title="Client Details" backLink="Back" />
+  <Navbar title="Client Details" backLink="Back">
+    <NavRight>
+      <Link
+        iconIos="f7:lightbulb"
+        iconAurora="f7:lightbulb"
+        iconMd="material:lightbulb"
+        on:click={blinkLED}
+        tooltip="Blink LED"
+      />
+      <Link
+        iconIos="f7:off"
+        iconAurora="f7:off"
+        iconMd="material:power_settings_new"
+        tooltip="Disconnect Client"
+        on:click={disconnectClient}
+      />
+      <Link
+        searchbarEnable=".searchbar-details"
+        iconIos="f7:search"
+        iconAurora="f7:search"
+        iconMd="material:search"
+      />
+    </NavRight>
+    <Searchbar
+      class="searchbar-details"
+      expandable
+      searchContainer=".search-list"
+      searchIn=".item-title, .item-after"
+      disableButton={!theme.aurora}
+    />
+  </Navbar>
 
-    {#each Object.entries(client.client_type == "WIRED" ? handledEntriesWired : handledEntriesWireless) as [title, data]}
-        <BlockTitle>{title}</BlockTitle>
-        <List>
-            {#each Object.entries(data) as [key, description]}
-                {#if typeof description === "object"}
-                    <ListItem
-                        title={description.title}
-                        after={`${client[key]} ${description.unit}`}
-                    />
-                {:else}
-                    <ListItem title={description} after={client[key]} />
-                {/if}
-            {/each}
-        </List>
-    {/each}
+  {#each Object.entries(client.client_type == "WIRED" ? handledEntriesWired : handledEntriesWireless) as [title, data]}
+    <BlockTitle>{title}</BlockTitle>
+    <List class="search-list">
+      {#each Object.entries(data) as [key, description]}
+        {#if typeof description === "object"}
+          <ListItem
+            title={description.title}
+            after={`${client[key]} ${description.unit}`}
+          />
+        {:else}
+          <ListItem title={description} after={client[key]} />
+        {/if}
+      {/each}
+    </List>
+  {/each}
 
-    <!-- <BlockTitle>Client Info</BlockTitle>
+  <!-- <BlockTitle>Client Info</BlockTitle>
     <List>
         <ListItem title="Name" after={client.name} />
         <ListItem title="IP" after={client.ip_address} />
@@ -191,7 +294,7 @@
         <ListItem title="OS Type" after={client.os_type} />
         <ListItem title="Manufacturer" after={client.manufacturer} />
     </List> -->
-    <!-- <BlockTitle>Wireless Info</BlockTitle>
+  <!-- <BlockTitle>Wireless Info</BlockTitle>
     <List>
         <ListItem title="Network" after={client.network} />
         <ListItem title="Connection" after={client.connection} />
@@ -203,13 +306,13 @@
         <ListItem title="SNR" after={client.snr} />
         <ListItem title="Speed" after={client.speed} />
     </List> -->
-    <!-- <BlockTitle>Role</BlockTitle>
+  <!-- <BlockTitle>Role</BlockTitle>
     <List>
         <ListItem title="User Role" after={client.user_role} />
         <ListItem title="Username" after={client.username} />
         <ListItem title="VLAN" after={client.vlan} />
     </List> -->
-    <!-- <BlockTitle>Device Info</BlockTitle>
+  <!-- <BlockTitle>Device Info</BlockTitle>
     <List>
         <ListItem title="Type" after={client.connected_device_type} />
         <ListItem title="Device" after={client.associated_device} />
@@ -219,7 +322,7 @@
         <ListItem title="Radio MAC" after={client.radio_mac} />
         <ListItem title="Radio Number" after={client.radio_number} />
     </List> -->
-    <!-- <BlockTitle>All Info</BlockTitle>
+  <!-- <BlockTitle>All Info</BlockTitle>
     <List>
         {#each Object.entries(client) as [title, data]}
             <ListItem {title} after={data} />
