@@ -1,6 +1,8 @@
 // import { injectManifest } from 'workbox-build';
 // const injectManifest = require('workbox-build').injectManifest;
 
+// Moved to vite.config.js
+
 // injectManifest({});
 module.exports = {
   swSrc: 'src/push-worker.js',

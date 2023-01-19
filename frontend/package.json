@@ -8,7 +8,8 @@
   "scripts": {
     "start": "npm run dev",
     "dev": "cross-env NODE_ENV=development vite",
-    "build": "cross-env NODE_ENV=production vite build && npx workbox injectManifest workbox-config.js",
+    "build": "cross-env NODE_ENV=production vite build", 
+    "unused": "// && npx workbox injectManifest workbox-config.js",
     "postinstall": "cpy --flat ./node_modules/framework7-icons/fonts/*.* ./src/fonts/ && cpy --flat ./node_modules/material-icons/iconfont/*.* ./src/fonts/"
   },
   "browserslist": [
@@ -30,7 +31,8 @@
     "skeleton-elements": "^4.0.1",
     "svelte": "^3.55.1",
     "swiper": "^8.4.5",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "vite-plugin-pwa": "^0.14.1"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^2.0.2",

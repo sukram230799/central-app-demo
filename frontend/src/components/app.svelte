@@ -46,7 +46,7 @@
     serviceWorker:
       process.env.NODE_ENV === "production"
         ? {
-            path: "/push-worker.js",
+            path: "/service-worker.js",
           }
         : {},
   };

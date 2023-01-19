@@ -8,11 +8,24 @@ const BUILD_DIR = path.resolve(__dirname, './www',);
 module.exports = async function () {
   const { svelte } = await import('@sveltejs/vite-plugin-svelte');
   const { reactivePreprocess } = require("svelte-reactive-preprocessor");
+  const { VitePWA } = await import('vite-plugin-pwa');
   return {
     plugins: [
       svelte({
         preprocess: reactivePreprocess(),
       }),
+      VitePWA({
+        strategies: 'injectManifest',
+        srcDir: '',
+        injectManifest: {
+          globPatterns: [
+            '**/*.{woff,woff2,js,css,png,jpg,svg,html}'
+          ],
+          globIgnores: [],
+          globDirectory: 'www',
+        },
+        filename: 'service-worker.js'
+      })
     ],
     root: SRC_DIR,
     base: '',

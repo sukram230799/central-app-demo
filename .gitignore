@@ -40,3 +40,9 @@ Thumbs.db
 
 # Production build
 www/
+
+# Profiling Data
+/Profile*.json
+
+# QR Codes
+/*CN*.jpg
