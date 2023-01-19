@@ -43,9 +43,25 @@ export class Central {
         return response.data;
     }
 
+  /**
+   * Send GET request via proxy
+   * @param {string} path Path to request from central api
+   * @param {obj} options Options to pass to central
+   * @returns obj
+   */
     async get(path, options = {}) {
         return await this.request(path, { ...options, method: 'GET' });
     }
+
+  /**
+   * Send POST request via proxy
+   * @param {string} path Path to request from central api
+   * @param {obj} options Options to pass to central
+   * @returns obj
+   */
+  async post(path, options = {}) {
+    return await this.request(path, { ...options, method: 'POST' });
+  }
 
     async refreshToken() {
         let refreshBody = {
