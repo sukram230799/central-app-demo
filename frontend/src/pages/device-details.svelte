@@ -4,6 +4,8 @@
     f7,
     f7ready,
     App,
+    Accordion,
+    AccordionContent,
     Panel,
     Views,
     View,
@@ -99,7 +101,24 @@
 
   console.log(device);
 
-  let handledEntriesAP = {};
+  let handledEntriesAP = {
+    Details: {
+      name: "Name",
+      model: "Model",
+      ip_address: "IP",
+      macaddr: "MAC",
+      serial: "Serial",
+      firmware_version: "Firmware",
+    },
+    "Group / Site / Label": {
+      group_name: "Group Name",
+    },
+    Swarm: {
+      swarm_name: "Swarm Name",
+      swarm_id: "Swarm Id",
+      swarm_master: "Is Swarm Master?",
+    },
+  };
   let handledEntriesSwitch = {
     Details: {
       name: "Name",
@@ -108,7 +127,7 @@
       ip_address: "IP",
       macaddr: "MAC",
       serial: "Serial",
-      firmware_version: "Fimrware",
+      firmware_version: "Firmware",
     },
     "Group / Site / Label": {
       group_name: "Group Name",
@@ -229,9 +248,28 @@
   {/each}
 
   <BlockTitle>All Info</BlockTitle>
+  <!-- <List accordionList>
+    <ListItem accordionItem title="All Info">
+      <AccordionContent> -->
   <List>
     {#each Object.entries(device) as [title, data]}
-      <ListItem {title} after={data} />
+      {#if !Array.isArray(data)}
+        <ListItem {title} after={data} />
+      {:else}
+        <ListItem {title} />
+        <li>
+          <ul>
+            {#each data as dataEntry}
+              {#each Object.entries(dataEntry) as [subTitle, subData]}
+                <ListItem title={subTitle} after={subData} />
+              {/each}
+            {/each}
+          </ul>
+        </li>
+      {/if}
     {/each}
   </List>
+  <!-- </AccordionContent>
+    </ListItem>
+  </List> -->
 </Page>
