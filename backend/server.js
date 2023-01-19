@@ -32,12 +32,16 @@ function sendNotifications(subscriptions) {
         const id = endpoint.substr((endpoint.length - 8), endpoint.length);
         webpush.sendNotification(subscription, notification, options)
             .then(result => {
-                console.log(`Endpoint ID: ${id}`);
-                console.log(`Result: ${result.statusCode}`);
+                if (process.env.NODE_ENV !== "production") {
+                    console.log(`Endpoint ID: ${id}`);
+                    console.log(`Result: ${result.statusCode}`);
+                }
             })
             .catch(error => {
-                console.log(`Endpoint ID: ${id}`);
-                console.log(`Error: ${error} `);
+                if (process.env.NODE_ENV !== "production") {
+                    console.log(`Endpoint ID: ${id}`);
+                    console.log(`Error: ${error} `);
+                }
             });
     });
 }
@@ -50,19 +54,22 @@ app.use(bodyparser.json());
 app.use(express.static('www'));
 
 app.post('/add-subscription', (request, response) => {
-    console.log(`Subscribing ${request.body.endpoint}`);
+    if (process.env.NODE_ENV !== "production")
+        console.log(`Subscribing ${request.body.endpoint}`);
     subs[request.body.endpoint] = request.body
     response.sendStatus(200);
 });
 
 app.post('/remove-subscription', (request, response) => {
-    console.log(`Unsubscribing ${request.body.endpoint}`);
+    if (process.env.NODE_ENV !== "production")
+        console.log(`Unsubscribing ${request.body.endpoint}`);
     delete subs[request.body.endpoint];
     response.sendStatus(200);
 });
 
 app.post('/notify-me', (request, response) => {
-    console.log(`Notifying ${request.body.endpoint}`);
+    if (process.env.NODE_ENV !== "production")
+        console.log(`Notifying ${request.body.endpoint}`);
     const subscription =
         subs[request.body.endpoint];
     sendNotifications([subscription]);
@@ -70,9 +77,11 @@ app.post('/notify-me', (request, response) => {
 });
 
 app.post('/notify-all', (request, response) => {
-    console.log('Notifying all subscribers');
-    console.log(subs);
-    console.log(typeof subs);
+    if (process.env.NODE_ENV !== "production") {
+        console.log('Notifying all subscribers');
+        console.log(subs);
+        console.log(typeof subs);
+    }
     const subscriptions =
         Object.values(subs);
     if (subscriptions.length > 0) {
@@ -84,7 +93,8 @@ app.post('/notify-all', (request, response) => {
 });
 
 app.post('/api-proxy', async (request, response) => {
-    console.log(request.body);
+    if (process.env.NODE_ENV !== "production")
+        console.log(request.body);
 
     let centralResponse;
     try {
@@ -96,10 +106,11 @@ app.post('/api-proxy', async (request, response) => {
             params: request.body.params,
             method: request.body.method,
         });
-
-        console.log(centralResponse);
+        if (process.env.NODE_ENV !== "production")
+            console.log(centralResponse);
     } catch (e) {
-        console.log(e)
+        if (process.env.NODE_ENV !== "production")
+            console.log(e)
         centralResponse = e.response;
     }
 

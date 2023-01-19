@@ -23,4 +23,6 @@ COPY ./backend/server.js ./
 
 EXPOSE 26799
 
+ENV NODE_ENV production
+
 CMD [ "node", "server.js" ]
