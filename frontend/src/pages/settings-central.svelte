@@ -1,6 +1,6 @@
 <script>
-  import { value } from "dom7";
   import {
+    f7,
     Page,
     Navbar,
     Block,
@@ -50,13 +50,21 @@
   });
 
   async function centralRefresh() {
-    await central.refreshToken();
+    try {
+      f7.preloader.show();
+      await central.refreshToken();
+      f7.preloader.hide();
+    } catch (e) {
+      if (e.name === "TokenNotUpdated") {
+      }
+    }
   }
 
-  function centralRequest() {
-    central.getDeviceFirmware("CN8BSW01FK").then((response) => {
-      console.log(response);
-    });
+  async function centralRequest() {
+    f7.preloader.show();
+    let response = await central.getDeviceFirmware("CN8BSW01FK");
+    f7.preloader.hide();
+    console.log(response);
   }
 
   function saveCredential() {
