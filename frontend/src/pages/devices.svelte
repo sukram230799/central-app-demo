@@ -140,7 +140,7 @@
   <BlockTitle>Devices</BlockTitle>
   <List class="search-list">
     {#if !devices.length}
-      {#each [{ ios: "material:cable", aurora: "material:cable", md: "material:cable" }, { ios: "material:cable", aurora: "material:cable", md: "material:cable" }, { ios: "f7:wifi", aurora: "f7:wifi", md: "material:wifi" }, { ios: "f7:wifi", aurora: "f7:wifi", md: "material:wifi" }, { ios: "material:gate", aurora: "material:gate", md: "material:gate" }, { ios: "material:gate", aurora: "material:gate", md: "material:gate" }].sort((a, b) => 0.5 - Math.random()) as icon}
+      {#each [{ ios: "material:cable", aurora: "material:cable", md: "material:cable" }, { ios: "material:cable", aurora: "material:cable", md: "material:cable" }, { ios: "f7:wifi", aurora: "f7:wifi", md: "material:wifi" }, { ios: "f7:wifi", aurora: "f7:wifi", md: "material:wifi" }, { ios: "material:router", aurora: "material:router", md: "material:router" }, { ios: "material:router", aurora: "material:router", md: "material:router" }].sort((a, b) => 0.5 - Math.random()) as icon}
         <ListItem
           class={theme.ios
             ? "skeleton-text skeleton-effect-pulse"
@@ -188,9 +188,9 @@
         {:else}
           <Icon
             slot="media"
-            ios="material:gate"
-            aurora="material:gate"
-            md="material:gate"
+            ios="material:router"
+            aurora="material:router"
+            md="material:router"
           />
         {/if}
       </ListItem>
