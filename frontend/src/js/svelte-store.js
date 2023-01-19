@@ -74,7 +74,17 @@ selectedFilterStore.subscribe((value) => localStorage.selectedFilter = JSON.stri
 
 const selectedSortingOrderStore = writable('');
 
-const selectedSortingOrder = writable('');
+const groupCacheStore = writable(localStorage.groups ? JSON.parse(localStorage.groups) : { groups: [] });
+groupCacheStore.subscribe((value) => localStorage.groups = JSON.stringify(value));
+const groupStore = derived([groupCacheStore], ([$groupCacheStore]) => $groupCacheStore.groups);
+
+const siteCacheStore = writable(localStorage.sites ? JSON.parse(localStorage.sites) : { sites: [] });
+siteCacheStore.subscribe((value) => localStorage.sites = JSON.stringify(value));
+const siteStore = derived([siteCacheStore], ([$siteCacheStore]) => $siteCacheStore.sites);
+
+const labelCacheStore = writable(localStorage.lables ? JSON.parse(localStorage.lables) : { labels: [] });
+labelCacheStore.subscribe((value) => localStorage.labels = JSON.stringify(value));
+const labelStore = derived([labelCacheStore], ([$labelCacheStore]) => $labelCacheStore.labels);
 
 export {
     camera as cameraStore,
@@ -86,5 +96,11 @@ export {
     selectedFilterStore as selectedFilterStore,
     selectedSortingOrderStore as selectedSortingOrderStore,
     timeRanges,
+    groupCacheStore as groupCacheStore,
+    siteCacheStore as siteCacheStore,
+    labelCacheStore as labelCacheStore,
+    groupStore,
+    siteStore,
+    labelStore,
 };
 

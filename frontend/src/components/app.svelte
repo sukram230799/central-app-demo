@@ -37,7 +37,14 @@
     selectedFilterNames,
     selectedSortingOrderStore,
     timeRanges,
+    groupStore,
+    labelStore,
+    siteStore,
+    groupCacheStore,
+    labelCacheStore,
+    siteCacheStore,
   } from "../js/svelte-store";
+  import { Central } from "../js/central";
 
   // Framework7 Parameters
   let f7params = {
@@ -104,6 +111,18 @@
   onMount(() => {
     f7ready(() => {
       // Call F7 APIs here
+      let central = new Central();
+      siteCacheStore.subscribe((value) => {
+        if (!value.time) central.listSites();
+      });
+      labelCacheStore.subscribe((value) => {
+        if (!value.time) central.listLabels();
+      });
+      groupCacheStore.subscribe((value) => {
+        if (!value.time) central.listGroups();
+      });
+      // central.listGroups();
+      // central.listLabels();
     });
   });
 
@@ -179,11 +198,9 @@
             bind:value={$selectedFilterStore.group}
             placeholder="Pease choose..."
           >
-            <option value="0">Group 0</option>
-            <option value="1">Group 1</option>
-            <option value="2">Group 2</option>
-            <option value="3">Group 3</option>
-            <option value="4">Group 4</option>
+            {#each $groupStore as group}
+              <option value={group}>{group}</option>
+            {/each}
           </ListInput>
           <ListInput
             label={selectedFilterNames.label}
@@ -192,11 +209,9 @@
             bind:value={$selectedFilterStore.label}
             placeholder="Pease choose..."
           >
-            <option value="0">Label 0</option>
-            <option value="1">Label 1</option>
-            <option value="2">Label 2</option>
-            <option value="3">Label 3</option>
-            <option value="4">Label 4</option>
+            {#each $labelStore as label}
+              <option value={label}>{label}</option>
+            {/each}
           </ListInput>
           <ListInput
             label={selectedFilterNames.site}
@@ -205,11 +220,9 @@
             bind:value={$selectedFilterStore.site}
             placeholder="Pease choose..."
           >
-            <option value="0">Site 0</option>
-            <option value="1">Site 1</option>
-            <option value="2">Site 2</option>
-            <option value="3">Site 3</option>
-            <option value="4">Site 4</option>
+            {#each $siteStore as site}
+              <option value={site.site_name}>{site.site_name}</option>
+            {/each}
           </ListInput>
           <ListInput input={false} label={selectedFilterNames.timeRange}>
             <!-- 3H = 3 Hours, 1D = 1 Day, 1W = 1 Week, 1M = 1Month, 3M = 3Months. -->

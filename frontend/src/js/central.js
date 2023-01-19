@@ -1,5 +1,9 @@
 import axios from 'axios';
-import { currentAccountStore, accountsStore, selectedFilterStore, selectedFilterDefaults, timeRanges } from './svelte-store.js';
+import {
+  currentAccountStore, accountsStore,
+  selectedFilterStore, selectedFilterDefaults, timeRanges,
+  groupCacheStore, labelCacheStore, siteCacheStore,
+} from './svelte-store.js';
 
 // const proxy = `${window.location.origin}/api-proxy`;
 // const proxy = `http://localhost:26799/api-proxy`;
@@ -377,6 +381,31 @@ export class Central {
     return await this.genericCommandsForDevice({ serial, command: 'config_sync' });
   }
 
+  async listSites() {
+    let sites = await this.get('central/v2/sites');
+    console.log(sites)
+    siteCacheStore.set({ time: Date.now(), sites: sites.responseBody.sites });
+    return sites.responseBody;
+  }
 
+  async listLabels() {
+    let labels = await this.get('central/v2/labels');
+    console.log(labels)
+    labelCacheStore.set({ time: Date.now(), labels: labels.responseBody.labels });
+    return labels.responseBody;
+  }
+
+  async listGroups() {
+    let groups = await this.get('configuration/v2/groups', {
+      params: {
+        limit: 100,
+        offset: 0,
+      }
+    });
+    console.log(groups)
+    groupCacheStore.set({ time: Date.now(), groups: groups.responseBody.data.flat() });
+    return groups.responseBody;
+  }
+  getAllGroups = this.listGroups;
 }
 
