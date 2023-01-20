@@ -76,6 +76,7 @@
     <Searchbar
       class="serachbar-troubleshooting"
       expandable
+      placeholder="Search Troubleshooting"
       searchContainer=".troubleshooting-options-list"
       searchIn=".item-title"
       disableButton={!theme.aurora}
@@ -103,27 +104,27 @@
 
   {#if !!optionsParsed}
     <BlockTitle>Troubleshooting Commands</BlockTitle>
-    <!-- <ListIndex
+  {/if}
+  <!-- <ListIndex
       init={!!optionsParsed}
       indexes={optionsParsed ? Object.keys(optionsParsed).map((name) => name[0]) : []}
       listEl=".troubleshooting-options-list"
       scrollList={true}
       label={true}
     /> -->
-    <List class="troubleshooting-options-list" ul={false}>
-      {#each optionsParsed ? Object.entries(optionsParsed) : [] as [category, data]}
-        <ListGroup>
-          <ListItem title={category} groupTitle />
-          {#each data as command}
-            <ListItem
-              title={command.summary}
-              routeProps={{ command, deviceType }}
-              href="/troubleshooting/details"
-            />
-            <!---->
-          {/each}
-        </ListGroup>
-      {/each}
-    </List>
-  {/if}
+  <List class="troubleshooting-options-list" ul={false}>
+    {#each optionsParsed ? Object.entries(optionsParsed) : [] as [category, data]}
+      <ListGroup>
+        <ListItem title={category} groupTitle />
+        {#each data as command}
+          <ListItem
+            title={command.summary}
+            routeProps={{ command, deviceType }}
+            href="/troubleshooting/details"
+          />
+          <!---->
+        {/each}
+      </ListGroup>
+    {/each}
+  </List>
 </Page>
