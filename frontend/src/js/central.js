@@ -335,6 +335,21 @@ export class Central {
     else throw { name: 'HTTP Error', message: `HTTP Status ${switchesResponse.status}`, options: switchesResponse };
   }
 
+
+
+  /**
+   * 
+   * @param {{ limit: string, offset: string, sku_type: string }} param0 
+   * @returns {{ total: number, devices: [{ device_type: string, services: [ string ], mac: string, serial: string, model: string }]}}
+   */
+  async getDevicesFromDeviceInventory({ limit = 1000, offset = 0, sku_type = 'all' }) {
+    let devicesResponse = await this.get('platform/device_inventory/v1/devices', { params: {limit, offset, sku_type}});
+    console.log(devicesResponse);
+    if (devicesResponse.status >= 200 && devicesResponse.status < 300)
+      return devicesResponse.responseBody;
+    else throw { name: 'HTTP Error', message: `HTTP Status ${devicesResponse.status}`, options: devicesResponse };
+  }
+
   /**
    * Disconnect User
    * @param {{ serial: string, disconnect_user_mac: string, disconnect_user_all: boolean, disconnect_user_network: boolean }} param0 

@@ -1,5 +1,6 @@
 <script>
-  import { value } from "dom7";
+  import { onMount } from "svelte";
+
   import {
     Page,
     Navbar,
@@ -33,7 +34,8 @@
     summary: "Ping",
   };
 
-  let serialNumber;
+  let serialNumber = "";
+  let devices = [];
   let argumentValues = [];
   let argumentNames = command.arguments?.map((value) => value.name);
 
@@ -116,6 +118,19 @@ Flags:       a = Airslice policy; A = Airslice app monitoring; c = MBO Cellular 
         }
       });
   }
+
+  onMount(() => {
+    const central = new Central();
+    central
+      .ready()
+      .then(() => {
+        return central.getDevicesFromDeviceInventory({ sku_type: deviceType });
+      })
+      .then((devicesList) => {
+        console.log(devicesList);
+        devices = devicesList.devices;
+      });
+  });
 </script>
 
 <Page>
@@ -145,9 +160,12 @@ Flags:       a = Airslice policy; A = Airslice app monitoring; c = MBO Cellular 
         searchbarPlaceholder: "Search Device",
       }}
     >
-      <select name="devcie" bind:value={serialNumber}>
-        <option value="CNG0AP01FK">CNG0AP01FK IAP-315</option>
-        <option value="CN8BSW01FK">CN8BSW01FK Aruba-2930F-8G-PoEP-2SFPP</option>
+      <select name="device" bind:value={serialNumber}>
+        {#each devices as device}
+          <option value={device.serial}>{device.serial} - {device.model}</option
+          >
+        {/each}
+        <!-- <option value="CN8BSW01FK">CN8BSW01FK Aruba-2930F-8G-PoEP-2SFPP</option> -->
       </select>
     </ListItem>
   </List>
