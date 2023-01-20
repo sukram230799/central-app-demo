@@ -70,6 +70,7 @@
   // Framework7 Parameters
   let f7params = {
     name: "Central Toolkit", // App name
+    id: 'dev.wuest.central',
     theme: "auto", // Automatic theme detection
     // theme: "ios",
     // theme: f7.desktop ? 'aurora' : 'auto',
