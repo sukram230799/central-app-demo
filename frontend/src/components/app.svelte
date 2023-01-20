@@ -53,10 +53,11 @@
     if (value && value.updateAvailable) {
       needRefreshToast = f7.toast.create({
         text: "New content available, click on load button to update.",
+        closeButtonText: 'load',
         closeButton: true,
         on: {
           close: function () {
-            console.log("Update!");
+            console.log("Update service-worker!");
             console.log(value.updateSW);
             doRefreshStore.set({ doRefresh: true });
           },
