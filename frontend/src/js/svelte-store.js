@@ -1,5 +1,8 @@
 import { writable, derived } from 'svelte/store';
 
+const needRefreshStore = writable({ updateAvailable: false, updateSW: null });
+const offlineReadyStore = writable({offlineReady: false});
+
 const camera = writable(localStorage.camera ? JSON.parse(localStorage.camera) : {}); // || {"Id":"d3f5ceb340cf8ddbec8422380bc32693a8b284a453e3aa76b67b8f6a423bc2f5","label":"HP HD Camera (0408:5373)"});
 camera.subscribe((value) => localStorage.camera = JSON.stringify(value));
 
@@ -87,6 +90,8 @@ labelCacheStore.subscribe((value) => localStorage.labels = JSON.stringify(value)
 const labelStore = derived([labelCacheStore], ([$labelCacheStore]) => $labelCacheStore.labels);
 
 export {
+    needRefreshStore as needRefreshStore,
+    offlineReadyStore as offlineReadyStore,
     camera as cameraStore,
     accounts as accountsStore,
     currentAccountId as currentAccountIdStore,

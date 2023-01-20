@@ -1,9 +1,3 @@
-import { registerSW } from 'virtual:pwa-register'
-
-const updateSW = registerSW({
-  onNeedRefresh() { console.log('On Need Refresh') },
-  onOfflineReady() { console.log('On Offline Ready') },
-});
 
 // Import Framework7
 import Framework7 from 'framework7/lite-bundle';
@@ -21,6 +15,14 @@ import '@mdi/font/css/materialdesignicons.css'
 
 // Import App Component
 import App from '../components/app.svelte';
+import { needRefreshStore, offlineReadyStore } from './svelte-store';
+
+import { registerSW } from 'virtual:pwa-register';
+
+const updateSW = registerSW({
+  onNeedRefresh() { console.log('onNeedRefresh'); needRefreshStore.set({ updateAvailable: true, updateSW }) },
+  onOfflineReady() { console.log('onOfflineReady'); offlineReadyStore.set({ offlineReady: true }) },
+});
 
 // Init F7 Svelte Plugin
 Framework7.use(Framework7Svelte)

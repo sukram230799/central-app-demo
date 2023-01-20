@@ -43,8 +43,26 @@
     groupCacheStore,
     labelCacheStore,
     siteCacheStore,
+    needRefreshStore,
   } from "../js/svelte-store";
   import { Central } from "../js/central";
+
+  let needRefreshToast;
+  needRefreshStore.subscribe((value) => {
+    if (value && value.updateAvailable) {
+      needRefreshToast = f7.toast.create({
+        text: "New content available, click on load button to update.",
+        closeButton: true,
+
+        on: {
+          close: () => {
+            value.updateSW();
+          },
+        },
+      });
+      needRefreshToast.open();
+    }
+  });
 
   // Framework7 Parameters
   let f7params = {
