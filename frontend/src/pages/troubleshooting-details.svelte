@@ -39,6 +39,8 @@
   let argumentValues = [];
   let argumentNames = command.arguments?.map((value) => value.name);
 
+  let loadingDevices = true;
+
   let running = false;
   let done = false;
   let failed = false;
@@ -129,6 +131,7 @@ Flags:       a = Airslice policy; A = Airslice app monitoring; c = MBO Cellular 
       .then((devicesList) => {
         console.log(devicesList);
         devices = devicesList.devices;
+        loadingDevices = false;
       });
   });
 </script>
@@ -159,6 +162,7 @@ Flags:       a = Airslice policy; A = Airslice app monitoring; c = MBO Cellular 
         searchbar: true,
         searchbarPlaceholder: "Search Device",
       }}
+      disabled={loadingDevices}
     >
       <select name="device" bind:value={serialNumber}>
         {#each devices as device}
@@ -169,14 +173,14 @@ Flags:       a = Airslice policy; A = Airslice app monitoring; c = MBO Cellular 
       </select>
     </ListItem>
   </List>
-  <Block strong>
+  <Block>
     <Button raised fill on:click={run}>Run</Button>
   </Block>
-  <BlockTitle>Status</BlockTitle>
   {#if running}
     <Progressbar infinite />
   {/if}
   {#if done}
+    <BlockTitle>Status</BlockTitle>
     <Block strong>
       <pre style="overflow: auto !important; overflow-y: scroll;">{output}</pre>
 
