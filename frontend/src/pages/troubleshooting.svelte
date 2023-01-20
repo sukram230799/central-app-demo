@@ -10,8 +10,10 @@
     Link,
     List,
     ListItem,
+    ListGroup,
     Searchbar,
     f7,
+    ListIndex,
   } from "framework7-svelte";
   import { Central } from "../js/central";
   import {
@@ -21,7 +23,7 @@
     switchOptions,
   } from "./troubleshooting-options";
 
-  let deviceType;
+  let deviceType = "";
   let central = new Central();
   let options;
   let optionsParsed;
@@ -62,7 +64,7 @@
 </script>
 
 <Page>
-  <Navbar title="About" backLink="Back">
+  <Navbar title="Troubleshooting" backLink="Back">
     <NavRight>
       <Link
         searchbarEnable=".serachbar-troubleshooting"
@@ -74,13 +76,13 @@
     <Searchbar
       class="serachbar-troubleshooting"
       expandable
-      searchContainer=".search-list"
+      searchContainer=".troubleshooting-options-list"
       searchIn=".item-title"
       disableButton={!theme.aurora}
     />
   </Navbar>
-  <BlockTitle>Troubleshooting</BlockTitle>
-  <List class="search-list">
+  <BlockTitle>Options</BlockTitle>
+  <List>
     <ListItem
       title="Device Type"
       smartSelect
@@ -98,12 +100,30 @@
       </select>
     </ListItem>
   </List>
-  {#each optionsParsed ? Object.entries(optionsParsed) : [] as [category, data]}
-    <BlockTitle>{category}</BlockTitle>
-    <List>
-      {#each data as command}
-        <ListItem title={command.summary} href="/troubleshooting/details" routeProps={{ command }} />
+
+  {#if !!optionsParsed}
+    <BlockTitle>Troubleshooting Commands</BlockTitle>
+    <!-- <ListIndex
+      init={!!optionsParsed}
+      indexes={optionsParsed ? Object.keys(optionsParsed).map((name) => name[0]) : []}
+      listEl=".troubleshooting-options-list"
+      scrollList={true}
+      label={true}
+    /> -->
+    <List class="troubleshooting-options-list" ul={false}>
+      {#each optionsParsed ? Object.entries(optionsParsed) : [] as [category, data]}
+        <ListGroup>
+          <ListItem title={category} groupTitle />
+          {#each data as command}
+            <ListItem
+              title={command.summary}
+              routeProps={{ command, deviceType }}
+              href="/troubleshooting/details"
+            />
+            <!---->
+          {/each}
+        </ListGroup>
       {/each}
     </List>
-  {/each}
+  {/if}
 </Page>

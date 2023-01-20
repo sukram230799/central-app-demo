@@ -51,7 +51,7 @@ export class Central {
   /**
    * Send GET request via proxy
    * @param {string} path Path to request from central api
-   * @param {obj} options Options to pass to central
+   * @param {{ data: {}, headers: {}, params: {} }} options Options to pass to central
    * @returns obj
    */
   async get(path, options = {}) {
@@ -61,7 +61,7 @@ export class Central {
   /**
    * Send POST request via proxy
    * @param {string} path Path to request from central api
-   * @param {obj} options Options to pass to central
+   * @param {{ data: {}, headers: {}, params: {} }} options Options to pass to central
    * @returns obj
    */
   async post(path, options = {}) {
@@ -307,7 +307,7 @@ export class Central {
 
   /**
    * Disconnect User
-   * @param {*} param0 
+   * @param {{ serial: string, disconnect_user_mac: string, disconnect_user_all: boolean, disconnect_user_network: boolean }} param0 
    * @returns 
    * This API disconnects the clients from an IAP. Disconnect user command has following option:
    *
@@ -412,6 +412,53 @@ export class Central {
     let troubleshootingCommands = await this.get('troubleshooting/v1/commands', { params: { device_type } });
     console.log(troubleshootingCommands);
     return troubleshootingCommands.responseBody;
+  }
+
+  /**
+   * Start Troubleshooting Session
+   * @param {{ device_type: string , serial:string, commands: [{ command_id: number, arguments: { name: string, value: string } }] }} TroubleshootingDetails
+   * @returns {{ serial: string, status: string, message: string, session_id: number }} 
+   * 
+   * Start troubleshooting session with list of commands for specific device. List of commands can have at most 10 commands.
+   * If there is any troubleshooting session running already for device then you cannot start new session.
+   * ---
+   * https://developer.arubanetworks.com/aruba-central/reference/apitroubleshooting_apistart_troubleshoot
+   */
+  async startTroubleshootingSession({ device_type, serial, commands }) {
+    let session = await this.post(`troubleshooting/v1/devices/${serial}`, { data: { device_type, commands } });
+    console.log(session);
+    return session.responseBody;
+  }
+
+
+  /**
+   * Get Troubleshooting Output
+   * @param {{ serial:string, session_id:number }} TroubleshootingSession Session Info
+   * @returns {{ serial: string, hostname: string, output: string, status: string, message: string }} 
+   * 
+   * Get a troubleshooting output for the troubleshooting session of specific device. Troubleshooting output has hold time of 5 minutes after which it will be expired.
+   * ---
+   * https://developer.arubanetworks.com/aruba-central/reference/apitroubleshooting_apiget_troubleshoot_output
+   */
+  async getTroubleshootingOutput({ serial, session_id }) {
+    let output = await this.get(`troubleshooting/v1/devices/${serial}`, { params: { session_id } });
+    console.log(output);
+    return output.responseBody;
+  }
+
+  /**
+   * Export Troubleshooting Output
+   * @param {{ serial:string, session_id:number }} TroubleshootingSession Session Info 
+   * @returns {{ serial: string, hostname: string, status: string, message: string }} 
+   * 
+   * Export the output for troubleshooting session of the specific device.
+   * ---
+   * https://developer.arubanetworks.com/aruba-central/reference/apitroubleshooting_apiexport_output
+   */
+  async exportTroubleshootingOutput({ serial, session_id }) {
+    let output = await this.get(`troubleshooting/v1/devices/${serial}/export`, { params: { session_id } });
+    console.log(output);
+    return output.responseBody;
   }
 }
 
