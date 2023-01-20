@@ -87,7 +87,7 @@
           }
         : {},
     view: {
-      pushState: true,
+      // pushState: true,
       browserHistory: true,
       browserHistoryRoot: "/",
     },
