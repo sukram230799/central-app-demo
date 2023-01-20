@@ -127,9 +127,12 @@
   }
 
   onMount(() => {
-    f7ready(() => {
+    f7ready(async () => {
       // Call F7 APIs here
       let central = new Central();
+      console.log('Await Central Ready');
+      await central.ready();
+      console.log('Central is ready. Load data');
       siteCacheStore.subscribe((value) => {
         if (!value.time) central.listSites();
       });
@@ -139,8 +142,6 @@
       groupCacheStore.subscribe((value) => {
         if (!value.time) central.listGroups();
       });
-      // central.listGroups();
-      // central.listLabels();
     });
   });
 

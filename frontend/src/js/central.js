@@ -11,16 +11,28 @@ import {
 
 export class Central {
 
+  _ready_promise;
   proxy;
   account;
   filters;
   constructor() {
     this.filters = selectedFilterDefaults;
-    currentAccountStore.subscribe((value) => this.account = value);
+    this._ready_promise = new Promise((resolve) => {
+      currentAccountStore.subscribe((value) => {
+        this.account = value;
+        if (value?.credential?.access_token) {
+          console.log('Central is Ready'); return resolve();
+        } else {
+          console.log('Central is not Ready');
+        }
+      });
+    })
     selectedFilterStore.subscribe((value) => this.filters = value);
     this.proxy = `${window.location.origin}/api-proxy`;
 
   }
+
+  ready() { return this._ready_promise }
 
   async request(path, options) {
     let body = {
