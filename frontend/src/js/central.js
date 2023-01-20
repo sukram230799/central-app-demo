@@ -150,7 +150,7 @@ export class Central {
    * https://developer.arubanetworks.com/aruba-central/reference/apiexternal_controllerget_wireless_clients
    */
   async listWirelessClients(group = null, swarm_id = null, label = null, site = null, network = null, serial = null, os_type = null, cluster_id = null, band = null, fields = null, calculate_total = false, offset = null, limit = null, sort = null, last_client_mac = null) {
-    let clients = await this.get('monitoring/v1/clients/wireless', {
+    let clientsResponse = await this.get('monitoring/v1/clients/wireless', {
       params: {
         group,
         swarm_id,
@@ -168,8 +168,10 @@ export class Central {
         last_client_mac,
       }
     });
-    console.log(clients);
-    return clients.responseBody;
+    console.log(clientsResponse);
+    if (clientsResponse.status >= 200 && clientsResponse.status < 300)
+      return clientsResponse.responseBody;
+    else throw { name: 'HTTP Error', message: `HTTP Status ${clientsResponse.status}`, options: clientsResponse };
   }
 
   /**
@@ -197,7 +199,7 @@ export class Central {
    * https://developer.arubanetworks.com/aruba-central/reference/apiexternal_controllerget_wired_clients
    */
   async listWiredClients(group = null, swarm_id = null, label = null, site = null, network = null, serial = null, cluster_id = null, stack_id = null, fields = null, calculate_total = false, offset = null, limit = null, sort = null, last_client_mac = null) {
-    let clients = await this.get('monitoring/v1/clients/wired', {
+    let clientsResponse = await this.get('monitoring/v1/clients/wired', {
       params: {
         group,
         swarm_id,
@@ -214,8 +216,10 @@ export class Central {
         last_client_mac,
       }
     });
-    console.log(clients);
-    return clients.responseBody;
+    console.log(clientsResponse);
+    if (clientsResponse.status >= 200 && clientsResponse.status < 300)
+      return clientsResponse.responseBody;
+    else throw { name: 'HTTP Error', message: `HTTP Status ${clientsResponse.status}`, options: clientsResponse };
   }
 
 
@@ -242,8 +246,7 @@ export class Central {
     show_usage,
     show_manufacturer,
     show_signal_db } = {}) {
-
-    let clients = await this.get('monitoring/v2/clients', {
+    let clientsResponse = await this.get('monitoring/v2/clients', {
       params: {
         group,
         swarm_id,
@@ -268,8 +271,10 @@ export class Central {
         show_signal_db
       }
     });
-    console.log(clients);
-    return clients.responseBody;
+    console.log(clientsResponse);
+    if (clientsResponse.status >= 200 && clientsResponse.status < 300)
+      return clientsResponse.responseBody;
+    else throw { name: 'HTTP Error', message: `HTTP Status ${clientsResponse.status}`, options: clientsResponse };
   }
 
   async listUnifiedClientsFiltered() {
@@ -297,30 +302,37 @@ export class Central {
   }
 
   async listAccessPoints() {
-    let aps = await this.get('monitoring/v2/aps', {
+    let apsResponse = await this.get('monitoring/v2/aps', {
       params: {}
     });
-    console.log(aps);
-    if (aps.status === 404) return { count: 0, total: 0, aps: [] };
-    return aps.responseBody;
+    console.log(apsResponse);
+    if (apsResponse.status === 404) return { count: 0, total: 0, aps: [] };
+
+    if (apsResponse.status >= 200 && apsResponse.status < 300)
+      return apsResponse.responseBody;
+    else throw { name: 'HTTP Error', message: `HTTP Status ${apsResponse.status}`, options: apsResponse };
   }
 
   async listGateways() {
-    let gateways = await this.get('v1/gateways', {
+    let gatewaysResponse = await this.get('v1/gateways', {
       params: {}
     });
-    console.log(gateways);
-    if (gateways.status === 404) return { count: 0, total: 0, gateways: [] };
-    return gateways.responseBody;
+    console.log(gatewaysResponse);
+    if (gatewaysResponse.status === 404) return { count: 0, total: 0, gateways: [] };
+    if (gatewaysResponse.status >= 200 && gatewaysResponse.status < 300)
+      return gatewaysResponse.responseBody;
+    else throw { name: 'HTTP Error', message: `HTTP Status ${gatewaysResponse.status}`, options: gatewaysResponse };
   }
 
   async listSwitches() {
-    let switches = await this.get('monitoring/v1/switches', {
+    let switchesResponse = await this.get('monitoring/v1/switches', {
       params: {}
     });
-    console.log(switches);
-    if (switches.status === 404) return { count: 0, total: 0, switches: [] };
-    return switches.responseBody;
+    console.log(switchesResponse);
+    if (switchesResponse.status === 404) return { count: 0, total: 0, switches: [] };
+    if (switchesResponse.status >= 200 && switchesResponse.status < 300)
+      return switchesResponse.responseBody;
+    else throw { name: 'HTTP Error', message: `HTTP Status ${switchesResponse.status}`, options: switchesResponse };
   }
 
   /**
@@ -337,15 +349,17 @@ export class Central {
    * https://developer.arubanetworks.com/aruba-central/reference/apiaction_commandsend_disconnect_user
    */
   async disconnectUser({ serial, disconnect_user_mac = null, disconnect_user_all, disconnect_user_network }) {
-    let result = await this.post(`device_management/v1/device/${serial}/action/disconnect_user`, {
+    let resultResponse = await this.post(`device_management/v1/device/${serial}/action/disconnect_user`, {
       data: {
         disconnect_user_mac,
         disconnect_user_all,
         disconnect_user_network,
       }
     });
-    console.log(result);
-    return result.responseBody;
+    console.log(resultResponse);
+    if (resultResponse.status >= 200 && resultResponse.status < 300)
+      return resultResponse.responseBody;
+    else throw { name: 'HTTP Error', message: `HTTP Status ${resultResponse.status}`, options: resultResponse };
   }
 
 
@@ -356,15 +370,19 @@ export class Central {
    * To get response of executed command using the respective task id.
    */
   async getStatus({ task_id }) {
-    let status = await this.get(`device_management/v1/status/${task_id}`, {});
-    console.log(status);
-    return status.responseBody;
+    let statusResponse = await this.get(`device_management/v1/status/${task_id}`, {});
+    console.log(statusResponse);
+    if (statusResponse.status >= 200 && statusResponse.status < 300)
+      return statusResponse.responseBody;
+    else throw { name: 'HTTP Error', message: `HTTP Status ${statusResponse.status}`, options: statusResponse };
   }
 
   async genericCommandsForDevice({ serial, command }) {
-    let result = await this.post(`device_management/v1/device/${serial}/action/${command}`, {});
-    console.log(result);
-    return result.responseBody;
+    let resultResponse = await this.post(`device_management/v1/device/${serial}/action/${command}`, {});
+    console.log(resultResponse);
+    if (resultResponse.status >= 200 && resultResponse.status < 300)
+      return resultResponse.responseBody;
+    else throw { name: 'HTTP Error', message: `HTTP Status ${resultResponse.status}`, options: resultResponse };
   }
 
   async rebootDevice({ serial }) {
@@ -400,36 +418,44 @@ export class Central {
   }
 
   async listSites() {
-    let sites = await this.get('central/v2/sites');
-    console.log(sites)
-    siteCacheStore.set({ time: Date.now(), sites: sites.responseBody.sites });
-    return sites.responseBody;
+    let sitesResponse = await this.get('central/v2/sites');
+    console.log(sitesResponse)
+    siteCacheStore.set({ time: Date.now(), sites: sitesResponse.responseBody.sites });
+    if (sitesResponse.status >= 200 && sitesResponse.status < 300)
+      return sitesResponse.responseBody;
+    else throw { name: 'HTTP Error', message: `HTTP Status ${sitesResponse.status}`, options: sitesResponse };
   }
 
   async listLabels() {
-    let labels = await this.get('central/v2/labels');
-    console.log(labels)
-    labelCacheStore.set({ time: Date.now(), labels: labels.responseBody.labels });
-    return labels.responseBody;
+    let labelsResponse = await this.get('central/v2/labels');
+    console.log(labelsResponse)
+    labelCacheStore.set({ time: Date.now(), labels: labelsResponse.responseBody.labels });
+    if (labelsResponse.status >= 200 && labelsResponse.status < 300)
+      return labelsResponse.responseBody;
+    else throw { name: 'HTTP Error', message: `HTTP Status ${labelsResponse.status}`, options: labelsResponse };
   }
 
   async listGroups() {
-    let groups = await this.get('configuration/v2/groups', {
+    let groupsResponse = await this.get('configuration/v2/groups', {
       params: {
         limit: 100,
         offset: 0,
       }
     });
-    console.log(groups)
-    groupCacheStore.set({ time: Date.now(), groups: groups.responseBody.data.flat() });
-    return groups.responseBody;
+    console.log(groupsResponse)
+    groupCacheStore.set({ time: Date.now(), groups: groupsResponse.responseBody.data.flat() });
+    if (groupsResponse.status >= 200 && groupsResponse.status < 300)
+      return groupsResponse.responseBody;
+    else throw { name: 'HTTP Error', message: `HTTP Status ${groupsResponse.status}`, options: groupsResponse };
   }
   getAllGroups = this.listGroups;
 
   async listTroubleshootingCommands({ device_type }) {
-    let troubleshootingCommands = await this.get('troubleshooting/v1/commands', { params: { device_type } });
-    console.log(troubleshootingCommands);
-    return troubleshootingCommands.responseBody;
+    let troubleshootingCommandsResponse = await this.get('troubleshooting/v1/commands', { params: { device_type } });
+    console.log(troubleshootingCommandsResponse);
+    if (troubleshootingCommandsResponse.status >= 200 && troubleshootingCommandsResponse.status < 300)
+      return troubleshootingCommandsResponse.responseBody;
+    else throw { name: 'HTTP Error', message: `HTTP Status ${troubleshootingCommandsResponse.status}`, options: troubleshootingCommandsResponse };
   }
 
   /**
@@ -443,9 +469,11 @@ export class Central {
    * https://developer.arubanetworks.com/aruba-central/reference/apitroubleshooting_apistart_troubleshoot
    */
   async startTroubleshootingSession({ device_type, serial, commands }) {
-    let session = await this.post(`troubleshooting/v1/devices/${serial}`, { data: { device_type, commands } });
-    console.log(session);
-    return session.responseBody;
+    let sessionInfoResponse = await this.post(`troubleshooting/v1/devices/${serial}`, { data: { device_type, commands } });
+    console.log(sessionInfoResponse);
+    if (sessionInfoResponse.status >= 200 && sessionInfoResponse.status < 300)
+      return sessionInfoResponse.responseBody;
+    else throw { name: 'HTTP Error', message: `HTTP Status ${sessionInfoResponse.status}`, options: sessionInfoResponse };
   }
 
 
@@ -459,9 +487,11 @@ export class Central {
    * https://developer.arubanetworks.com/aruba-central/reference/apitroubleshooting_apiget_troubleshoot_output
    */
   async getTroubleshootingOutput({ serial, session_id }) {
-    let output = await this.get(`troubleshooting/v1/devices/${serial}`, { params: { session_id } });
-    console.log(output);
-    return output.responseBody;
+    let outputResponse = await this.get(`troubleshooting/v1/devices/${serial}`, { params: { session_id } });
+    console.log(outputResponse);
+    if (outputResponse.status >= 200 && outputResponse.status < 300)
+      return outputResponse.responseBody;
+    else throw { name: 'HTTP Error', message: `HTTP Status ${outputResponse.status}`, options: outputResponse };
   }
 
   /**
@@ -474,9 +504,11 @@ export class Central {
    * https://developer.arubanetworks.com/aruba-central/reference/apitroubleshooting_apiexport_output
    */
   async exportTroubleshootingOutput({ serial, session_id }) {
-    let output = await this.get(`troubleshooting/v1/devices/${serial}/export`, { params: { session_id } });
-    console.log(output);
-    return output.responseBody;
+    let outputResponse = await this.get(`troubleshooting/v1/devices/${serial}/export`, { params: { session_id } });
+    console.log(outputResponse);
+    if (outputResponse.status >= 200 && outputResponse.status < 300)
+      return outputResponse.responseBody;
+    else throw { name: 'HTTP Error', message: `HTTP Status ${outputResponse.status}`, options: outputResponse };
   }
 }
 

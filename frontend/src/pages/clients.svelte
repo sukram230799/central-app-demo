@@ -110,11 +110,18 @@
     //   console.log(clientLists);
     //   clients = [...clientLists[0].clients, ...clientLists[1].clients];
     // });
-    central.listUnifiedClientsFiltered().then((clientList) => {
-      console.log(clientList);
-      clients = clientList.clients;
-      loaded = true;
-    });
+    central
+      .listUnifiedClientsFiltered()
+      .then((clientList) => {
+        console.log(clientList);
+        clients = clientList.clients;
+        loaded = true;
+      })
+      .catch((error) => {
+        loaded = true;
+        console.log(error);
+        console.log(error.options);
+      });
   }
 </script>
 
@@ -133,7 +140,7 @@
         iconIos="f7:search"
         iconAurora="f7:search"
         iconMd="material:search"
-        disabled={!clients.length}
+        disabled={!clients?.length}
       />
     </NavRight>
     <Searchbar
@@ -247,7 +254,7 @@
         {/if}
       </ListItem>
     {/each}
-    {#if loaded && !clients.length}
+    {#if loaded && !clients?.length}
       <ListItem>No entries</ListItem>
     {/if}
   </List>
