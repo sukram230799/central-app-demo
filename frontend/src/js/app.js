@@ -1,3 +1,10 @@
+import { registerSW } from 'virtual:pwa-register'
+
+const updateSW = registerSW({
+  onNeedRefresh() { console.log('On Need Refresh') },
+  onOfflineReady() { console.log('On Offline Ready') },
+});
+
 // Import Framework7
 import Framework7 from 'framework7/lite-bundle';
 
