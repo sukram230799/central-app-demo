@@ -83,9 +83,6 @@ Flags:       a = Airslice policy; A = Airslice app monitoring; c = MBO Cellular 
         commands: [
           {
             command_id: command.command_id,
-            // We have an array of the argumentValues ordered the same way as command.arguments
-            // Now we combine the command.arguments[i].name with argumentValues[i]
-            // to form [{command.arguments[i].name: argumentValues[i]}]
             arguments: argumentValues.map((value, i) => ({
               name: argumentNames[i],
               value: argumentValues[i],
@@ -105,7 +102,7 @@ Flags:       a = Airslice policy; A = Airslice app monitoring; c = MBO Cellular 
           if (status.status === "RUNNING") {
           } else if (status.status === "COMPLETED") {
             console.log(status.output);
-            output = status.output;
+            output = status.output.trimStart();
             running = false;
             done = true;
             break;
