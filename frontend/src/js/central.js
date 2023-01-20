@@ -32,6 +32,12 @@ export class Central {
 
   }
 
+  /**
+   * Await ready
+   * @returns Promise
+   * 
+   * Resolves the promise when API Keys are available
+   */
   ready() { return this._ready_promise }
 
   async request(path, options) {
