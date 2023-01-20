@@ -44,6 +44,7 @@
     labelCacheStore,
     siteCacheStore,
     needRefreshStore,
+    doRefreshStore,
   } from "../js/svelte-store";
   import { Central } from "../js/central";
 
@@ -53,10 +54,11 @@
       needRefreshToast = f7.toast.create({
         text: "New content available, click on load button to update.",
         closeButton: true,
-
         on: {
-          close: () => {
-            value.updateSW();
+          close: function () {
+            console.log("Update!");
+            console.log(value.updateSW);
+            doRefreshStore.set({ doRefresh: true });
           },
         },
       });
@@ -130,9 +132,9 @@
     f7ready(async () => {
       // Call F7 APIs here
       let central = new Central();
-      console.log('Await Central Ready');
+      console.log("Await Central Ready");
       await central.ready();
-      console.log('Central is ready. Load data');
+      console.log("Central is ready. Load data");
       siteCacheStore.subscribe((value) => {
         if (!value.time) central.listSites();
       });

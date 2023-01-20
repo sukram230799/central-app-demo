@@ -15,12 +15,16 @@ import '@mdi/font/css/materialdesignicons.css'
 
 // Import App Component
 import App from '../components/app.svelte';
-import { needRefreshStore, offlineReadyStore } from './svelte-store';
+import { needRefreshStore, offlineReadyStore, doRefreshStore } from './svelte-store';
 
 import { registerSW } from 'virtual:pwa-register';
 
 const updateSW = registerSW({
-  onNeedRefresh() { console.log('onNeedRefresh'); needRefreshStore.set({ updateAvailable: true, updateSW }) },
+  onNeedRefresh() {
+    console.log('onNeedRefresh'); 
+    needRefreshStore.set({ updateAvailable: true, updateSW }); 
+    doRefreshStore.subscribe((value) => { if (value.doRefresh) updateSW() })
+  },
   onOfflineReady() { console.log('onOfflineReady'); offlineReadyStore.set({ offlineReady: true }) },
 });
 
