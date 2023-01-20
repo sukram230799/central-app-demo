@@ -94,9 +94,10 @@
 
   <BlockTitle>Navigation</BlockTitle>
   <List>
-    <ListItem link="/firmware/" title="Firmware" />
+    <!-- <ListItem link="/firmware/" title="Firmware" /> -->
     <ListItem link="/clients/" title="Clients" />
     <ListItem link="/devices/" title="Devices" />
+    <ListItem link="/config/" title="Groups / Sites / Labels" />
     <ListItem link="/troubleshooting/" title="Troubleshooting" />
   </List>
 
