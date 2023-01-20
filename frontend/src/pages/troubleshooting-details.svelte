@@ -10,6 +10,7 @@
     ListItem,
     ListInput,
     Button,
+    Progressbar,
   } from "framework7-svelte";
 
   import { Central } from "../js/central";
@@ -35,6 +36,10 @@
   let serialNumber;
   let argumentValues = [];
   let argumentNames = command.arguments?.map((value) => value.name);
+
+  let running = false;
+  let done = false;
+  let failed = false;
 
   let output = "";
   const exampleOutput = `
@@ -69,7 +74,8 @@ Flags:       a = Airslice policy; A = Airslice app monitoring; c = MBO Cellular 
 
   function run() {
     let central = new Central();
-    debugger;
+    running = true;
+    // debugger;
     central
       .startTroubleshootingSession({
         serial: serialNumber,
@@ -100,9 +106,12 @@ Flags:       a = Airslice policy; A = Airslice app monitoring; c = MBO Cellular 
           } else if (status.status === "COMPLETED") {
             console.log(status.output);
             output = status.output;
+            running = false;
+            done = true;
             break;
           } else if (status.status === "EXPIRED") {
             output = "EXPIRED";
+            running = false;
             break;
           } else {
             output = status;
@@ -149,9 +158,14 @@ Flags:       a = Airslice policy; A = Airslice app monitoring; c = MBO Cellular 
     <Button raised fill on:click={run}>Run</Button>
   </Block>
   <BlockTitle>Status</BlockTitle>
-  <Block strong>
-    <pre style="overflow: auto !important; overflow-y: scroll;">{output}</pre>
+  {#if running}
+    <Progressbar infinite />
+  {/if}
+  {#if done}
+    <Block strong>
+      <pre style="overflow: auto !important; overflow-y: scroll;">{output}</pre>
 
-    <code class="codeblock" style="overflow: auto" />
-  </Block>
+      <!-- <code class="codeblock" style="overflow: auto" /> -->
+    </Block>
+  {/if}
 </Page>
