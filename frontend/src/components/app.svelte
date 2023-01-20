@@ -53,7 +53,7 @@
     if (value && value.updateAvailable) {
       needRefreshToast = f7.toast.create({
         text: "New content available, click on load button to update.",
-        closeButtonText: 'load',
+        closeButtonText: "load",
         closeButton: true,
         on: {
           close: function () {
@@ -70,7 +70,7 @@
   // Framework7 Parameters
   let f7params = {
     name: "Central Toolkit", // App name
-    id: 'dev.wuest.central',
+    id: "dev.wuest.central",
     theme: "auto", // Automatic theme detection
     // theme: "ios",
     // theme: f7.desktop ? 'aurora' : 'auto',
@@ -86,6 +86,11 @@
             path: "/service-worker.js",
           }
         : {},
+    view: {
+      pushState: true,
+      browserHistory: true,
+      browserHistoryRoot: "/",
+    },
   };
   // Login screen demo data
   let username = "";

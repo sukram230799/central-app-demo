@@ -21,8 +21,8 @@ import { registerSW } from 'virtual:pwa-register';
 
 const updateSW = registerSW({
   onNeedRefresh() {
-    console.log('onNeedRefresh'); 
-    needRefreshStore.set({ updateAvailable: true, updateSW }); 
+    console.log('onNeedRefresh');
+    needRefreshStore.set({ updateAvailable: true, updateSW });
     doRefreshStore.subscribe((value) => { if (value.doRefresh) updateSW() })
   },
   onOfflineReady() { console.log('onOfflineReady'); offlineReadyStore.set({ offlineReady: true }) },
@@ -34,8 +34,4 @@ Framework7.use(Framework7Svelte)
 // Mount Svelte App
 const app = new App({
   target: document.getElementById('app'),
-  view: {
-    browserHistory: true,
-    browserHistoryRoot: '/'
-  },
 });
