@@ -18,7 +18,7 @@ module.exports = async function () {
         strategies: 'injectManifest',
         srcDir: '',
         injectManifest: {
-          maximumFileSizeToCacheInBytes: 10,
+          maximumFileSizeToCacheInBytes: 10*1024*1024,
           globPatterns: [
             '**/*.{woff,woff2,js,css,png,jpg,svg,html}'
           ],
