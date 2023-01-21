@@ -13,22 +13,26 @@
     ListItem,
   } from "framework7-svelte";
   import { Central } from "../js/central";
+  import { groupStore } from "../js/svelte-store";
 
   let groups = [];
+  groupStore.subscribe((groupEntries) => {
+    groups = groupEntries;
+  });
 
   const central = new Central();
 
-  async function loadData() {
-    await central
-          .ready();
+  async function loadData(showProgressbar) {
+    if (showProgressbar) f7.progressbar.show("red");
+    await central.ready();
       const groupsResponse = await central.listGroups();
-      groups = groupsResponse.groups;
+    if (showProgressbar) f7.progressbar.hide();
   }
 
-  loadData();
+  loadData(true);
 
   function loadMore(done) {
-    loadData().then(() => done());
+    loadData(false).then(() => done());
   }
 </script>
 

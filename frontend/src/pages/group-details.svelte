@@ -54,7 +54,7 @@
         {#if !Array.isArray(data)}
           <ListItem {title} after={data} />
         {:else}
-          <ListItem {title} />
+          <ListItem title={`${title}:`} />
           <li>
             <ul>
               {#if !data.length}
