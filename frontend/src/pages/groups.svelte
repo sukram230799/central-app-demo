@@ -1,4 +1,6 @@
 <script>
+  import { onDestroy } from "svelte";
+
   import {
     f7,
     theme,
@@ -35,6 +37,8 @@
   function loadMore(done) {
     loadData(false).then(() => done());
   }
+
+  onDestroy(() => f7.progressbar.hide());
 </script>
 
 <Page ptr onPtrRefresh={loadMore}>
