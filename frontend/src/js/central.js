@@ -296,9 +296,18 @@ export class Central {
       show_signal_db: 'signal_db' in this.filters.additionalFields,
     }
     if (this.filters.clientType === 'both') {
+      const [wiredResponse, wirelsessResponse] = await Promise.all([
+        this.listUnifiedClients({ ...params, client_type: 'WIRED' }),
+        this.listUnifiedClients({ ...params, client_type: 'WIRELESS' }),
+      ]);
       return {
-        ... await this.listUnifiedClients({ ...params, client_type: 'WIRED' }),
-        ... await this.listUnifiedClients({ ...params, client_type: 'WIRELESS' })
+        count: wiredResponse.count + wirelsessResponse.count,
+        last_clients_mac: [wiredResponse.last_client_mac, wirelsessResponse.last_client_mac],
+        total: wiredResponse.total + wirelsessResponse.total,
+        clients: [
+          ...wirelsessResponse.clients,
+          ...wiredResponse.clients,
+        ]
       };
     }
     return await this.listUnifiedClients(params);
