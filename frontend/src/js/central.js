@@ -9,14 +9,24 @@ import {
 // const proxy = `http://localhost:26799/api-proxy`;
 // const backend = 'https://internal-apigw.central.arubanetworks.com/';
 
+const rateBucketMax = 10;
+
 class Central {
 
+  rateBucket = rateBucketMax;
   _ready_promise;
   proxy;
   account;
   filters;
   log = process.env.NODE_ENV !== "production";
   constructor() {
+    setInterval(() => {
+      if (this.rateBucket < rateBucketMax) {
+        this.rateBucket++;
+        console.log('Pour me some API');
+      }
+    }, 2 * 1000);
+
     this.filters = selectedFilterDefaults;
     this._ready_promise = new Promise((resolve) => {
       currentAccountStore.subscribe((value) => {
@@ -39,9 +49,14 @@ class Central {
    * 
    * Resolves the promise when API Keys are available
    */
-  ready() { return this._ready_promise }
+  ready(chargeRate = 0) {
+    this.rateBucket += chargeRate;
+    if (this.rateBucket > rateBucketMax) this.rateBucket = rateBucketMax;
+    return this._ready_promise;
+  }
 
   async request(path, options) {
+    if (--this.rateBucket <= 0) { alert('Ratelimit Exceeded'); throw { message: "Ratelimit Exceeded" } };
     let body = {
       headers: { 'Authorization': `Bearer ${this.account.credential.access_token}` },
       ...options,
