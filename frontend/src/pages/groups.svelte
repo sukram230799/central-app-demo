@@ -93,67 +93,80 @@
       {/each}
     {/if}
     {#each groups as group}
-      <ListItem
-        disabled={false && !detailsLoaded}
-        title={group}
-        href="/groups/details/"
-        routeProps={{
-          groupName: group,
-          groupProperties:
-            groupsProperties && groupsProperties[group]
-              ? groupsProperties[group]
-              : {},
-          groupTemplateInfo:
-            groupsTemplateInfo && groupsTemplateInfo[group]
-              ? groupsTemplateInfo[group]
-              : {},
-        }}
-      >
-        <svelte:fragment slot="subtitle">
-          Wired: {#if groupsTemplateInfo[group]?.Wired}
-            <span class="badge color-gray">Template</span>
-          {:else}
-            <span class="badge color-orange">UI Group</span>
-          {/if} Wireless: {#if groupsTemplateInfo[group]?.Wireless}
-            <span class="badge color-gray">Template</span>
-          {:else}
-            <span class="badge color-orange">UI Group</span>
-          {/if}
-        </svelte:fragment>
-        <svelte:fragment slot="text">
-          <span />
-          <!-- AOS8 or AOS10-->
-          {#if groupsProperties[group]?.AOSVersion === "AOS_8X"}
-            <span class="badge color-teal">AOS8</span>
-          {:else if groupsProperties[group]?.AOSVersion === "AOS_10X"}
-            <span class="badge color-orange">AOS10</span>
-            <!-- AP Type -->
-            {#if groupsProperties[group]?.APNetworkRole === "Standard"}
-              <span class="badge color-gray">Campus AP</span>
-            {:else if groupsProperties[group]?.APNetworkRole === "Microbranch"}
-              <span class="badge color-gray">Campus AP</span>
+      {#if detailsLoaded}
+        <ListItem
+          disabled={false && !detailsLoaded}
+          title={group}
+          href="/groups/details/"
+          routeProps={{
+            groupName: group,
+            groupProperties:
+              groupsProperties && groupsProperties[group]
+                ? groupsProperties[group]
+                : {},
+            groupTemplateInfo:
+              groupsTemplateInfo && groupsTemplateInfo[group]
+                ? groupsTemplateInfo[group]
+                : {},
+          }}
+        >
+          <svelte:fragment slot="subtitle">
+            Wired: {#if groupsTemplateInfo[group]?.Wired}
+              <span class="badge color-gray">Template</span>
+            {:else}
+              <span class="badge color-orange">UI Group</span>
+            {/if} Wireless: {#if groupsTemplateInfo[group]?.Wireless}
+              <span class="badge color-gray">Template</span>
+            {:else}
+              <span class="badge color-orange">UI Group</span>
             {/if}
-          {/if}
-          <!--  Switch Type -->
-          {#if groupsProperties[group]?.AllowedSwitchTypes.includes("AOS_CX")}
-            <span class="badge color-gray">AOS-CX</span>
-          {/if}
-          {#if groupsProperties[group]?.AllowedSwitchTypes.includes("AOS_S")}
-            <span class="badge color-gray">AOS-S</span>
-          {/if}
-          {#if groupsProperties[group]?.MonitorOnlySwitch}
-            <span class="badge color-gray">Monitor-Only</span>
-          {/if}
-          <!-- Gateway Type -->
-          {#if groupsProperties[group]?.GWNetworkRole === "BranchGateway"}
-            <span class="badge color-gray">Branch Gateway</span>
-          {:else if groupsProperties[group]?.GWNetworkRole === "WLANGateway"}
-            <span class="badge color-gray">Mobility Gateway</span>
-          {:else if groupsProperties[group]?.GWNetworkRole === "VPNConcentrator"}
-            <span class="badge color-gray">VPNC</span>
-          {/if}
-        </svelte:fragment>
-      </ListItem>
+          </svelte:fragment>
+          <svelte:fragment slot="text">
+            <span />
+            <!-- AOS8 or AOS10-->
+            {#if groupsProperties[group]?.AOSVersion === "AOS_8X"}
+              <span class="badge color-teal">AOS8</span>
+            {:else if groupsProperties[group]?.AOSVersion === "AOS_10X"}
+              <span class="badge color-orange">AOS10</span>
+              <!-- AP Type -->
+              {#if groupsProperties[group]?.APNetworkRole === "Standard"}
+                <span class="badge color-gray">Campus AP</span>
+              {:else if groupsProperties[group]?.APNetworkRole === "Microbranch"}
+                <span class="badge color-gray">Campus AP</span>
+              {/if}
+            {/if}
+            <!--  Switch Type -->
+            {#if groupsProperties[group]?.AllowedSwitchTypes.includes("AOS_CX")}
+              <span class="badge color-gray">AOS-CX</span>
+            {/if}
+            {#if groupsProperties[group]?.AllowedSwitchTypes.includes("AOS_S")}
+              <span class="badge color-gray">AOS-S</span>
+            {/if}
+            {#if groupsProperties[group]?.MonitorOnlySwitch}
+              <span class="badge color-gray">Monitor-Only</span>
+            {/if}
+            <!-- Gateway Type -->
+            {#if groupsProperties[group]?.GWNetworkRole === "BranchGateway"}
+              <span class="badge color-gray">Branch Gateway</span>
+            {:else if groupsProperties[group]?.GWNetworkRole === "WLANGateway"}
+              <span class="badge color-gray">Mobility Gateway</span>
+            {:else if groupsProperties[group]?.GWNetworkRole === "VPNConcentrator"}
+              <span class="badge color-gray">VPNC</span>
+            {/if}
+          </svelte:fragment>
+        </ListItem>
+      {:else}
+        <ListItem
+          disabled={false && !detailsLoaded}
+          title={group}
+          href="/groups/details/"
+          routeProps={{
+            groupName: group,
+            groupProperties: {},
+            groupTemplateInfo: {},
+          }}
+        />
+      {/if}
     {/each}
   </List>
 </Page>
