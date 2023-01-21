@@ -151,15 +151,15 @@
       currentAccountIdStoreUnsub = currentAccountIdStore.subscribe(
         (accountId) => {
           const siteCacheStoreUnsub = siteCacheStore.subscribe((value) => {
-            if (!value[accountId].time)
+            if (!value[accountId]?.time)
               central.listSites().finally(() => siteCacheStoreUnsub());
           });
           const labelCacheStoreUnsub = labelCacheStore.subscribe((value) => {
-            if (!value[accountId].time)
+            if (!value[accountId]?.time)
               central.listLabels().finally(() => labelCacheStoreUnsub());
           });
           const groupCacheStoreUnsub = groupCacheStore.subscribe((value) => {
-            if (!value[accountId].time)
+            if (!value[accountId]?.time)
               central.listGroups().finally(() => groupCacheStoreUnsub());
           });
         }
