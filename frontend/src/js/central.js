@@ -15,6 +15,7 @@ export class Central {
   proxy;
   account;
   filters;
+  log = process.env.NODE_ENV !== "production";
   constructor() {
     this.filters = selectedFilterDefaults;
     this._ready_promise = new Promise((resolve) => {
@@ -61,6 +62,7 @@ export class Central {
       response = await axios.post(this.proxy, body);
     }
 
+    if (this.log)
     console.log(response);
 
     return response.data;
@@ -119,7 +121,7 @@ export class Central {
     // return credentialResponse.data.responseBody.access_token;
   }
 
-  handleResponse(response, log = process.env.NODE_ENV !== "production") {
+  handleResponse(response, log = this.log) {
     if (log)
       console.log(response);
     if (response.status >= 200 && response.status < 300)
