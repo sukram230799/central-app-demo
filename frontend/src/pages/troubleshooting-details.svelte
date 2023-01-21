@@ -79,6 +79,7 @@ Flags:       a = Airslice policy; A = Airslice app monitoring; c = MBO Cellular 
   function run() {
     let central = new Central();
     running = true;
+    output = "";
     // debugger;
     central
       .startTroubleshootingSession({
@@ -97,25 +98,26 @@ Flags:       a = Airslice policy; A = Airslice app monitoring; c = MBO Cellular 
       .then(async (session) => {
         for (let i = 1; i <= 4; i++) {
           await new Promise((resolve) => setTimeout(resolve, i * i * 500));
-          let status = await central.getTroubleshootingOutput({
+          let tsOutput = await central.getTroubleshootingOutput({
             session_id: session.session_id,
             serial: serialNumber,
           });
-          console.log(status.status, status);
-
-          if (status.status === "RUNNING") {
-          } else if (status.status === "COMPLETED") {
-            console.log(status.output);
-            output = status.output.trimStart();
+          console.log(tsOutput.status, tsOutput);
+          tsOutput.status = "EXPIRED";
+          if (tsOutput.status === "RUNNING") {
+          } else if (tsOutput.status === "COMPLETED") {
+            console.log(tsOutput.output);
+            output = tsOutput.output.trimStart();
             running = false;
             done = true;
             break;
-          } else if (status.status === "EXPIRED") {
+          } else if (tsOutput.status === "EXPIRED") {
             output = "EXPIRED";
             running = false;
+            failed = true;
             break;
           } else {
-            output = status;
+            output = tsOutput;
           }
         }
       });
@@ -162,29 +164,37 @@ Flags:       a = Airslice policy; A = Airslice app monitoring; c = MBO Cellular 
         searchbar: true,
         searchbarPlaceholder: "Search Device",
       }}
-      disabled={loadingDevices}
+      disabled={loadingDevices || running}
     >
       <select name="device" bind:value={serialNumber}>
         {#each devices as device}
           <option value={device.serial}>{device.serial} - {device.model}</option
           >
         {/each}
-        <!-- <option value="CN8BSW01FK">CN8BSW01FK Aruba-2930F-8G-PoEP-2SFPP</option> -->
       </select>
     </ListItem>
   </List>
   <Block>
     <Button raised fill on:click={run}>Run</Button>
   </Block>
-  {#if running}
-    <Progressbar infinite />
+  {#if running || failed}
+    <List simpleList>
+      <ListItem>
+        {#if running}
+          <Progressbar infinite />
+        {:else if failed}
+          <Progressbar color="red" progress={100} />
+        {/if}
+      </ListItem>
+    </List>
   {/if}
-  {#if done}
+  {#if done || failed}
     <BlockTitle>Status</BlockTitle>
     <Block strong>
-      <pre style="overflow: auto !important; overflow-y: scroll;">{output}</pre>
-
-      <!-- <code class="codeblock" style="overflow: auto" /> -->
+      <pre style="overflow: auto !important; overflow-y: scroll;"><code
+          class="codeblock"
+          style="overflow: auto">{output}</code
+        ></pre>
     </Block>
   {/if}
 </Page>
