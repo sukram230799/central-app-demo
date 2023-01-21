@@ -91,27 +91,28 @@
     },
   ];*/
 
-  function onPageInit() {
-    Promise.all([
+  async function loadData() {
+    const deviceLists = await Promise.all([
       central.listAccessPoints(),
       central.listGateways(),
       central.listSwitches(),
-    ]).then((deviceLists) => {
-      console.log(deviceLists);
-      devices = [
-        ...deviceLists[0].aps,
-        ...deviceLists[1].gateways,
-        ...deviceLists[2].switches,
-      ];
-    });
-    // central.listAccessPoints().then((deviceList) => {
-    //   console.log(deviceList);
-    //   devices = deviceList.aps;
-    // });
+    ]);
+    console.log(deviceLists);
+    devices = [
+      ...deviceLists[0].aps,
+      ...deviceLists[1].gateways,
+      ...deviceLists[2].switches,
+    ];
+  }
+
+  loadData();
+
+  function loadMore(done) {
+    loadData().then(() => done());
   }
 </script>
 
-<Page on:pageInit={onPageInit}>
+<Page ptr onPtrRefresh={loadMore}>
   <Navbar title="Devices" backLink="Back"
     ><NavRight>
       <!---->

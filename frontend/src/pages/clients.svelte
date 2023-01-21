@@ -92,40 +92,27 @@
     },
   ];*/
 
-  function onPageInit() {
-    // Promise.all([
-    //   central.listUnifiedClients({
-    //     client_type: "WIRELESS",
-    //     show_manufacturer: true,
-    //     show_signal_db: true,
-    //     show_usage: true,
-    //   }),
-    //   central.listUnifiedClients({
-    //     client_type: "WIRED",
-    //     show_manufacturer: true,
-    //     show_signal_db: true,
-    //     show_usage: true,
-    //   }),
-    // ]).then((clientLists) => {
-    //   console.log(clientLists);
-    //   clients = [...clientLists[0].clients, ...clientLists[1].clients];
-    // });
-    central
-      .listUnifiedClientsFiltered()
-      .then((clientList) => {
-        console.log(clientList);
-        clients = clientList.clients;
-        loaded = true;
-      })
-      .catch((error) => {
-        loaded = true;
-        console.log(error);
-        console.log(error.options);
-      });
+  async function loadData() {
+    try {
+      const clientList = await central.listUnifiedClientsFiltered();
+      console.log(clientList);
+      clients = clientList.clients;
+      loaded = true;
+    } catch (error) {
+      loaded = true;
+      console.log(error);
+      console.log(error.options);
+    }
+  }
+
+  loadData();
+
+  function loadMore(done) {
+    loadData().then(() => done());
   }
 </script>
 
-<Page on:pageInit={onPageInit}>
+<Page ptr onPtrRefresh={loadMore}>
   <Navbar title="Clients" backLink="Back">
     <NavRight>
       <!---->
