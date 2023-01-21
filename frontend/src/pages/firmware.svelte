@@ -13,7 +13,7 @@
   } from "framework7-svelte";
 
   import { Html5Qrcode, Html5QrcodeScannerState } from "html5-qrcode";
-  import { Central } from "../js/central";
+  import { central } from "../js/central";
 
   import { cameraStore } from "../js/svelte-store";
 
@@ -73,7 +73,7 @@
 
       if (serialNumber != decodedText) {
         serialNumber = decodedText;
-        new Central().getDeviceFirmware(serialNumber).then((result) => {
+        central.getDeviceFirmware(serialNumber).then((result) => {
           info = result;
           infoString = JSON.stringify(result, null, 4);
           console.log(result);
@@ -87,7 +87,7 @@
       //     // console.log("HIDE!");
       //     // readerVisible = false;
       //     serialNumber = decodedText;
-      //     new Central().getDeviceFirmware(serialNumber).then((result) => {
+      //     central.getDeviceFirmware(serialNumber).then((result) => {
       //       infoString = JSON.stringify(result.responseBody, null, 4);
       //       console.log(result);
       //     });

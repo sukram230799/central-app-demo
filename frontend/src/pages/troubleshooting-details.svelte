@@ -14,7 +14,7 @@
     Progressbar,
   } from "framework7-svelte";
 
-  import { Central } from "../js/central";
+  import { central } from "../js/central";
 
   export let deviceType;
   export let command = {
@@ -77,7 +77,6 @@ Flags:       a = Airslice policy; A = Airslice app monitoring; c = MBO Cellular 
 `;
 
   function run() {
-    let central = new Central();
     running = true;
     output = "";
     // debugger;
@@ -124,7 +123,6 @@ Flags:       a = Airslice policy; A = Airslice app monitoring; c = MBO Cellular 
   }
 
   onMount(() => {
-    const central = new Central();
     central
       .ready()
       .then(() => {

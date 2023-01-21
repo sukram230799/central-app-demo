@@ -24,11 +24,9 @@
     BlockFooter,
     Searchbar,
   } from "framework7-svelte";
-  import { Central } from "../js/central";
+  import { central } from "../js/central";
 
   export let client;
-
-  const central = new Central();
 
   /*
     client = {

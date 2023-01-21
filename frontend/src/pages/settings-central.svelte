@@ -12,7 +12,7 @@
     Button,
   } from "framework7-svelte";
 
-  import { Central } from "../js/central";
+  import { central } from "../js/central";
 
   import {
     currentAccountStore,
@@ -26,7 +26,6 @@
    * NOTE: This will overwrite the credential field on any refresh token upgrade!
    */
 
-  let central = new Central();
   let account;
   let accountsMapping;
   let accountsData;

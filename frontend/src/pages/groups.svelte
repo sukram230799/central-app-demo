@@ -15,7 +15,7 @@
     Searchbar,
     ListItem,
   } from "framework7-svelte";
-  import { Central } from "../js/central";
+  import { central } from "../js/central";
   import { groupStore } from "../js/svelte-store";
 
   let groups = [];
@@ -23,12 +23,10 @@
     groups = groupEntries;
   });
 
-  const central = new Central();
-
   async function loadData(showProgressbar) {
     if (showProgressbar) f7.progressbar.show("red");
     await central.ready();
-      const groupsResponse = await central.listGroups();
+    const groupsResponse = await central.listGroups();
     if (showProgressbar) f7.progressbar.hide();
   }
 
@@ -61,6 +59,17 @@
   </Navbar>
   <BlockTitle>Groups</BlockTitle>
   <List class="search-groups-overview-list">
+    {#if !groups.length}
+      {#each Array.from(Array(20).keys()) as el}
+        <ListItem
+          class={theme.ios
+            ? "skeleton-text skeleton-effect-pulse"
+            : "skeleton-text skeleton-effect-wave"}
+          title={`Group Name ${el}`}
+          href="#"
+        />
+      {/each}
+    {/if}
     {#each groups as group}
       <ListItem
         title={group}

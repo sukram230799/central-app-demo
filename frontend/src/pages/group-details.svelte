@@ -8,12 +8,11 @@
     List,
     ListItem,
   } from "framework7-svelte";
-  import { Central } from "../js/central";
+  import { central } from "../js/central";
 
   export let groupName;
   let properties = {};
 
-  const central = new Central();
   central
     .ready()
     .then(() => central.getPropertiesOfGroups({ groups: [groupName] }))

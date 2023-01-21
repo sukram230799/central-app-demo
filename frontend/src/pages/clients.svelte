@@ -13,9 +13,7 @@
     Searchbar,
   } from "framework7-svelte";
 
-  import { Central } from "../js/central";
-
-  let central = new Central();
+  import { central } from "../js/central";
 
   let loaded = false;
   let clients = []; /* = [

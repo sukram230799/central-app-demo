@@ -15,7 +15,7 @@
     f7,
     ListIndex,
   } from "framework7-svelte";
-  import { Central } from "../js/central";
+  import { central } from "../js/central";
   import {
     controllerOptions,
     iapOptions,
@@ -24,7 +24,6 @@
   } from "./troubleshooting-options";
 
   let deviceType = "";
-  let central = new Central();
   let options;
   let optionsParsed;
 

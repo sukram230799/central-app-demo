@@ -9,7 +9,7 @@ import {
 // const proxy = `http://localhost:26799/api-proxy`;
 // const backend = 'https://internal-apigw.central.arubanetworks.com/';
 
-export class Central {
+class Central {
 
   _ready_promise;
   proxy;
@@ -532,3 +532,4 @@ export class Central {
   }
 }
 
+export const central = new Central();

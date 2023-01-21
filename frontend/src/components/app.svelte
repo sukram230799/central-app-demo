@@ -47,7 +47,7 @@
     doRefreshStore,
     currentAccountIdStore,
   } from "../js/svelte-store";
-  import { Central } from "../js/central";
+  import { central } from "../js/central";
 
 
   location.replace("/#!/");
@@ -144,7 +144,6 @@
   onMount(() => {
     f7ready(async () => {
       // Call F7 APIs here
-      let central = new Central();
       console.log("Await Central Ready");
       await central.ready();
       console.log("Central is ready. Load data");

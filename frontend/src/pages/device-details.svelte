@@ -26,10 +26,9 @@
     BlockFooter,
     Searchbar,
   } from "framework7-svelte";
-  import { Central } from "../js/central";
+  import { central } from "../js/central";
 
   export let device;
-  const central = new Central();
 
   const deviceAP = {
     ap_deployment_mode: "IAP",
