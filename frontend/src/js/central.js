@@ -119,8 +119,17 @@ export class Central {
     // return credentialResponse.data.responseBody.access_token;
   }
 
+  handleResponse(response, log = process.env.NODE_ENV !== "production") {
+    if (log)
+      console.log(response);
+    if (response.status >= 200 && response.status < 300)
+      return response.responseBody;
+    else throw { name: 'HTTP Error', message: `HTTP Status ${response.status}`, options: response };
+  }
+
   async getDeviceFirmware(serial) {
-    return (await this.get(`firmware/v1/devices/${serial}`)).responseBody;
+    let firmwareResponse = await this.get(`firmware/v1/devices/${serial}`);
+    return this.handleResponse(firmwareResponse);
   }
 
   /**
@@ -168,10 +177,8 @@ export class Central {
         last_client_mac,
       }
     });
-    console.log(clientsResponse);
-    if (clientsResponse.status >= 200 && clientsResponse.status < 300)
-      return clientsResponse.responseBody;
-    else throw { name: 'HTTP Error', message: `HTTP Status ${clientsResponse.status}`, options: clientsResponse };
+
+    return this.handleResponse(clientsResponse);
   }
 
   /**
@@ -216,10 +223,8 @@ export class Central {
         last_client_mac,
       }
     });
-    console.log(clientsResponse);
-    if (clientsResponse.status >= 200 && clientsResponse.status < 300)
-      return clientsResponse.responseBody;
-    else throw { name: 'HTTP Error', message: `HTTP Status ${clientsResponse.status}`, options: clientsResponse };
+
+    return this.handleResponse(clientsResponse);
   }
 
 
@@ -271,10 +276,8 @@ export class Central {
         show_signal_db
       }
     });
-    console.log(clientsResponse);
-    if (clientsResponse.status >= 200 && clientsResponse.status < 300)
-      return clientsResponse.responseBody;
-    else throw { name: 'HTTP Error', message: `HTTP Status ${clientsResponse.status}`, options: clientsResponse };
+
+    return this.handleResponse(clientsResponse);
   }
 
   async listUnifiedClientsFiltered() {
@@ -305,34 +308,28 @@ export class Central {
     let apsResponse = await this.get('monitoring/v2/aps', {
       params: {}
     });
-    console.log(apsResponse);
+
     if (apsResponse.status === 404) return { count: 0, total: 0, aps: [] };
 
-    if (apsResponse.status >= 200 && apsResponse.status < 300)
-      return apsResponse.responseBody;
-    else throw { name: 'HTTP Error', message: `HTTP Status ${apsResponse.status}`, options: apsResponse };
+    return this.handleResponse(apsResponse);
   }
 
   async listGateways() {
     let gatewaysResponse = await this.get('v1/gateways', {
       params: {}
     });
-    console.log(gatewaysResponse);
+
     if (gatewaysResponse.status === 404) return { count: 0, total: 0, gateways: [] };
-    if (gatewaysResponse.status >= 200 && gatewaysResponse.status < 300)
-      return gatewaysResponse.responseBody;
-    else throw { name: 'HTTP Error', message: `HTTP Status ${gatewaysResponse.status}`, options: gatewaysResponse };
+    return this.handleResponse(gatewaysResponse);
   }
 
   async listSwitches() {
     let switchesResponse = await this.get('monitoring/v1/switches', {
       params: {}
     });
-    console.log(switchesResponse);
+
     if (switchesResponse.status === 404) return { count: 0, total: 0, switches: [] };
-    if (switchesResponse.status >= 200 && switchesResponse.status < 300)
-      return switchesResponse.responseBody;
-    else throw { name: 'HTTP Error', message: `HTTP Status ${switchesResponse.status}`, options: switchesResponse };
+    return this.handleResponse(switchesResponse);
   }
 
 
@@ -343,11 +340,9 @@ export class Central {
    * @returns {{ total: number, devices: [{ device_type: string, services: [ string ], mac: string, serial: string, model: string }]}}
    */
   async getDevicesFromDeviceInventory({ limit = 1000, offset = 0, sku_type = 'all' }) {
-    let devicesResponse = await this.get('platform/device_inventory/v1/devices', { params: {limit, offset, sku_type}});
-    console.log(devicesResponse);
-    if (devicesResponse.status >= 200 && devicesResponse.status < 300)
-      return devicesResponse.responseBody;
-    else throw { name: 'HTTP Error', message: `HTTP Status ${devicesResponse.status}`, options: devicesResponse };
+    let devicesResponse = await this.get('platform/device_inventory/v1/devices', { params: { limit, offset, sku_type } });
+
+    return this.handleResponse(devicesResponse);
   }
 
   /**
@@ -371,10 +366,8 @@ export class Central {
         disconnect_user_network,
       }
     });
-    console.log(resultResponse);
-    if (resultResponse.status >= 200 && resultResponse.status < 300)
-      return resultResponse.responseBody;
-    else throw { name: 'HTTP Error', message: `HTTP Status ${resultResponse.status}`, options: resultResponse };
+
+    return this.handleResponse(resultResponse);
   }
 
 
@@ -386,18 +379,14 @@ export class Central {
    */
   async getStatus({ task_id }) {
     let statusResponse = await this.get(`device_management/v1/status/${task_id}`, {});
-    console.log(statusResponse);
-    if (statusResponse.status >= 200 && statusResponse.status < 300)
-      return statusResponse.responseBody;
-    else throw { name: 'HTTP Error', message: `HTTP Status ${statusResponse.status}`, options: statusResponse };
+
+    return this.handleResponse(statusResponse);
   }
 
   async genericCommandsForDevice({ serial, command }) {
     let resultResponse = await this.post(`device_management/v1/device/${serial}/action/${command}`, {});
-    console.log(resultResponse);
-    if (resultResponse.status >= 200 && resultResponse.status < 300)
-      return resultResponse.responseBody;
-    else throw { name: 'HTTP Error', message: `HTTP Status ${resultResponse.status}`, options: resultResponse };
+
+    return this.handleResponse(resultResponse);
   }
 
   async rebootDevice({ serial }) {
@@ -434,20 +423,16 @@ export class Central {
 
   async listSites() {
     let sitesResponse = await this.get('central/v2/sites');
-    console.log(sitesResponse)
+    if (sitesResponse.status === 200)
     siteCacheStore.set({ time: Date.now(), sites: sitesResponse.responseBody.sites });
-    if (sitesResponse.status >= 200 && sitesResponse.status < 300)
-      return sitesResponse.responseBody;
-    else throw { name: 'HTTP Error', message: `HTTP Status ${sitesResponse.status}`, options: sitesResponse };
+    return this.handleResponse(sitesResponse);
   }
 
   async listLabels() {
     let labelsResponse = await this.get('central/v2/labels');
-    console.log(labelsResponse)
+    if (labelsResponse.status === 200)
     labelCacheStore.set({ time: Date.now(), labels: labelsResponse.responseBody.labels });
-    if (labelsResponse.status >= 200 && labelsResponse.status < 300)
-      return labelsResponse.responseBody;
-    else throw { name: 'HTTP Error', message: `HTTP Status ${labelsResponse.status}`, options: labelsResponse };
+    return this.handleResponse(labelsResponse);
   }
 
   async listGroups() {
@@ -457,20 +442,17 @@ export class Central {
         offset: 0,
       }
     });
-    console.log(groupsResponse)
+    if (groupsResponse?.responseBody?.data && Array.isArray(groupsResponse.responseBody.data)) groupsResponse.responseBody.groups = groupsResponse.responseBody.data.flat();
+    if (groupsResponse.status === 200)
     groupCacheStore.set({ time: Date.now(), groups: groupsResponse.responseBody.data.flat() });
-    if (groupsResponse.status >= 200 && groupsResponse.status < 300)
-      return groupsResponse.responseBody;
-    else throw { name: 'HTTP Error', message: `HTTP Status ${groupsResponse.status}`, options: groupsResponse };
+    return this.handleResponse(groupsResponse);
   }
   getAllGroups = this.listGroups;
 
   async listTroubleshootingCommands({ device_type }) {
     let troubleshootingCommandsResponse = await this.get('troubleshooting/v1/commands', { params: { device_type } });
-    console.log(troubleshootingCommandsResponse);
-    if (troubleshootingCommandsResponse.status >= 200 && troubleshootingCommandsResponse.status < 300)
-      return troubleshootingCommandsResponse.responseBody;
-    else throw { name: 'HTTP Error', message: `HTTP Status ${troubleshootingCommandsResponse.status}`, options: troubleshootingCommandsResponse };
+
+    return this.handleResponse(troubleshootingCommandsResponse);
   }
 
   /**
@@ -485,10 +467,8 @@ export class Central {
    */
   async startTroubleshootingSession({ device_type, serial, commands }) {
     let sessionInfoResponse = await this.post(`troubleshooting/v1/devices/${serial}`, { data: { device_type, commands } });
-    console.log(sessionInfoResponse);
-    if (sessionInfoResponse.status >= 200 && sessionInfoResponse.status < 300)
-      return sessionInfoResponse.responseBody;
-    else throw { name: 'HTTP Error', message: `HTTP Status ${sessionInfoResponse.status}`, options: sessionInfoResponse };
+
+    return this.handleResponse(sessionInfoResponse);
   }
 
 
@@ -503,10 +483,8 @@ export class Central {
    */
   async getTroubleshootingOutput({ serial, session_id }) {
     let outputResponse = await this.get(`troubleshooting/v1/devices/${serial}`, { params: { session_id } });
-    console.log(outputResponse);
-    if (outputResponse.status >= 200 && outputResponse.status < 300)
-      return outputResponse.responseBody;
-    else throw { name: 'HTTP Error', message: `HTTP Status ${outputResponse.status}`, options: outputResponse };
+
+    return this.handleResponse(outputResponse);
   }
 
   /**
@@ -520,10 +498,8 @@ export class Central {
    */
   async exportTroubleshootingOutput({ serial, session_id }) {
     let outputResponse = await this.get(`troubleshooting/v1/devices/${serial}/export`, { params: { session_id } });
-    console.log(outputResponse);
-    if (outputResponse.status >= 200 && outputResponse.status < 300)
-      return outputResponse.responseBody;
-    else throw { name: 'HTTP Error', message: `HTTP Status ${outputResponse.status}`, options: outputResponse };
+
+    return this.handleResponse(outputResponse);
   }
 }
 
