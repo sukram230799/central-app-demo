@@ -11,6 +11,8 @@ import CameraSettingsPage from '../pages/settings-camera.svelte';
 import CentralSettingsPage from '../pages/settings-central.svelte';
 import TroubleshootingPage from '../pages/troubleshooting.svelte';
 import TroubleshootingDetailsPage from '../pages/troubleshooting-details.svelte';
+import GroupsPage from '../pages/groups.svelte';
+import GroupDetailsPage from '../pages/group-details.svelte';
 
 
 import DynamicRoutePage from '../pages/dynamic-route.svelte';
@@ -49,6 +51,14 @@ var routes = [
   {
     path: '/troubleshooting/details',
     component: TroubleshootingDetailsPage,
+  },
+  {
+    path: '/groups/',
+    component: GroupsPage,
+  },
+  {
+    path: '/groups/details/',
+    component: GroupDetailsPage,
   },
   {
     path: '/settings/camera',

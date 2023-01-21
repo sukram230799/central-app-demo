@@ -449,6 +449,15 @@ export class Central {
   }
   getAllGroups = this.listGroups;
 
+  async getPropertiesOfGroups({ groups }) {
+    let propertiesResponse = await this.get('configuration/v1/groups/properties', {
+      params: {
+        groups: groups.join()
+      }
+    });
+    return this.handleResponse(propertiesResponse);
+  }
+
   async listTroubleshootingCommands({ device_type }) {
     let troubleshootingCommandsResponse = await this.get('troubleshooting/v1/commands', { params: { device_type } });
 
