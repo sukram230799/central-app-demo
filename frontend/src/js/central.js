@@ -443,9 +443,9 @@ export class Central {
   async listLabels() {
     let labelsResponse = await this.get('central/v2/labels');
     if (labelsResponse.status === 200)
-      labelCacheStore.update((lables) => {
+      labelCacheStore.update((labels) => {
         labels[this.account.id] = { time: Date.now(), labels: labelsResponse.responseBody.labels };
-        return lables;
+        return labels;
       });
     return this.handleResponse(labelsResponse);
   }
