@@ -433,14 +433,20 @@ export class Central {
   async listSites() {
     let sitesResponse = await this.get('central/v2/sites');
     if (sitesResponse.status === 200)
-    siteCacheStore.set({ time: Date.now(), sites: sitesResponse.responseBody.sites });
+      siteCacheStore.update((sites) => {
+        sites[this.account.id] = { time: Date.now(), sites: sitesResponse.responseBody.sites };
+        return sites;
+      });
     return this.handleResponse(sitesResponse);
   }
 
   async listLabels() {
     let labelsResponse = await this.get('central/v2/labels');
     if (labelsResponse.status === 200)
-    labelCacheStore.set({ time: Date.now(), labels: labelsResponse.responseBody.labels });
+      labelCacheStore.update((lables) => {
+        labels[this.account.id] = { time: Date.now(), labels: labelsResponse.responseBody.labels };
+        return lables;
+      });
     return this.handleResponse(labelsResponse);
   }
 
@@ -453,7 +459,10 @@ export class Central {
     });
     if (groupsResponse?.responseBody?.data && Array.isArray(groupsResponse.responseBody.data)) groupsResponse.responseBody.groups = groupsResponse.responseBody.data.flat();
     if (groupsResponse.status === 200)
-    groupCacheStore.set({ time: Date.now(), groups: groupsResponse.responseBody.data.flat() });
+      groupCacheStore.update((groups) => {
+        groups[this.account.id] = { time: Date.now(), groups: groupsResponse.responseBody.data.flat() };
+        return groups;
+      });
     return this.handleResponse(groupsResponse);
   }
   getAllGroups = this.listGroups;

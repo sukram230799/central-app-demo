@@ -1,20 +1,20 @@
 import { writable, derived } from 'svelte/store';
 
 const needRefreshStore = writable({ updateAvailable: false, updateSW: null });
-const doRefreshStore = writable({doRefresh: false});
-const offlineReadyStore = writable({offlineReady: false});
+const doRefreshStore = writable({ doRefresh: false });
+const offlineReadyStore = writable({ offlineReady: false });
 
-const camera = writable(localStorage.camera ? JSON.parse(localStorage.camera) : {}); // || {"Id":"d3f5ceb340cf8ddbec8422380bc32693a8b284a453e3aa76b67b8f6a423bc2f5","label":"HP HD Camera (0408:5373)"});
-camera.subscribe((value) => localStorage.camera = JSON.stringify(value));
+const cameraStore = writable(localStorage.camera ? JSON.parse(localStorage.camera) : {}); // || {"Id":"d3f5ceb340cf8ddbec8422380bc32693a8b284a453e3aa76b67b8f6a423bc2f5","label":"HP HD Camera (0408:5373)"});
+cameraStore.subscribe((value) => localStorage.camera = JSON.stringify(value));
 
-const accounts = writable(localStorage.credentials ? JSON.parse(localStorage.credentials) : {});
-accounts.subscribe((value) => localStorage.credentials = JSON.stringify(value))
+const accountsStore = writable(localStorage.credentials ? JSON.parse(localStorage.credentials) : {});
+accountsStore.subscribe((value) => localStorage.credentials = JSON.stringify(value))
 
-const currentAccountId = writable(localStorage.selectedCredentialId);
-currentAccountId.subscribe((value) => localStorage.selectedCredentialId = value);
+const currentAccountIdStore = writable(localStorage.selectedCredentialId);
+currentAccountIdStore.subscribe((value) => localStorage.selectedCredentialId = value);
 
-const currentAccount = derived(
-    [accounts, currentAccountId], ([$credentials, $selectedCredentialId]) => $credentials[$selectedCredentialId]
+const currentAccountStore = derived(
+    [accountsStore, currentAccountIdStore], ([$accounts, $currentAccountId]) => $accounts[$currentAccountId]
 );
 
 const timeRanges = ["3H", "1D", "1W", "1M", "3M"];
@@ -78,26 +78,26 @@ selectedFilterStore.subscribe((value) => localStorage.selectedFilter = JSON.stri
 
 const selectedSortingOrderStore = writable('');
 
-const groupCacheStore = writable(localStorage.groups ? JSON.parse(localStorage.groups) : { groups: [] });
+const groupCacheStore = writable(localStorage.groups ? JSON.parse(localStorage.groups) : {});
 groupCacheStore.subscribe((value) => localStorage.groups = JSON.stringify(value));
-const groupStore = derived([groupCacheStore], ([$groupCacheStore]) => $groupCacheStore.groups);
+const groupStore = derived([groupCacheStore, currentAccountIdStore], ([$groupCache, $currentAccountId]) => $currentAccountId in $groupCache ? $groupCache[$currentAccountId].groups : []);
 
-const siteCacheStore = writable(localStorage.sites ? JSON.parse(localStorage.sites) : { sites: [] });
+const siteCacheStore = writable(localStorage.sites ? JSON.parse(localStorage.sites) : {});
 siteCacheStore.subscribe((value) => localStorage.sites = JSON.stringify(value));
-const siteStore = derived([siteCacheStore], ([$siteCacheStore]) => $siteCacheStore.sites);
+const siteStore = derived([siteCacheStore, currentAccountIdStore], ([$siteCache, $currentAccountId]) => $currentAccountId in $siteCache ? $siteCache[$currentAccountId].sites : []);
 
-const labelCacheStore = writable(localStorage.labels ? JSON.parse(localStorage.labels) : { labels: [] });
+const labelCacheStore = writable(localStorage.labels ? JSON.parse(localStorage.labels) : {});
 labelCacheStore.subscribe((value) => localStorage.labels = JSON.stringify(value));
-const labelStore = derived([labelCacheStore], ([$labelCacheStore]) => $labelCacheStore.labels);
+const labelStore = derived([labelCacheStore, currentAccountIdStore], ([$labelCache, $currentAccountId]) => $currentAccountId in $labelCache ? $labelCache[$currentAccountId].labels : []);
 
 export {
     needRefreshStore as needRefreshStore,
     doRefreshStore,
     offlineReadyStore as offlineReadyStore,
-    camera as cameraStore,
-    accounts as accountsStore,
-    currentAccountId as currentAccountIdStore,
-    currentAccount as currentAccountStore,
+    cameraStore as cameraStore,
+    accountsStore as accountsStore,
+    currentAccountIdStore as currentAccountIdStore,
+    currentAccountStore as currentAccountStore,
     selectedFilterNames,
     selectedFilterDefaults,
     selectedFilterStore as selectedFilterStore,

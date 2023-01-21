@@ -1,5 +1,5 @@
 <script>
-  import { onMount } from "svelte";
+  import { onDestroy, onMount } from "svelte";
 
   import {
     f7,
@@ -45,10 +45,13 @@
     siteCacheStore,
     needRefreshStore,
     doRefreshStore,
+    currentAccountIdStore,
   } from "../js/svelte-store";
   import { Central } from "../js/central";
 
+
   location.replace("/#!/");
+
   let needRefreshToast;
   needRefreshStore.subscribe((value) => {
     if (value && value.updateAvailable) {
@@ -136,6 +139,8 @@
     });
   }
 
+  let currentAccountIdStoreUnsub;
+
   onMount(() => {
     f7ready(async () => {
       // Call F7 APIs here
@@ -143,16 +148,27 @@
       console.log("Await Central Ready");
       await central.ready();
       console.log("Central is ready. Load data");
-      siteCacheStore.subscribe((value) => {
-        if (!value.time) central.listSites();
-      });
-      labelCacheStore.subscribe((value) => {
-        if (!value.time) central.listLabels();
-      });
-      groupCacheStore.subscribe((value) => {
-        if (!value.time) central.listGroups();
-      });
+      currentAccountIdStoreUnsub = currentAccountIdStore.subscribe(
+        (accountId) => {
+          const siteCacheStoreUnsub = siteCacheStore.subscribe((value) => {
+            if (!value[accountId].time)
+              central.listSites().finally(() => siteCacheStoreUnsub());
+          });
+          const labelCacheStoreUnsub = labelCacheStore.subscribe((value) => {
+            if (!value[accountId].time)
+              central.listLabels().finally(() => labelCacheStoreUnsub());
+          });
+          const groupCacheStoreUnsub = groupCacheStore.subscribe((value) => {
+            if (!value[accountId].time)
+              central.listGroups().finally(() => groupCacheStoreUnsub());
+          });
+        }
+      );
     });
+  });
+
+  onDestroy(() => {
+    currentAccountIdStoreUnsub();
   });
 
   const arrayIsEqual = (a, b) =>
