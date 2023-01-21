@@ -252,7 +252,17 @@ class Central {
     return this.handleResponse(clientsResponse);
   }
 
-
+  /**
+   * 
+   * @param {*} param0 
+   * @returns 
+   * This is a unified form of List APIs /monitoring/v1/clients/wired and /monitoring/v1/clients/wireless and it is backward compatible with these v1 apis.
+   *
+   * Get a list of unified clients. You can only specify one of group, swarm_id, cluster_id, network, site and
+   * label parameters.
+   * ---
+   * https://developer.arubanetworks.com/aruba-central/reference/apiexternal_controllerget_v2_unified_clients
+   */
   async listUnifiedClients({
     group,
     swarm_id,
@@ -465,6 +475,10 @@ class Central {
     return this.handleResponse(sitesResponse);
   }
 
+  /**
+   * List Labels
+   * @returns {{count: number, total: number, labels: [string]}}
+   */
   async listLabels() {
     let labelsResponse = await this.get('central/v2/labels');
     if (labelsResponse.status === 200)
@@ -475,6 +489,10 @@ class Central {
     return this.handleResponse(labelsResponse);
   }
 
+  /**
+   * List Groups
+   * @returns {{total: number, data: [[string]], groups: [string]}}
+   */
   async listGroups() {
     let groupsResponse = await this.get('configuration/v2/groups', {
       params: {
@@ -492,6 +510,62 @@ class Central {
   }
   getAllGroups = this.listGroups;
 
+  /**
+   * Get info whether a list of groups is in template mode
+   * @param {[string]} groups - Groups to get info about
+   * @returns {{data: [{group: string, template_details: {Wired: boolean, Wireless: boolean}}]}}
+   */
+  async getGroupTemplateInfo(groups) {
+    let groupTemplateInfoResponse = await this.get('/configuration/v2/groups/template_info', { params: { groups: groups.join(',') } });
+
+    return this.handleResponse(groupTemplateInfoResponse)
+  }
+
+  /**
+   * Clone Group
+   * @param {{group: string, clone_group: string, upgrade_architecture: boolean}} cloneParams - Clone Parameters
+   * @param {string} cloneParams.group - Name of group to be created.
+   * @param {string} cloneParams.clone_group - Group to be cloned.
+   * @param {boolean} cloneParams.upgrade_architecture - Upgrade group architecture during clone.
+   * @returns {Object}
+   * 
+   * Clone and create new group from a given group with the given name. The configuration of the new group will be inherited from the given group.
+   * For example:
+   * Sample request body to create a group is as follows:
+   * {
+   *   "group": "Lorem",
+   *   "clone_group": "Ipsum"
+   * }
+   * With the above body, a group named Lorem will be created with the attributes such as template-type & configurations cloned from Ipsum group.
+   */
+  async cloneGroup({ group, clone_group, upgrade_architecture = false }) {
+    // debugger;
+    let cloneResponse = await this.post('configuration/v2/groups/clone', {
+      data: {
+        group, clone_group, upgrade_architecture
+      }
+    });
+    // debugger;
+
+    return this.handleResponse(cloneResponse);
+  }
+
+
+  entry = { "AOSVersion": "AOS_8X", "AllowedDevTypes": ["AccessPoints", "Gateways", "Switches"], "AllowedSwitchTypes": ["AOS_S", "AOS_CX"], "ApNetworkRole": "Standard", "Architecture": "Instant", "GwNetworkRole": "BranchGateway", "MonitorOnly": [], "MonitorOnlySwitch": false, "NewCentral": false }
+  /**
+   * 
+   * @param {{groups: [string]}} param0 
+   * @returns {{data: [{group: string, properties: { 
+   * "AOSVersion": "AOS_8X"|"AOS_10X", 
+   * "AllowedDevTypes": ["AccessPoints", "Gateways", "Switches"], 
+   * "AllowedSwitchTypes": ["AOS_S", "AOS_CX"], 
+   * "ApNetworkRole": "Standard", 
+   * "Architecture": "Instant", 
+   * "GwNetworkRole": "BranchGateway", 
+   * "MonitorOnly": [], 
+   * "MonitorOnlySwitch": false, 
+   * "NewCentral": false }}]}}
+   */
   async getPropertiesOfGroups({ groups }) {
     let propertiesResponse = await this.get('configuration/v1/groups/properties', {
       params: {

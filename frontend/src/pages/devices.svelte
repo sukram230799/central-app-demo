@@ -90,6 +90,7 @@
   ];*/
 
   async function loadData() {
+    await central.ready(3);
     const deviceLists = await Promise.all([
       central.listAccessPoints(),
       central.listGateways(),

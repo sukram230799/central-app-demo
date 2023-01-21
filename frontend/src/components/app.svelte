@@ -49,7 +49,6 @@
   } from "../js/svelte-store";
   import { central } from "../js/central";
 
-
   location.replace("/#!/");
 
   let needRefreshToast;
