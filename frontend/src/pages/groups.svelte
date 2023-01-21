@@ -1,5 +1,6 @@
 <script>
   import {
+    f7,
     theme,
     Page,
     Navbar,
