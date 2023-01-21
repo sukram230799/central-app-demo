@@ -2,7 +2,7 @@
 import HomePage from '../pages/home.svelte';
 import AboutPage from '../pages/about.svelte';
 import FormPage from '../pages/form.svelte';
-import FirmwarePage from '../pages/firmware.svelte';
+// import FirmwarePage from '../pages/firmware.svelte';
 import ClientsPage from '../pages/clients.svelte';
 import ClientDetailsPage from '../pages/client-details.svelte';
 import DevicesPage from '../pages/devices.svelte';
@@ -22,16 +22,16 @@ var routes = [
     path: '/',
     component: HomePage,
   },
-  {
-    path: '/firmware/',
-    component: FirmwarePage,
-  },
+  // {
+  //   path: '/firmware/',
+  //   component: FirmwarePage,
+  // },
   {
     path: '/clients/',
     component: ClientsPage,
   },
   {
-    path: '/client-details/',
+    path: '/clients/details/',
     component: ClientDetailsPage,
   },
   {
@@ -39,7 +39,7 @@ var routes = [
     component: DevicesPage,
   },
   {
-    path: '/device-details/',
+    path: '/devices/details/',
     component: DeviceDetailsPage,
   },
   {

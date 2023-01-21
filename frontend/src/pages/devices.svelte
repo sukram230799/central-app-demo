@@ -168,7 +168,7 @@
         header={`${device.group_name}`}
         title={device.name ? device.name : device.macaddr}
         footer={`${device.serial} – ${device.macaddr}`}
-        href="/device-details/"
+        href="/devices/details/"
         routeProps={{ device: device }}
       >
         {#if device?.switch_type}

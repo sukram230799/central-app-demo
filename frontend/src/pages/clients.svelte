@@ -197,7 +197,7 @@
         footer={`${client.macaddr} – ${client.ip_address}`}
         title={client.name ? client.name : client.macaddr}
         header={`${client.associated_device} – ${client.associated_device_name}`}
-        href="/client-details/"
+        href="/clients/details/"
         routeProps={{ client: client }}
       >
         <!-- <i slot="media" class="icon demo-list-icon" /> -->
