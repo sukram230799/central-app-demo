@@ -93,6 +93,8 @@ app.post('/notify-all', (request, response) => {
 });
 
 app.post('/api-proxy', async (request, response) => {
+    if (!request?.body?.url?.startsWith('https://internal-apigw.central.arubanetworks.com/'))
+        return response.sendStatus(403);
     if (process.env.NODE_ENV !== "production")
         console.log(request.body);
 
