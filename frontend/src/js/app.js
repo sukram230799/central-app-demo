@@ -29,7 +29,7 @@ const updateSW = registerSW({
 });
 
 // Init F7 Svelte Plugin
-Framework7.use(Framework7Svelte)
+Framework7.use(Framework7Svelte);
 
 // Mount Svelte App
 const app = new App({

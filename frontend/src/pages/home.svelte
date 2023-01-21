@@ -18,7 +18,6 @@
     Col,
     Button,
   } from "framework7-svelte";
-  import Icon from "framework7-svelte/components/icon.svelte";
 
   async function backgroundSync() {
     const status = await navigator.permissions.query({

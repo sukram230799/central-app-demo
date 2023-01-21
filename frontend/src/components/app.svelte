@@ -48,6 +48,7 @@
   } from "../js/svelte-store";
   import { Central } from "../js/central";
 
+  location.replace("/#!/");
   let needRefreshToast;
   needRefreshStore.subscribe((value) => {
     if (value && value.updateAvailable) {
@@ -89,7 +90,7 @@
     view: {
       // pushState: true,
       browserHistory: true,
-      browserHistoryRoot: "/",
+      // browserHistoryRoot: "/",
     },
   };
   // Login screen demo data
