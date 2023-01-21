@@ -22,8 +22,7 @@ class Central {
   constructor() {
     setInterval(() => {
       if (this.rateBucket < rateBucketMax) {
-        this.rateBucket++;
-        console.log('Pour me some API');
+        this.pourMeSomeApi(1);
       }
     }, 2 * 1000);
 
@@ -50,13 +49,22 @@ class Central {
    * Resolves the promise when API Keys are available
    */
   ready(chargeRate = 0) {
-    this.rateBucket += chargeRate;
-    if (this.rateBucket > rateBucketMax) this.rateBucket = rateBucketMax;
+    this.pourMeSomeApi(chargeRate - 1);
     return this._ready_promise;
   }
 
+  pourMeSomeApi(chargeRate) {
+    this.rateBucket += chargeRate;
+    if (this.rateBucket > rateBucketMax) this.rateBucket = rateBucketMax;
+
+    console.log('Pour me some API', this.rateBucket);
+  }
+
   async request(path, options) {
-    if (--this.rateBucket <= 0) { alert('Ratelimit Exceeded'); throw { message: "Ratelimit Exceeded" } };
+    if (--this.rateBucket <= 0) {
+      alert('Ratelimit Exceeded');
+      // throw { message: "Ratelimit Exceeded" } // Don't throw yet. The alert should be blocking :D
+    };
     let body = {
       headers: { 'Authorization': `Bearer ${this.account.credential.access_token}` },
       ...options,
