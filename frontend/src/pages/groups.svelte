@@ -25,6 +25,7 @@
     cloneGroupGetName,
     deleteGroupDialog,
   } from "../components/group-operations";
+  import { notImplemented } from "../components/not-implemented";
 
   let groups = [];
   let detailsLoaded = false;
@@ -94,7 +95,12 @@
 <Page ptr onPtrRefresh={loadMore}>
   <Navbar title="Groups" backLink="Back">
     <NavRight>
-      <Link iconIos="f7:plus" iconAurora="f7:plus" iconMd="material:add" />
+      <Link
+        iconIos="f7:plus"
+        iconAurora="f7:plus"
+        iconMd="material:add"
+        on:click={() => notImplemented(f7, "Add Group")}
+      />
       <Link
         searchbarEnable=".searchbar-groups-overview"
         iconIos="f7:search"
