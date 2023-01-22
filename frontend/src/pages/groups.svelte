@@ -14,11 +14,17 @@
     NavRight,
     Searchbar,
     ListItem,
+    SwipeoutActions,
+    SwipeoutButton,
   } from "framework7-svelte";
   import { central } from "../js/central";
   import { groupStore } from "../js/svelte-store";
   import GroupPropertiesBubbles from "../components/group-properties-bubbles.svelte";
   import GroupTemplateBubbles from "../components/group-template-bubbles.svelte";
+  import {
+    cloneGroupGetName,
+    deleteGroupDialog,
+  } from "../components/group-operations";
 
   let groups = [];
   let detailsLoaded = false;
@@ -60,12 +66,35 @@
     loadData(false).then(() => done());
   }
 
+  function cloneGroup() {
+    const groupName = this.$$scope.ctx.slice(-1)[0];
+    console.log("clone", groupName);
+    cloneGroupGetName(f7, groupCloned, groupName);
+  }
+
+  function groupCloned() {
+    loadData(true);
+    f7.swipeout.close(".swipeout");
+  }
+
+  function deleteGroup() {
+    const groupName = this.$$scope.ctx.slice(-1)[0];
+    console.log("delete", groupName);
+    deleteGroupDialog(f7, groupDelted, groupName);
+  }
+
+  function groupDelted() {
+    loadData(true);
+    f7.swipeout.close(".swipeout");
+  }
+
   onDestroy(() => f7.progressbar.hide());
 </script>
 
 <Page ptr onPtrRefresh={loadMore}>
   <Navbar title="Groups" backLink="Back">
     <NavRight>
+      <Link iconIos="f7:plus" iconAurora="f7:plus" iconMd="material:add" />
       <Link
         searchbarEnable=".searchbar-groups-overview"
         iconIos="f7:search"
@@ -97,6 +126,7 @@
     {#each groups as group}
       {#if detailsLoaded}
         <ListItem
+          swipeout
           disabled={false && !detailsLoaded}
           title={group}
           href="/groups/details/"
@@ -112,6 +142,14 @@
                 : {},
           }}
         >
+          <SwipeoutActions left>
+            <SwipeoutButton overswipe color="red" onClick={deleteGroup}
+              >Delete</SwipeoutButton
+            >
+            <SwipeoutButton color="orange" onClick={cloneGroup}
+              >Clone</SwipeoutButton
+            >
+          </SwipeoutActions>
           <svelte:fragment slot="subtitle">
             <GroupTemplateBubbles
               groupTemplateInfo={groupsTemplateInfo[group]}

@@ -9,9 +9,17 @@
     ListItem,
     NavRight,
     Link,
+    Block,
   } from "framework7-svelte";
   import { central } from "../js/central";
+  import {
+    cloneGroupGetName,
+    deleteGroupDialog,
+  } from "../components/group-operations";
+  import GroupTemplateBubbles from "../components/group-template-bubbles.svelte";
+  import GroupPropertiesBubbles from "../components/group-properties-bubbles.svelte";
 
+  export let f7router;
   export let groupName;
   export let groupProperties = {};
   export let groupTemplateInfo = {};
@@ -34,53 +42,18 @@
   let title = groupName;
   export let showAllEntries = true;
 
-  async function cloneGroupGetName() {
-    await central.ready();
-    f7.dialog.prompt(
-      "Please enter the name of the new group",
-      "Clone Group",
-      (newGroupName) => {
-        if (newGroupName.length >= 0) {
-          cloneGroupGetUpgrade(newGroupName);
-        } else
-          f7.toast.show({ text: "Name can't be empty", closeTimeout: 1000 });
-      }
-    );
+  async function cloneGroup() {
+    cloneGroupGetName(f7, groupCloned, groupName);
   }
 
-  function cloneGroupGetUpgrade(newGroupName) {
-    f7.dialog
-      .create({
-        title: "Clone Group",
-        text: "Upgrade Architecture?",
-        buttons: [{ text: "Keep" }, { text: "Upgrade" }],
-        onClick: (dialog, index) => {
-          console.log(dialog);
-          cloneGroup(newGroupName, !!index);
-        },
-      })
-      .open();
+  function groupCloned() {}
+
+  async function deleteGroup() {
+    deleteGroupDialog(f7, groupDelted, groupName);
   }
 
-  function cloneGroup(newGroupName, upgradeArchitecture) {
-    f7.preloader.show();
-    central
-      .cloneGroup({
-        group: newGroupName,
-        clone_group: groupName,
-        upgrade_architecture: upgradeArchitecture,
-      })
-      .then((message) => f7.toast.show({ text: message, closeTimeout: 2000 }))
-      .catch((e) => {
-        console.log(e);
-        f7.toast.show({
-          text: e?.options?.responseBody?.description
-            ? e.options.responseBody.description
-            : JSON.stringify(e),
-          closeTimeout: 8000,
-        });
-      })
-      .finally(() => f7.preloader.hide());
+  function groupDelted() {
+    f7router.back();
   }
 </script>
 
@@ -91,11 +64,33 @@
         iconIos="f7:plus_square_on_square"
         iconAurora="f7:plus_square_on_square"
         iconMd="material:content_copy"
-        on:click={cloneGroupGetName}
+        on:click={cloneGroup}
         tooltip="Clone Group"
+      />
+      <Link
+        iconIos="f7:trash"
+        iconAurora="f7:trash"
+        iconMd="material:delete_forever"
+        on:click={deleteGroup}
+        tooltip="Delete Group"
       />
     </NavRight>
   </Navbar>
+  <BlockTitle>Group Info</BlockTitle>
+  <List>
+    <ListItem>
+      <span>
+        <GroupTemplateBubbles {groupTemplateInfo} />
+      </span>
+    </ListItem>
+    <ListItem>
+      <span
+        >Properties:
+        <GroupPropertiesBubbles {groupProperties} />
+      </span>
+    </ListItem>
+  </List>
+  <Block />
 
   {#each Object.entries(handledEntries) as [title, data]}
     <BlockTitle>{title}</BlockTitle>

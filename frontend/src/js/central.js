@@ -95,7 +95,7 @@ class Central {
    * Send GET request via proxy
    * @param {string} path Path to request from central api
    * @param {{ data: {}, headers: {}, params: {} }} options Options to pass to central
-   * @returns obj
+   * @returns {Object}
    */
   async get(path, options = {}) {
     return await this.request(path, { ...options, method: 'GET' });
@@ -105,12 +105,21 @@ class Central {
    * Send POST request via proxy
    * @param {string} path Path to request from central api
    * @param {{ data: {}, headers: {}, params: {} }} options Options to pass to central
-   * @returns obj
+   * @returns {Object}
    */
   async post(path, options = {}) {
     return await this.request(path, { ...options, method: 'POST' });
   }
 
+  /**
+   * Send DELETE request via proxy
+   * @param {string} path Path to request from central api
+   * @param {{ data: {}, headers: {}, params: {} }} options Options to pass to central
+   * @returns {Object}
+   */
+  async delete(path, options = {}) {
+    return await this.request(path, { ...options, method: 'DELETE' });
+  }
   async refreshToken() {
     let refreshBody = {
       // baseUrl: baseUrl,
@@ -509,6 +518,12 @@ class Central {
     return this.handleResponse(groupsResponse);
   }
   getAllGroups = this.listGroups;
+
+  async deleteGroup({ group }) {
+    let deleteGroupResponse = await this.delete(`configuration/v1/groups/${group}`)
+
+    return this.handleResponse(deleteGroupResponse)
+  }
 
   /**
    * Get info whether a list of groups is in template mode
