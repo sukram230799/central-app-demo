@@ -25,10 +25,10 @@
   <span class="badge color-gray">Monitor-Only</span>
 {/if}
 <!-- Gateway Type -->
-{#if groupProperties?.GWNetworkRole === "BranchGateway"}
+{#if groupProperties?.GwNetworkRole === "BranchGateway"}
   <span class="badge color-gray">Branch Gateway</span>
-{:else if groupProperties?.GWNetworkRole === "WLANGateway"}
+{:else if groupProperties?.GwNetworkRole === "WLANGateway"}
   <span class="badge color-gray">Mobility Gateway</span>
-{:else if groupProperties?.GWNetworkRole === "VPNConcentrator"}
+{:else if groupProperties?.GwNetworkRole === "VPNConcentrator"}
   <span class="badge color-gray">VPNC</span>
 {/if}
