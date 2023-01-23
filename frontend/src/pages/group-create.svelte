@@ -14,6 +14,7 @@
     Link,
   } from "framework7-svelte";
   import { central } from "../js/central";
+  import { groupStore } from "../js/svelte-store";
 
   export let f7router;
 
@@ -37,6 +38,7 @@
 
   $: if (apNetworkRole === "Microbranch") allowGWs = false;
   $: if (architecture === "Instant") gwNetworkRole = "BranchGateway";
+  $: if (architecture !== "AOS10") apNetworkRole = "Standard";
 
   function createGroup() {
     let allowedDevTypes = [];
@@ -64,11 +66,11 @@
           Wireless: templateWireless,
         },
         group_properties: {
-          Architecture: architecture,
+          Architecture: allowAPs || allowGWs ? architecture : undefined,
           AllowedDevTypes: allowedDevTypes,
           AllowedSwitchTypes: allowedSwitchTypes,
           MonitorOnly: monitorOnly,
-          ApNetworkRole: architecture === "AOS10" ? apNetworkRole : "Standard",
+          ApNetworkRole: apNetworkRole,
           GwNetworkRole: gwNetworkRole,
         },
       },
@@ -100,7 +102,8 @@
   }
 
   function groupCreated() {
-    f7router.back();
+    groupStore.add(groupName);
+    // f7router.back();
   }
 
   function groupFailed() {}
@@ -133,15 +136,20 @@
       <span>Template Wireless</span>
       <Toggle bind:checked={templateWired} />
     </ListItem>
-    <ListInput
-      label="Architecture"
-      type="select"
-      bind:value={architecture}
-      placeholder="Please choose..."
-    >
-      <option value="Instant">Instant / AOS8</option>
-      <option value="AOS10">AOS10</option>
-    </ListInput>
+    {#if allowAPs || allowGWs}
+      <ListInput
+        label="Architecture"
+        type="select"
+        bind:value={architecture}
+        placeholder="Please choose..."
+      >
+        <option value="Instant">Instant / AOS8</option>
+        <option value="AOS10">AOS10</option>
+      </ListInput>
+    {/if}
+  </List>
+  <BlockTitle>Access Points</BlockTitle>
+  <List>
     <ListItem>
       <span>Acceess Points</span>
       <Toggle bind:checked={allowAPs} />
@@ -154,9 +162,14 @@
         placeholder="Please choose..."
       >
         <option value="Standard">Standard</option>
-        <option value="Microbranch">Microbranch</option>
+        {#if architecture === "AOS10"}
+          <option value="Microbranch">Microbranch</option>
+        {/if}
       </ListInput>
     {/if}
+  </List>
+  <Block>Gateways</Block>
+  <List>
     <ListItem disabled={apNetworkRole === "Microbranch"}>
       <span>Gateways</span>
       <Toggle
@@ -178,6 +191,9 @@
         {/if}
       </ListInput>
     {/if}
+  </List>
+  <BlockTitle>Switches</BlockTitle>
+  <List>
     <ListItem>
       <span>AOS-S Switch</span>
       <Toggle bind:checked={allowAOS_S} />
