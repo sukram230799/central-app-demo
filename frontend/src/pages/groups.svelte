@@ -132,7 +132,7 @@
     {#each groups as group}
       {#if detailsLoaded}
         <ListItem
-          swipeout
+          swipeout={false}
           disabled={false && !detailsLoaded}
           title={group}
           href="/groups/details/"
@@ -148,6 +148,7 @@
                 : {},
           }}
         >
+          <!--
           <SwipeoutActions left>
             <SwipeoutButton overswipe color="red" onClick={deleteGroup}
               >Delete</SwipeoutButton
@@ -156,6 +157,7 @@
               >Clone</SwipeoutButton
             >
           </SwipeoutActions>
+          -->
           <svelte:fragment slot="subtitle">
             <GroupTemplateBubbles
               groupTemplateInfo={groupsTemplateInfo[group]}
