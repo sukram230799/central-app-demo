@@ -168,7 +168,7 @@
       </ListInput>
     {/if}
   </List>
-  <Block>Gateways</Block>
+  <BlockTitle>Gateways</BlockTitle>
   <List>
     <ListItem disabled={apNetworkRole === "Microbranch"}>
       <span>Gateways</span>
