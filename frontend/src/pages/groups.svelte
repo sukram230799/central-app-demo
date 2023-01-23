@@ -43,11 +43,11 @@
     await central.ready(1);
     const groupsResponse = await central.listGroups(); // Groups are added via subscription!
     // TODO: Can be parallelized
-    groupsTemplateInfoResult = await central.getGroupTemplateInfo(
-      groupsResponse.groups
-    );
+    groupsTemplateInfoResult = await central.getGroupTemplateInfo({
+      groups: groupsResponse.groups,
+    });
     groupsPropertiesResult = await central.getPropertiesOfGroups({
-      groups,
+      groups: groupsResponse.groups,
     });
     groupsTemplateInfo = groupsTemplateInfoResult.data.reduce((accu, value) => {
       accu[value.group] = value.template_details;
@@ -73,19 +73,26 @@
     cloneGroupGetName(f7, groupCloned, groupName);
   }
 
-  function groupCloned() {
+  function groupCloned(isCloned, groupName) {
+    if (isCloned) {
     loadData(true);
+      groupStore.add(groupName);
+    }
     f7.swipeout.close(".swipeout");
   }
 
   function deleteGroup() {
+    console.log(this);
     const groupName = this.$$scope.ctx.slice(-1)[0];
     console.log("delete", groupName);
     deleteGroupDialog(f7, groupDelted, groupName);
   }
 
-  function groupDelted() {
+  function groupDelted(isDeleted, groupName) {
+    if (isDeleted) {
+      groupStore.delete(groupName);
     loadData(true);
+    }
     f7.swipeout.close(".swipeout");
   }
 
@@ -99,7 +106,7 @@
         iconIos="f7:plus"
         iconAurora="f7:plus"
         iconMd="material:add"
-        on:click={() => notImplemented(f7, "Add Group")}
+        href="/groups/create/"
       />
       <Link
         searchbarEnable=".searchbar-groups-overview"

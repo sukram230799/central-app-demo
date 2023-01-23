@@ -24,6 +24,8 @@
   export let groupProperties = {};
   export let groupTemplateInfo = {};
 
+  let groupDetails = { ...groupProperties, template: groupTemplateInfo };
+
   if (
     // https://stackoverflow.com/questions/679915/how-do-i-test-for-an-empty-javascript-object
     groupProperties && // 👈 null and undefined check
@@ -36,6 +38,11 @@
       .then((propertiesResponse) => {
         groupProperties = propertiesResponse.data[0].properties;
         console.log(groupProperties);
+      })
+      .then(() => central.getGroupTemplateInfo({ groups: [groupName] }))
+      .then((templateInfoResponse) => {
+        templateInfo = templateInfoResponse.data[0].properties;
+        console.log(templateInfo);
       });
 
   const handledEntries = {};
@@ -112,7 +119,7 @@
     <BlockTitle>All Info</BlockTitle>
 
     <List>
-      {#each Object.entries(groupProperties) as [title, data]}
+      {#each Object.entries(groupDetails) as [title, data]}
         {#if !Array.isArray(data)}
           <ListItem {title} after={data} />
         {:else}

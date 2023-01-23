@@ -36,7 +36,10 @@ function cloneGroupDisplay(f7, callback, oldGroupName, newGroupName, upgradeArch
       clone_group: oldGroupName,
       upgrade_architecture: upgradeArchitecture,
     })
-    .then((message) => f7.toast.show({ text: message, closeTimeout: 2000 }))
+    .then((message) => {
+      f7.toast.show({ text: message, closeTimeout: 2000 })
+      if (callback) callback(true, newGroupName);
+    })
     .catch((e) => {
       console.log(e);
       f7.toast.show({
@@ -45,10 +48,10 @@ function cloneGroupDisplay(f7, callback, oldGroupName, newGroupName, upgradeArch
           : JSON.stringify(e),
         closeTimeout: 8000,
       });
+      if (callback) callback(false, newGroupName);
     })
     .finally(() => {
-      f7.preloader.hide()
-      if (callback) callback()
+      f7.preloader.hide();
     });
 }
 
@@ -62,7 +65,10 @@ function deleteGroupDialog(f7, callback, groupName) {
         if (index) {
           f7.preloader.show();
           central.deleteGroup({ group: groupName })
-            .then((message) => f7.toast.show({ text: message, closeTimeout: 2000 }))
+            .then((message) => {
+              if (callback) callback(true, groupName);
+              f7.toast.show({ text: message, closeTimeout: 2000 })
+            })
             .catch((e) => {
               console.log(e);
               f7.toast.show({
@@ -71,10 +77,10 @@ function deleteGroupDialog(f7, callback, groupName) {
                   : JSON.stringify(e),
                 closeTimeout: 8000,
               });
+              if (callback) callback(false, groupName);
             })
             .finally(() => {
-              f7.preloader.hide()
-              if (callback) callback()
+              f7.preloader.hide();
             });
         }
       },

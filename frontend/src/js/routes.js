@@ -13,6 +13,7 @@ import TroubleshootingPage from '../pages/troubleshooting.svelte';
 import TroubleshootingDetailsPage from '../pages/troubleshooting-details.svelte';
 import GroupsPage from '../pages/groups.svelte';
 import GroupDetailsPage from '../pages/group-details.svelte';
+import GroupCreatePage from '../pages/group-create.svelte';
 
 
 import DynamicRoutePage from '../pages/dynamic-route.svelte';
@@ -55,6 +56,10 @@ var routes = [
   {
     path: '/groups/',
     component: GroupsPage,
+  },
+  {
+    path: '/groups/create/',
+    component: GroupCreatePage,
   },
   {
     path: '/groups/details/',

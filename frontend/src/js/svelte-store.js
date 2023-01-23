@@ -1,4 +1,4 @@
-import { writable, derived } from 'svelte/store';
+import { writable, derived, get } from 'svelte/store';
 
 const needRefreshStore = writable({ updateAvailable: false, updateSW: null });
 const doRefreshStore = writable({ doRefresh: false });
@@ -81,6 +81,25 @@ const selectedSortingOrderStore = writable('');
 const groupCacheStore = writable(localStorage.groups ? JSON.parse(localStorage.groups) : {});
 groupCacheStore.subscribe((value) => localStorage.groups = JSON.stringify(value));
 const groupStore = derived([groupCacheStore, currentAccountIdStore], ([$groupCache, $currentAccountId]) => $currentAccountId in $groupCache ? $groupCache[$currentAccountId].groups : []);
+groupStore.delete = (groupName) => {
+    groupCacheStore.update((groupCache) => {
+        const currentAccountId = get(currentAccountIdStore);
+        console.log(currentAccountId);
+        console.log(groupCache);
+        let groupArray = groupCache[currentAccountId].groups;
+        console.log(groupArray);
+        groupArray.splice(groupArray.indexOf(groupName));
+        groupCache[currentAccountId].groups = groupArray;
+        return groupCache;
+    });
+};
+groupStore.add = (groupName) => {
+    groupCacheStore.update((groupCache) => {
+        const currentAccountId = get(currentAccountIdStore);
+        groupCache[currentAccountId].groups.push(groupName);
+        return groupCache;
+    });
+};
 
 const siteCacheStore = writable(localStorage.sites ? JSON.parse(localStorage.sites) : {});
 siteCacheStore.subscribe((value) => localStorage.sites = JSON.stringify(value));

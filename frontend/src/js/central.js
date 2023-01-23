@@ -525,12 +525,32 @@ class Central {
     return this.handleResponse(deleteGroupResponse)
   }
 
+  async createGroup({ groupName }) {
+
+    return this.handleResponse();
+  }
+
+  /**
+   * 
+   * @param {{ group: string, group_attributes: { template_info: { Wired: boolean, Wireless: boolean, }, group_properties: { AllowedDevTypes: [string], AllowedSwitchTypes: [string], MonitorOnly: [string], ApNetworkRole: string, GwNetworkRole: string}}}} groupProperties 
+   * @param groupProperties.group_attributes.group_properties.AllowedDevTypes - ["AccessPoints"|"Gateways"|"Switches"]
+   * @param groupProperties.group_attributes.group_properties.AllowedSwitchTypes - ["AOS_S"|"AOS_CX"]
+   * @param groupProperties.group_attributes.group_properties.MonitorOnly - ["AOS_S"|"AOS_CX"]
+   * @param groupProperties.group_attributes.group_properties.ApNetworkRole - "Standard"|"Microbranch"
+   * @returns 
+   */
+  async createGroupProperties({ groupDetails }) {
+    let createGroupResponse = await this.post('configuration/v3/groups', { data: { ...groupDetails } });
+
+    return this.handleResponse(createGroupResponse);
+  }
+
   /**
    * Get info whether a list of groups is in template mode
    * @param {[string]} groups - Groups to get info about
    * @returns {{data: [{group: string, template_details: {Wired: boolean, Wireless: boolean}}]}}
    */
-  async getGroupTemplateInfo(groups) {
+  async getGroupTemplateInfo({groups}) {
     let groupTemplateInfoResponse = await this.get('/configuration/v2/groups/template_info', { params: { groups: groups.join(',') } });
 
     return this.handleResponse(groupTemplateInfoResponse)
