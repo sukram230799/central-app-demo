@@ -36,7 +36,7 @@
   let monitorAOS_S = false;
   let monitorAOS_CX = false;
 
-  $: if (apNetworkRole === "Microbranch") allowGWs = false;
+  $: if (allowAPs && apNetworkRole === "Microbranch") allowGWs = false;
   $: if (architecture === "Instant") gwNetworkRole = "BranchGateway";
   $: if (architecture !== "AOS10") apNetworkRole = "Standard";
 
@@ -170,10 +170,10 @@
   </List>
   <BlockTitle>Gateways</BlockTitle>
   <List>
-    <ListItem disabled={apNetworkRole === "Microbranch"}>
+    <ListItem disabled={allowAPs && apNetworkRole === "Microbranch"}>
       <span>Gateways</span>
       <Toggle
-        disabled={apNetworkRole === "Microbranch"}
+        disabled={allowAPs && apNetworkRole === "Microbranch"}
         bind:checked={allowGWs}
       />
     </ListItem>
