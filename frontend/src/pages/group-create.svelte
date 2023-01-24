@@ -37,10 +37,23 @@
   let monitorAOS_CX = false;
 
   $: if (allowAPs && apNetworkRole === "Microbranch") allowGWs = false;
+  // $: if (allowGWs && gwNetworkRole === "VPNC") allowAPs = false;
   $: if (architecture === "Instant") gwNetworkRole = "BranchGateway";
   $: if (architecture !== "AOS10") apNetworkRole = "Standard";
 
   function createGroup() {
+    if (!groupName)
+      return f7.toast.show({
+        text: "Group Name can't be empty",
+        closeTimeout: 2000,
+      });
+
+    if (allowGWs && gwNetworkRole === "VPNConcentrator" && allowAPs)
+      return f7.toast.show({
+        text: "Access points cannot be present in a group with VPN concentrator network role set for Gateways",
+        closeTimeout: 2000,
+      });
+
     let allowedDevTypes = [];
     if (allowAPs) allowedDevTypes.push("AccessPoints");
     else apNetworkRole = undefined;
@@ -184,10 +197,10 @@
         bind:value={gwNetworkRole}
         placeholder="Please choose..."
       >
-        <option value="BranchGateway">BranchGateway</option>
-        <option value="VPNConcentrator">VPNConcentrator</option>
+        <option value="BranchGateway">Branch Gateway</option>
+        <option value="VPNConcentrator">VPN Concentrator</option>
         {#if architecture === "AOS10"}
-          <option value="WLANGateway">WLANGateway</option>
+          <option value="WLANGateway">WLAN Gateway</option>
         {/if}
       </ListInput>
     {/if}
