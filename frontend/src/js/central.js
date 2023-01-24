@@ -357,6 +357,20 @@ class Central {
     return await this.listUnifiedClients(params);
   }
 
+  /**
+   * Get Client Details
+   * @param {*} param0 
+   * @returns 
+   * This is a unified form of Details APIs /monitoring/v1/clients/wired/{macaddr} and /monitoring/v1/clients/wireless/{macaddr} and it is backward compatible with these v1 apis.
+   * ---
+   * https://developer.arubanetworks.com/aruba-central/reference/apiexternal_controllerget_v2_unified_client_detail
+   */
+  async getClientDetails({ macaddr }) {
+    const clientDetailsResponse = await this.get(`monitoring/v2/clients/${macaddr}`)
+
+    return this.handleResponse(clientDetailsResponse);
+  }
+
   async listAccessPoints() {
     let apsResponse = await this.get('monitoring/v2/aps', {
       params: {}
@@ -537,7 +551,31 @@ class Central {
    * @param groupProperties.group_attributes.group_properties.AllowedSwitchTypes - ["AOS_S"|"AOS_CX"]
    * @param groupProperties.group_attributes.group_properties.MonitorOnly - ["AOS_S"|"AOS_CX"]
    * @param groupProperties.group_attributes.group_properties.ApNetworkRole - "Standard"|"Microbranch"
+   * @param groupProperties.group_attributes.group_properties.GwNetworkRole - "BranchGateway"|"VPNConcentrator"|"WLANGateway"
    * @returns 
+   * Create new group given a group name, configuration mode(UI or template mode of configuration) to be set per device type and the user can also specify the following properties for the group
+   * 
+   * Device types(AccessPoints, Gateways, Switches) to be allowed in the group
+   * 
+   * Architecture(Instant / AOS10) for the access points and gateways in the group.
+   * 
+   * Network role(Standard / Microbranch) for access points in the group.
+   * Standard network role is applicable for both AOS10 and Instant architecture.
+   * Microbranch network role for access points is applicable only for AOS10 architecture.
+   * 
+   * Network role(BranchGateway / VPNConcentrator / WLANGateway) for gateways in the group.
+   * BranchGateway and VPNConcentrator network role are applicable for both AOS10 and Instant architecture.
+   * WLANGateway network role is applicable only for AOS10 architecture.
+   * 
+   * Switch device types (AOS_S, AOS_CX) to be allowed in the group if the group can have switches.
+   * 
+   * List of device types for which monitor only mode is to be enabled. Currently, this is available only for AOS_S switches in groups where switches are managed using UI mode of configuration.
+   * If empty list - [] is passed as value, monitor only mode is disabled.
+   * If AOS_S is passed in the list - ["AOS_S"], monitor only mode is enabled for AOS_S switches in the group.
+   * 
+   * Configuration mode can be set for Access points and Gateways under the 'Wireless' field and for switches under the 'Wired' field. The configuration mode is specified as a boolean value indicating if the device type is managed using the template mode of configuration or not.
+   * ---
+   * https://developer.arubanetworks.com/aruba-central/reference/apigroupscreate_group_v3
    */
   async createGroupProperties({ groupDetails }) {
     let createGroupResponse = await this.post('configuration/v3/groups', { data: { ...groupDetails } });
@@ -550,7 +588,7 @@ class Central {
    * @param {[string]} groups - Groups to get info about
    * @returns {{data: [{group: string, template_details: {Wired: boolean, Wireless: boolean}}]}}
    */
-  async getGroupTemplateInfo({groups}) {
+  async getGroupTemplateInfo({ groups }) {
     let groupTemplateInfoResponse = await this.get('/configuration/v2/groups/template_info', { params: { groups: groups.join(',') } });
 
     return this.handleResponse(groupTemplateInfoResponse)

@@ -3,31 +3,55 @@
     theme,
     f7,
     f7ready,
-    App,
-    Panel,
-    Views,
-    View,
-    Popup,
     Page,
     Navbar,
-    Toolbar,
     NavRight,
     Link,
     Block,
     BlockTitle,
-    LoginScreen,
-    LoginScreenTitle,
     List,
     ListItem,
-    ListInput,
-    ListButton,
-    BlockFooter,
     Searchbar,
+    Icon,
+    Row,
+    Col,
+    Button,
   } from "framework7-svelte";
   import { central } from "../js/central";
+  import { pinnedClientsStore } from "../js/svelte-store";
 
   export let client;
+  let loaded = false;
+  let loadClass = theme.ios
+    ? "skeleton-text skeleton-effect-pulse"
+    : "skeleton-text skeleton-effect-wave";
+  let pinnedState = false;
 
+  pinnedClientsStore.subscribe(
+    (pinnedClients) => (pinnedState = client.macaddr in pinnedClients)
+  );
+
+  if (client.partial) {
+    loaded = false;
+    loadData();
+  } else {
+    loaded = true;
+    loadClass = "";
+  }
+
+  function loadData() {
+    return central
+      .ready(1)
+      .then(() => central.getClientDetails({ macaddr: client.macaddr }))
+      .then((clientDetails) => (client = clientDetails))
+      .catch((e) => {
+        f7.toast.show({ text: JSON.stringify(e), setTimeout: 10000 });
+      })
+      .finally(() => {
+        loaded = true;
+        loadClass = "";
+      });
+  }
   /*
     client = {
         associated_device: "CNG0AP01FK",
@@ -233,24 +257,45 @@
       }
     }
   }
+
+  function pinClient() {
+    if (pinnedState) {
+      pinnedClientsStore.delete(client.macaddr);
+      f7.toast.show({
+        text: `Unpinned`,
+        closeTimeout: 2000,
+      });
+    } else {
+      pinnedClientsStore.add(client);
+      f7.toast.show({
+        text: `Pinned`,
+        closeTimeout: 2000,
+      });
+    }
+  }
+
+  function loadMore(done) {
+    loadData().then(() => done());
+  }
 </script>
 
-<Page>
-  <Navbar title="Client Details" backLink="Back">
+<Page ptr onPtrRefresh={loadMore}>
+  <Navbar
+    title={client.name
+      ? client.name
+      : client.macaddr + pinnedState
+      ? " - (P)"
+      : ""}
+    backLink="Back"
+  >
     <NavRight>
       <Link
-        iconIos="f7:lightbulb"
-        iconAurora="f7:lightbulb"
-        iconMd="material:lightbulb"
-        on:click={blinkLED}
-        tooltip="Blink LED"
-      />
-      <Link
-        iconIos="f7:off"
-        iconAurora="f7:off"
-        iconMd="material:power_settings_new"
-        tooltip="Disconnect Client"
-        on:click={disconnectClient}
+        iconIos={pinnedState ? "f7:pin_slash" : "f7:pin"}
+        iconAurora={pinnedState ? "f7:pin_slash" : "f7:pin"}
+        iconMd="material:push_pin"
+        tooltip="Pin"
+        on:click={pinClient}
+        title="Test"
       />
       <Link
         searchbarEnable=".searchbar-details"
@@ -268,62 +313,46 @@
     />
   </Navbar>
 
+  <BlockTitle>Actions</BlockTitle>
+  <Block strong>
+    <Row style="justify-content: normal;">
+      <Col style="display:flex; justify-content: center;">
+        <Link
+          iconIos="f7:lightbulb"
+          iconAurora="f7:lightbulb"
+          iconMd="material:lightbulb"
+          on:click={blinkLED}
+          tooltip="Blink LED"
+          text="Blink LED"
+        />
+      </Col>
+      <Col style="display:flex; justify-content: center;">
+        <Link
+          iconIos="f7:off"
+          iconAurora="f7:off"
+          iconMd="material:power_settings_new"
+          tooltip="Disconnect Client"
+          text="Disconnect"
+          on:click={disconnectClient}
+        />
+      </Col>
+    </Row>
+  </Block>
+
   {#each Object.entries(client.client_type == "WIRED" ? handledEntriesWired : handledEntriesWireless) as [title, data]}
     <BlockTitle>{title}</BlockTitle>
     <List class="search-list">
       {#each Object.entries(data) as [key, description]}
         {#if typeof description === "object"}
           <ListItem
+            class={loadClass}
             title={description.title}
             after={`${client[key]} ${description.unit}`}
           />
         {:else}
-          <ListItem title={description} after={client[key]} />
+          <ListItem class={loadClass} title={description} after={client[key]} />
         {/if}
       {/each}
     </List>
   {/each}
-
-  <!-- <BlockTitle>Client Info</BlockTitle>
-    <List>
-        <ListItem title="Name" after={client.name} />
-        <ListItem title="IP" after={client.ip_address} />
-        <ListItem title="MAC" after={client.macaddr} />
-        <ListItem title="OS Type" after={client.os_type} />
-        <ListItem title="Manufacturer" after={client.manufacturer} />
-    </List> -->
-  <!-- <BlockTitle>Wireless Info</BlockTitle>
-    <List>
-        <ListItem title="Network" after={client.network} />
-        <ListItem title="Connection" after={client.connection} />
-        <ListItem title="Encryption" after={client.encryption_method} />
-        <ListItem title="Channel" after={client.channel} />
-        <ListItem title="Band" after={client.band} />
-        <ListItem title="Signal dB" after={client.signal_db} />
-        <ListItem title="Signal Strength" after={client.signal_strength} />
-        <ListItem title="SNR" after={client.snr} />
-        <ListItem title="Speed" after={client.speed} />
-    </List> -->
-  <!-- <BlockTitle>Role</BlockTitle>
-    <List>
-        <ListItem title="User Role" after={client.user_role} />
-        <ListItem title="Username" after={client.username} />
-        <ListItem title="VLAN" after={client.vlan} />
-    </List> -->
-  <!-- <BlockTitle>Device Info</BlockTitle>
-    <List>
-        <ListItem title="Type" after={client.connected_device_type} />
-        <ListItem title="Device" after={client.associated_device} />
-        <ListItem title="MAC" after={client.associated_device_mac} />
-        <ListItem title="Name" after={client.associated_device_name} />
-        <ListItem title="Group" after={client.group_name} />
-        <ListItem title="Radio MAC" after={client.radio_mac} />
-        <ListItem title="Radio Number" after={client.radio_number} />
-    </List> -->
-  <!-- <BlockTitle>All Info</BlockTitle>
-    <List>
-        {#each Object.entries(client) as [title, data]}
-            <ListItem {title} after={data} />
-        {/each}
-    </List> -->
 </Page>

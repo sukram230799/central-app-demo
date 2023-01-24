@@ -12,8 +12,10 @@
     Icon,
     Searchbar,
   } from "framework7-svelte";
+  import { onDestroy } from "svelte/internal";
 
   import { central } from "../js/central";
+  import { pinnedClientsStore } from "../js/svelte-store";
 
   let loaded = false;
   let clients = []; /* = [
@@ -89,6 +91,20 @@
       vlan: 1,
     },
   ];*/
+  let pinnedClients = [];
+
+  const pinnedClientsStoreUnsub = pinnedClientsStore.subscribe(
+    (pinnedClientsResult) => {
+      pinnedClients = Object.values(pinnedClientsResult);
+      console.log(pinnedClients);
+    }
+  );
+
+  onDestroy(() => {
+    console.log("onDestroy");
+    pinnedClientsStoreUnsub();
+    pinnedClients = [];
+  });
 
   async function loadData() {
     try {
@@ -136,6 +152,29 @@
       disableButton={!theme.aurora}
     />
   </Navbar>
+  {#if pinnedClients.length}
+    <BlockTitle>Pinned Clients</BlockTitle>
+    <List class="pinned-list">
+      {#each pinnedClients as pinnedClient}
+        <ListItem
+          footer={`${pinnedClient.macaddr} – ${pinnedClient.ip_address}`}
+          title={pinnedClient.name ? pinnedClient.name : pinnedClient.macaddr}
+          href="/clients/details/"
+          routeProps={{
+            client: clients?.filter(
+              (client) => client.macaddr === pinnedClient.macaddr
+            ).length
+              ? clients?.filter(
+                  (client) => client.macaddr === pinnedClient.macaddr
+                )[0]
+              : { ...pinnedClient, partial: true },
+          }}
+        >
+          <Icon ios="f7:pin" aurora="f7:pin" md="material:push_pin" />
+        </ListItem>
+      {/each}
+    </List>
+  {/if}
   <BlockTitle>Clients</BlockTitle>
   <List class="search-list">
     {#if !loaded}

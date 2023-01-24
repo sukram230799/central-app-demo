@@ -109,6 +109,25 @@ const labelCacheStore = writable(localStorage.labels ? JSON.parse(localStorage.l
 labelCacheStore.subscribe((value) => localStorage.labels = JSON.stringify(value));
 const labelStore = derived([labelCacheStore, currentAccountIdStore], ([$labelCache, $currentAccountId]) => $currentAccountId in $labelCache ? $labelCache[$currentAccountId].labels : []);
 
+const pinnedClientsAllStore = writable(localStorage.pinnedClients ? JSON.parse(localStorage.pinnedClients) : {});
+pinnedClientsAllStore.subscribe((value) => localStorage.pinnedClients = JSON.stringify(value))
+const pinnedClientsStore = derived([pinnedClientsAllStore, currentAccountIdStore], ([$pinnedClientsAll, $currentAccountId]) => $currentAccountId in $pinnedClientsAll ? $pinnedClientsAll[$currentAccountId] : {});
+pinnedClientsStore.add = (client) => {
+    pinnedClientsAllStore.update((pinnedClientAll) => {
+        const currentAccountId = get(currentAccountIdStore);
+        if (!pinnedClientAll[currentAccountId]) pinnedClientAll[currentAccountId] = {};
+        pinnedClientAll[currentAccountId][client.macaddr] = { macaddr: client.macaddr, ip_address: client.ip_address, name: client.name };
+        return pinnedClientAll;
+    });
+}
+pinnedClientsStore.delete = (client_macaddr) => {
+    pinnedClientsAllStore.update((pinnedClientsAll) => {
+        const currentAccountId = get(currentAccountIdStore);
+        if (pinnedClientsAll[currentAccountId]) delete pinnedClientsAll[currentAccountId][client_macaddr];
+        return pinnedClientsAll;
+    });
+}
+
 export {
     needRefreshStore as needRefreshStore,
     doRefreshStore,
@@ -128,5 +147,6 @@ export {
     groupStore,
     siteStore,
     labelStore,
+    pinnedClientsStore,
 };
 
