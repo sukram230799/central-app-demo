@@ -102,7 +102,7 @@ Flags:       a = Airslice policy; A = Airslice app monitoring; c = MBO Cellular 
             serial: serialNumber,
           });
           console.log(tsOutput.status, tsOutput);
-          tsOutput.status = "EXPIRED";
+          
           if (tsOutput.status === "RUNNING") {
           } else if (tsOutput.status === "COMPLETED") {
             console.log(tsOutput.output);
