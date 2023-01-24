@@ -27,23 +27,33 @@
   let groupDetails = { ...groupProperties, template: groupTemplateInfo };
 
   if (
-    // https://stackoverflow.com/questions/679915/how-do-i-test-for-an-empty-javascript-object
-    groupProperties && // 👈 null and undefined check
-    Object.keys(groupProperties).length === 0 &&
-    Object.getPrototypeOf(groupProperties) === Object.prototype
+    (groupProperties &&
+      Object.keys(groupProperties).length === 0 &&
+      Object.getPrototypeOf(groupProperties) === Object.prototype) ||
+    (groupTemplateInfo &&
+      Object.keys(groupTemplateInfo).length === 0 &&
+      Object.getPrototypeOf(groupTemplateInfo) === Object.prototype)
   )
-    central
-      .ready(1)
-      .then(() => central.getPropertiesOfGroups({ groups: [groupName] }))
-      .then((propertiesResponse) => {
-        groupProperties = propertiesResponse.data[0].properties;
-        console.log(groupProperties);
-      })
-      .then(() => central.getGroupTemplateInfo({ groups: [groupName] }))
-      .then((templateInfoResponse) => {
-        groupTemplateInfo = templateInfoResponse.data[0].properties;
-        console.log(groupTemplateInfo);
-      });
+    central.ready(2).then(() => loadData());
+
+  async function loadData() {
+    await Promise.all([loadTemplateInfo(), loadGroupProperties()]);
+    groupDetails = { ...groupProperties, template: groupTemplateInfo };
+  }
+
+  async function loadTemplateInfo() {
+    const templateInfoResponse = await central.getGroupTemplateInfo({
+      groups: [groupName],
+    });
+    groupTemplateInfo = templateInfoResponse.data[0].template_details;
+  }
+
+  async function loadGroupProperties() {
+    const propertiesResponse = await central.getPropertiesOfGroups({
+      groups: [groupName],
+    });
+    groupProperties = propertiesResponse.data[0].properties;
+  }
 
   const handledEntries = {};
   let title = groupName;
