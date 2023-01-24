@@ -24,7 +24,11 @@
   export let groupProperties = {};
   export let groupTemplateInfo = {};
 
-  let groupDetails = { ...groupProperties, template: groupTemplateInfo };
+  let groupDetails = {
+    ...groupProperties,
+    TemplateWired: groupTemplateInfo.Wired,
+    TemplateWireless: groupTemplateInfo.Wireless,
+  };
 
   if (
     (groupProperties &&
@@ -38,7 +42,11 @@
 
   async function loadData() {
     await Promise.all([loadTemplateInfo(), loadGroupProperties()]);
-    groupDetails = { ...groupProperties, template: groupTemplateInfo };
+    groupDetails = {
+      ...groupProperties,
+      TemplateWired: groupTemplateInfo.Wired,
+      TemplateWireless: groupTemplateInfo.Wireless,
+    };
   }
 
   async function loadTemplateInfo() {
