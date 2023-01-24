@@ -8,11 +8,19 @@
 {:else if groupProperties?.AOSVersion === "AOS_10X"}
   <span class="badge color-orange">AOS10</span>
   <!-- AP Type -->
-  {#if groupProperties?.APNetworkRole === "Standard"}
+  {#if groupProperties?.ApNetworkRole === "Standard"}
     <span class="badge color-gray">Campus AP</span>
-  {:else if groupProperties?.APNetworkRole === "Microbranch"}
-    <span class="badge color-gray">Campus AP</span>
+  {:else if groupProperties?.ApNetworkRole === "Microbranch"}
+    <span class="badge color-gray">Microbranch</span>
   {/if}
+{/if}
+<!-- Gateway Type -->
+{#if groupProperties?.GwNetworkRole === "BranchGateway"}
+  <span class="badge color-gray">Branch Gateway</span>
+{:else if groupProperties?.GwNetworkRole === "WLANGateway"}
+  <span class="badge color-gray">Mobility Gateway</span>
+{:else if groupProperties?.GwNetworkRole === "VPNConcentrator"}
+  <span class="badge color-gray">VPNC</span>
 {/if}
 <!--  Switch Type -->
 {#if groupProperties?.AllowedSwitchTypes.includes("AOS_CX")}
@@ -23,12 +31,4 @@
 {/if}
 {#if groupProperties?.MonitorOnlySwitch}
   <span class="badge color-gray">Monitor-Only</span>
-{/if}
-<!-- Gateway Type -->
-{#if groupProperties?.GwNetworkRole === "BranchGateway"}
-  <span class="badge color-gray">Branch Gateway</span>
-{:else if groupProperties?.GwNetworkRole === "WLANGateway"}
-  <span class="badge color-gray">Mobility Gateway</span>
-{:else if groupProperties?.GwNetworkRole === "VPNConcentrator"}
-  <span class="badge color-gray">VPNC</span>
 {/if}
