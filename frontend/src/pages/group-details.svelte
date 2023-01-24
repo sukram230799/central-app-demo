@@ -41,8 +41,8 @@
       })
       .then(() => central.getGroupTemplateInfo({ groups: [groupName] }))
       .then((templateInfoResponse) => {
-        templateInfo = templateInfoResponse.data[0].properties;
-        console.log(templateInfo);
+        groupTemplateInfo = templateInfoResponse.data[0].properties;
+        console.log(groupTemplateInfo);
       });
 
   const handledEntries = {};
