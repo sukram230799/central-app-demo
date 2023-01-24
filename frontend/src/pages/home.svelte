@@ -49,14 +49,14 @@
 <Page name="home" {onPageInit}>
   <!-- Top Navbar -->
   <Navbar large sliding={false}>
-    <NavLeft>
+    <!-- <NavLeft>
       <Link
         iconIos="f7:menu"
         iconAurora="f7:menu"
         iconMd="material:menu"
         panelOpen="left"
       />
-    </NavLeft>
+    </NavLeft> -->
     <NavTitle sliding>Central Toolkit</NavTitle>
     <NavRight>
       <Link
