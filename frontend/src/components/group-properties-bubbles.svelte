@@ -23,10 +23,10 @@
   <span class="badge color-gray">VPNC</span>
 {/if}
 <!--  Switch Type -->
-{#if groupProperties?.AllowedSwitchTypes.includes("AOS_CX")}
+{#if groupProperties?.AllowedSwitchTypes?.includes("AOS_CX")}
   <span class="badge color-gray">AOS-CX</span>
 {/if}
-{#if groupProperties?.AllowedSwitchTypes.includes("AOS_S")}
+{#if groupProperties?.AllowedSwitchTypes?.includes("AOS_S")}
   <span class="badge color-gray">AOS-S</span>
 {/if}
 {#if groupProperties?.MonitorOnlySwitch}
