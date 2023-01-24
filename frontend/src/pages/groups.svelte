@@ -25,7 +25,6 @@
     cloneGroupGetName,
     deleteGroupDialog,
   } from "../components/group-operations";
-  import { notImplemented } from "../components/not-implemented";
 
   let groups = [];
   let detailsLoaded = false;
@@ -42,23 +41,30 @@
     if (showProgressbar) f7.progressbar.show("red");
     await central.ready(1);
     const groupsResponse = await central.listGroups(); // Groups are added via subscription!
-    // TODO: Can be parallelized
+    const groups = groupsResponse.groups;
+    await Promise.all([loadTemplateInfo(groups), loadGroupProperties(groups)]);
+    detailsLoaded = true;
+    if (showProgressbar) f7.progressbar.hide();
+  }
+
+  async function loadTemplateInfo(groups) {
     groupsTemplateInfoResult = await central.getGroupTemplateInfo({
-      groups: groupsResponse.groups,
-    });
-    groupsPropertiesResult = await central.getPropertiesOfGroups({
-      groups: groupsResponse.groups,
+      groups,
     });
     groupsTemplateInfo = groupsTemplateInfoResult.data.reduce((accu, value) => {
       accu[value.group] = value.template_details;
       return accu;
     }, []);
+  }
+
+  async function loadGroupProperties(groups) {
+    groupsPropertiesResult = await central.getPropertiesOfGroups({
+      groups,
+    });
     groupsProperties = groupsPropertiesResult.data.reduce((accu, value) => {
       accu[value.group] = value.properties;
       return accu;
     }, []);
-    detailsLoaded = true;
-    if (showProgressbar) f7.progressbar.hide();
   }
 
   loadData(true);
@@ -75,8 +81,8 @@
 
   function groupCloned(isCloned, groupName) {
     if (isCloned) {
-    loadData(true);
       groupStore.add(groupName);
+      loadData(true);
     }
     f7.swipeout.close(".swipeout");
   }
