@@ -3,16 +3,24 @@
     f7,
     Page,
     Navbar,
+    NavRight,
     Block,
     BlockTitle,
     List,
     ListInput,
+    ListItem,
     Row,
     Col,
     Button,
+    Link,
+    Popup,
   } from "framework7-svelte";
+  import QRCode from "qrcode";
 
   import { central } from "../js/central";
+  import centralBaseUrl from "../js/central-base-url.json";
+
+  console.log(centralBaseUrl);
 
   import {
     currentAccountStore,
@@ -26,12 +34,21 @@
    * NOTE: This will overwrite the credential field on any refresh token upgrade!
    */
 
-  let account;
+  let account = {
+    id: "",
+    base_url: "",
+    client_id: "",
+    client_secret: "",
+    credential: {},
+    name: "",
+  };
   let accountsMapping;
   let accountsData;
   let credentialString;
   let selectedAccountId;
   let newUUID = uuidv4();
+
+  let exportPopupOpened = false;
 
   accountsStore.subscribe((value) => {
     accountsMapping = Object.entries(value).map(([k, v]) => ({
@@ -100,10 +117,29 @@
   }
 
   function onPageInit(event) {}
+
+  function onExportPopupOpen() {
+    QRCode.toDataURL(
+      JSON.stringify({ ...account, id: undefined, name: undefined }),
+      function (error, url) {
+        if (error) console.error(error);
+        var img = document.getElementById("qr-export-img");
+        img.src = url;
+        console.log("success!");
+      }
+    );
+  }
+
+  function exportQR() {
+    exportPopupOpened = true;
+  }
+
+  function importQR() {}
 </script>
 
 <Page on:pageInit={onPageInit}>
   <Navbar title="Central Config" backLink="Back" />
+
   <BlockTitle>Account Selector</BlockTitle>
   <List>
     <ListInput
@@ -120,6 +156,60 @@
       <option value={newUUID}>New Account...</option>
     </ListInput>
   </List>
+
+  <BlockTitle>Actions</BlockTitle>
+  <Block strong>
+    <Row style="justify-content: normal;">
+      <Col style="display:flex; justify-content: center;">
+        <Link
+          iconIos="f7:qrcode"
+          iconAurora="f7:qrcode"
+          iconMd="material:qr_code"
+          on:click={console.log}
+          tooltip="Export"
+          text="Export"
+          onClick={exportQR}
+        />
+      </Col>
+      <Col style="display:flex; justify-content: center;">
+        <Link
+          iconIos="f7:qrcode_viewfinder"
+          iconAurora="f7:qrcode_viewfinder"
+          iconMd="material:qr_code_scanner"
+          on:click={importQR}
+          tooltip="Import"
+          text="Import"
+        />
+      </Col>
+    </Row>
+  </Block>
+  <Popup
+    swipeToClose={true}
+    class="popup-qr-export"
+    opened={exportPopupOpened}
+    onPopupClosed={() => (exportPopupOpened = false)}
+    onPopupOpen={onExportPopupOpen}
+  >
+    <Page>
+      <Navbar title="QR Export">
+        <NavRight>
+          <Link popupClose>Close</Link>
+        </NavRight>
+      </Navbar>
+      <div
+        style="height: 100%; flex-direction: column;"
+        class="display-flex justify-content-center align-items-center"
+      >
+        <div>
+          <img style="width: 100%;" id="qr-export-img" />
+        </div>
+        <div style="padding-left: 1em; padding-right: 1em;">
+          Remember: A credential can only be used on one device at a time!
+        </div>
+      </div>
+    </Page>
+  </Popup>
+
   <BlockTitle>Central Access Token</BlockTitle>
   <List noHairlinesMd>
     <ListInput
@@ -129,13 +219,17 @@
       bind:value={account.name}
     />
 
-    <ListInput
-      label="Base URL"
-      type="url"
-      placeholder="https://internal-apigw.central.arubanetworks.com/"
-      validate
-      bind:value={account.base_url}
-    />
+    <ListItem
+      title="Central Instance"
+      smartSelect
+      smartSelectParams={{ openIn: "popover" }}
+    >
+      <select name="selectedSortingOrder" bind:value={account.base_url}>
+        {#each Object.entries(centralBaseUrl) as [name, url]}
+          <option value={url}>{name}</option>
+        {/each}
+      </select>
+    </ListItem>
 
     <ListInput
       label="Client Id"
