@@ -19,6 +19,7 @@
 
   import { central } from "../js/central";
   import centralBaseUrl from "../js/central-base-url.json";
+  import { Html5Qrcode } from "html5-qrcode";
 
   console.log(centralBaseUrl);
 
@@ -26,9 +27,12 @@
     currentAccountStore,
     accountsStore,
     currentAccountIdStore,
+    cameraStore,
   } from "../js/svelte-store.js";
 
   import { v4 as uuidv4 } from "uuid";
+  import { get } from "svelte/store";
+  import { onDestroy } from "svelte";
 
   /**
    * NOTE: This will overwrite the credential field on any refresh token upgrade!
@@ -42,6 +46,7 @@
     credential: {},
     name: "",
   };
+  let accountImport = {};
   let accountsMapping;
   let accountsData;
   let credentialString;
@@ -49,6 +54,8 @@
   let newUUID = uuidv4();
 
   let exportPopupOpened = false;
+  let importPopupOpened = false;
+  let html5QrCode;
 
   accountsStore.subscribe((value) => {
     accountsMapping = Object.entries(value).map(([k, v]) => ({
@@ -65,27 +72,48 @@
     selectAccount();
   });
 
-  async function centralRefresh() {
-    try {
-      f7.preloader.show();
-      await central.refreshToken();
-      f7.preloader.hide();
-    } catch (e) {
-      if (e.name === "TokenNotUpdated") {
-      }
-    }
+  function centralRefresh() {
+    return new Promise((resolve) => resolve())
+      .then(() => f7.preloader.show())
+      .then(() => central.refreshToken())
+      .then((result) => {
+        f7.toast.show({ text: "Success", closeTimeout: 1000 });
+        console.log(result);
+      })
+      .catch((e) => {
+        console.log(e);
+        f7.toast.show({
+          text: e?.message ? e.message : `Error: ${JSON.stringify(e)}`,
+          closeTimeout: 8000,
+        });
+      })
+      .finally(() => f7.preloader.hide());
   }
 
-  async function centralRequest() {
-    f7.preloader.show();
-    let response = await central.getDeviceFirmware("CN8BSW01FK");
-    f7.preloader.hide();
-    console.log(response);
+  function centralRequest() {
+    return central
+      .ready(1)
+      .then(() => f7.preloader.show())
+      .then(() => central.getAllGroups())
+      .then((result) => {
+        f7.toast.show({ text: "Success", closeTimeout: 1000 });
+        console.log(result);
+      })
+      .catch((e) => {
+        console.log(e);
+        f7.toast.show({
+          text: e?.options?.responseBody?.description
+            ? e.options.responseBody.description
+            : `Error: ${JSON.stringify(e)}`,
+          closeTimeout: 8000,
+        });
+      })
+      .finally(() => f7.preloader.hide());
   }
 
-  function saveCredential() {
+  function saveCredential(directCredential = false) {
     accountsStore.update((value) => {
-      account.credential = JSON.parse(credentialString);
+      if (!directCredential) account.credential = JSON.parse(credentialString);
       value[selectedAccountId] = account;
       return value;
     });
@@ -130,11 +158,59 @@
     );
   }
 
+  function onImportPopupOpen() {
+    html5QrCode = new Html5Qrcode("import-qr-reader");
+    html5QrCode
+      .start(
+        { deviceId: { exact: get(cameraStore).id } },
+        { fps: 10 },
+        (decodedText, decodedResult) => {
+          console.log(decodedResult);
+          try {
+            accountImport = JSON.parse(decodedText);
+            console.log(accountImport);
+            importPopupOpened = false;
+            importAccount();
+          } catch (e) {
+            console.log(accountImport);
+          }
+        }
+      )
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+
   function exportQR() {
     exportPopupOpened = true;
   }
 
-  function importQR() {}
+  function importQR() {
+    importPopupOpened = true;
+  }
+
+  function importAccount() {
+    f7.dialog.prompt(
+      `Overwrite "${account.name}"? Confirm by typing name.`,
+      (name) => {
+        if (name === account.name)
+          f7.dialog.confirm(
+            `Are you sure to overwrite "${account.name}"`,
+            () => {
+              account = { ...account, ...accountImport };
+              saveCredential(true);
+              updateCredentialString();
+            }
+          );
+      }
+    );
+  }
+
+  onDestroy(() => {
+    try {
+      html5QrCode?.stop();
+    } catch (err) {}
+  });
 </script>
 
 <Page on:pageInit={onPageInit}>
@@ -162,23 +238,22 @@
     <Row style="justify-content: normal;">
       <Col style="display:flex; justify-content: center;">
         <Link
-          iconIos="f7:qrcode"
-          iconAurora="f7:qrcode"
-          iconMd="material:qr_code"
-          on:click={console.log}
-          tooltip="Export"
-          text="Export"
-          onClick={exportQR}
-        />
-      </Col>
-      <Col style="display:flex; justify-content: center;">
-        <Link
           iconIos="f7:qrcode_viewfinder"
           iconAurora="f7:qrcode_viewfinder"
           iconMd="material:qr_code_scanner"
           on:click={importQR}
           tooltip="Import"
           text="Import"
+        />
+      </Col>
+      <Col style="display:flex; justify-content: center;">
+        <Link
+          iconIos="f7:qrcode"
+          iconAurora="f7:qrcode"
+          iconMd="material:qr_code"
+          tooltip="Export"
+          text="Export"
+          onClick={exportQR}
         />
       </Col>
     </Row>
@@ -201,8 +276,39 @@
         class="display-flex justify-content-center align-items-center"
       >
         <div>
-          <img style="width: 100%;" id="qr-export-img" />
+          <img style="width: 100%;" id="qr-export-img" alt="" />
         </div>
+        <div style="padding-left: 1em; padding-right: 1em;">
+          Remember: A credential can only be used on one device at a time!
+        </div>
+      </div>
+    </Page>
+  </Popup>
+  <Popup
+    swipeToClose={true}
+    class="popup-qr-import"
+    opened={importPopupOpened}
+    onPopupOpen={onImportPopupOpen}
+    onPopupClosed={() => {
+      importPopupOpened = false;
+      try {
+        html5QrCode.stop();
+      } catch (e) {}
+    }}
+  >
+    <Page>
+      <Navbar title="QR Export">
+        <NavRight>
+          <Link popupClose>Close</Link>
+        </NavRight>
+      </Navbar>
+      <!-- <div
+        style="height: 100%; flex-direction: column;"
+        class="display-flex justify-content-center align-items-center"
+      > -->
+      <div>
+        <div style="margin-top: 50%" id="import-qr-reader" width="600px" />
+
         <div style="padding-left: 1em; padding-right: 1em;">
           Remember: A credential can only be used on one device at a time!
         </div>
