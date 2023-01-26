@@ -9,7 +9,7 @@ async function cloneGroupGetName(f7, callback, oldGroupName) {
       if (newGroupName.length >= 0) {
         cloneGroupGetUpgrade(f7, callback, oldGroupName, newGroupName);
       } else
-        f7.toast.show({ text: "Name can't be empty", closeTimeout: 1000 });
+        f7.toast.show({ text: "Name can't be empty", closeTimeout: 2000 });
     }
   );
 }
