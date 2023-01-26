@@ -120,7 +120,16 @@ class Central {
   async delete(path, options = {}) {
     return await this.request(path, { ...options, method: 'DELETE' });
   }
+
+  refreshTokenPromise = new Promise((resolve) => resolve());
+
   async refreshToken() {
+    await this.refreshTokenPromise;
+    let resolveMe;
+    this.refreshTokenPromise = new Promise((resolve) => {
+      resolveMe = resolve;
+    });
+    try {
     let refreshBody = {
       // baseUrl: baseUrl,
       url: `${this.account.base_url}/oauth2/token`,
@@ -149,7 +158,9 @@ class Central {
     } else {
       // throw { name: 'TokenNotUpdated', message: 'Token could not be updated.' };
     }
-
+    } finally {
+      resolveMe();
+    }
     // return credentialResponse.data.responseBody.access_token;
   }
 
