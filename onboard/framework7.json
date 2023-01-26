@@ -1,0 +1,19 @@
+{
+  "cwd": "C:\\Users\\wuest\\Documents\\Projects\\mba-svelte\\onboard",
+  "type": [
+    "web"
+  ],
+  "name": "Central Toolkit Onboard",
+  "framework": "svelte",
+  "template": "blank",
+  "bundler": "vite",
+  "cssPreProcessor": "scss",
+  "theming": {
+    "customColor": true,
+    "color": "#ff8300",
+    "darkTheme": false,
+    "iconFonts": true,
+    "fillBars": true
+  },
+  "customBuild": false
+}
