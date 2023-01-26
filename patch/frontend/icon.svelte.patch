@@ -1,0 +1,12 @@
+--- node_modules/framework7-svelte/components/icon.svelte	2023-01-26 08:28:16.054199800 +0100
++++ node_modules/framework7-svelte/components/icon.svelte	2023-01-26 08:40:32.440568300 +0100
+ 
+@@ -47,7 +47,7 @@
+     }
+ 
+     if (prop === 'icon') {
+-      classes[value] = true;
++      classes = { icon: true, [value]: true };
+     }
+   } else {
+     classes = {
