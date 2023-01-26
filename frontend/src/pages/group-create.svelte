@@ -12,13 +12,16 @@
     Toggle,
     NavRight,
     Link,
+    f7ready,
   } from "framework7-svelte";
   import { central } from "../js/central";
   import { groupStore } from "../js/svelte-store";
 
   export let f7router;
-
-  let groupName = "";
+  export let groupName = "";
+  export let oldGroupName = "";
+  export let oldGroupDetails = {};
+  export let edit = false;
 
   let templateWireless = false;
   let templateWired = false;
@@ -41,18 +44,53 @@
   $: if (architecture === "Instant") gwNetworkRole = "BranchGateway";
   $: if (architecture !== "AOS10") apNetworkRole = "Standard";
 
-  function createGroup() {
-    if (!groupName)
-      return f7.toast.show({
+  if (edit) loadUpdateGroupDetails();
+
+  function loadUpdateGroupDetails() {
+    console.log(oldGroupDetails);
+    try {
+      groupName = oldGroupName;
+
+      templateWireless = oldGroupDetails.Wireless;
+      templateWired = oldGroupDetails.Wired;
+
+      allowAPs = oldGroupDetails.AllowedDevTypes.includes("AccessPoints");
+      allowGWs = oldGroupDetails.AllowedDevTypes.includes("Gateways");
+
+      architecture = oldGroupDetails.Architecture;
+
+      apNetworkRole = oldGroupDetails.ApNetworkRole;
+      gwNetworkRole = oldGroupDetails.GwNetworkRole;
+
+      allowAOS_S = oldGroupDetails.AllowedSwitchTypes.includes("AOS_S");
+      allowAOS_CX = oldGroupDetails.AllowedSwitchTypes.includes("AOS_CX");
+
+      monitorAOS_S = oldGroupDetails.MonitorOnly.includes("AOS_S");
+      monitorAOS_CX = oldGroupDetails.MonitorOnly.includes("AOS_CX");
+    } catch (e) {
+      f7.toast.show({
+        text: "Couldn't load group details",
+        closeTimeout: 2000,
+      });
+    }
+  }
+
+  function getGroupDetails() {
+    if (!groupName) {
+      f7.toast.show({
         text: "Group Name can't be empty",
         closeTimeout: 2000,
       });
+      return null;
+    }
 
-    if (allowGWs && gwNetworkRole === "VPNConcentrator" && allowAPs)
-      return f7.toast.show({
+    if (allowGWs && gwNetworkRole === "VPNConcentrator" && allowAPs) {
+      f7.toast.show({
         text: "Access points cannot be present in a group with VPN concentrator network role set for Gateways",
         closeTimeout: 2000,
       });
+      return null;
+    }
 
     let allowedDevTypes = [];
     if (allowAPs) allowedDevTypes.push("AccessPoints");
@@ -88,6 +126,68 @@
         },
       },
     };
+    return details;
+  }
+
+  function updateGroup() {
+    const details = getGroupDetails();
+    if (details === null) return;
+
+    console.log(details);
+    console.log(oldGroupDetails);
+
+    central
+      .ready(1)
+      .then(() => f7.preloader.show())
+      .then(() =>
+        central.updateGroupProperties({
+          groupName: oldGroupName,
+          groupDetails: details,
+        })
+      )
+      .then((message) => {
+        f7.toast.show({ text: message, closeTimeout: 2000 });
+        groupCreated();
+      })
+      .catch((e) => {
+        console.log(e);
+        f7.toast.show({
+          text: e?.options?.responseBody?.description
+            ? e.options.responseBody.description
+            : JSON.stringify(e),
+          closeTimeout: 8000,
+        });
+        groupFailed();
+      })
+      .then(() => {
+        if (groupName !== oldGroupName)
+          return central.updateGroupName({
+            oldGroupName,
+            newGroupName: groupName,
+          });
+      })
+      .then((message) => {
+        f7.toast.show({ text: message, closeTimeout: 2000 });
+        groupCreated();
+      })
+      .catch((e) => {
+        console.log(e);
+        f7.toast.show({
+          text: e?.options?.responseBody?.description
+            ? e.options.responseBody.description
+            : JSON.stringify(e),
+          closeTimeout: 8000,
+        });
+        groupFailed();
+      })
+      .finally(() => {
+        f7.preloader.hide();
+      });
+  }
+
+  function createGroup() {
+    const details = getGroupDetails();
+    if (details === null) return;
 
     console.log(details);
     console.log(JSON.stringify(details, null, 2));
@@ -119,17 +219,22 @@
     // f7router.back();
   }
 
+  function done() {
+    if (edit) updateGroup();
+    else createGroup();
+  }
+
   function groupFailed() {}
 </script>
 
 <Page>
-  <Navbar title="Create Group" backLink="Back">
+  <Navbar title={edit ? "Edit Group" : "Create Group"} backLink="Back">
     <NavRight>
       <Link
         iconIos="f7:checkmark_alt"
         iconAurora="f7:checkmark_alt"
         iconMd="material:done"
-        on:click={createGroup}
+        on:click={done}
       />
     </NavRight>
   </Navbar>
@@ -146,7 +251,7 @@
       <Toggle bind:checked={templateWireless} />
     </ListItem>
     <ListItem>
-      <span>Template Wireless</span>
+      <span>Template Wired</span>
       <Toggle bind:checked={templateWired} />
     </ListItem>
     {#if allowAPs || allowGWs}

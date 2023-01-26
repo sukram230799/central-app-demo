@@ -106,6 +106,22 @@
     <Row style="justify-content: normal;">
       <Col style="display:flex; justify-content: center;">
         <Link
+          iconIos="f7:pencil"
+          iconAurora="f7:pencil"
+          iconMd="material:edit"
+          tooltip="Edit Group"
+          href="/groups/create/"
+          routeProps={{
+            groupName: groupName,
+            oldGroupName: groupName,
+            oldGroupDetails: groupDetails,
+            edit: true,
+          }}
+          text="Edit"
+        />
+      </Col>
+      <Col style="display:flex; justify-content: center;">
+        <Link
           iconIos="f7:plus_square_on_square"
           iconAurora="f7:plus_square_on_square"
           iconMd="material:content_copy"

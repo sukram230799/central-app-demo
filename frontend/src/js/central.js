@@ -47,7 +47,7 @@ class Central {
    * @returns Promise
    * 
    * Resolves the promise when API Keys are available
-   */
+  */
   ready(chargeRate = 0) {
     this.pourMeSomeApi(chargeRate - 1);
     return this._ready_promise;
@@ -86,7 +86,7 @@ class Central {
     }
 
     if (this.log)
-    console.log(response);
+      console.log(response);
 
     return response.data;
   }
@@ -112,6 +112,16 @@ class Central {
   }
 
   /**
+   * Send PATCH request via proxy
+   * @param {string} path Path to request from central api
+   * @param {{ data: {}, headers: {}, params: {} }} options Options to pass to central
+   * @returns {Object}
+   */
+  async patch(path, options = {}) {
+    return await this.request(path, { ...options, method: 'PATCH' });
+  }
+
+  /**
    * Send DELETE request via proxy
    * @param {string} path Path to request from central api
    * @param {{ data: {}, headers: {}, params: {} }} options Options to pass to central
@@ -130,34 +140,34 @@ class Central {
       resolveMe = resolve;
     });
     try {
-    let refreshBody = {
-      // baseUrl: baseUrl,
-      url: `${this.account.base_url}/oauth2/token`,
-      method: 'POST',
-      params: {
-        client_id: this.account.client_id,
-        client_secret: this.account.client_secret,
-        grant_type: 'refresh_token',
-        refresh_token: this.account.credential.refresh_token,
+      let refreshBody = {
+        // baseUrl: baseUrl,
+        url: `${this.account.base_url}/oauth2/token`,
+        method: 'POST',
+        params: {
+          client_id: this.account.client_id,
+          client_secret: this.account.client_secret,
+          grant_type: 'refresh_token',
+          refresh_token: this.account.credential.refresh_token,
+        }
+      };
+      let credentialResponse = await axios.post(this.proxy, refreshBody);
+
+      if (credentialResponse.data.status === 200) {
+
+        console.log(`Credentials Updated, expires in ${credentialResponse.data.responseBody.expires_in}`);
+
+        accountsStore.update((value) => {
+          value[this.account.id].credential.access_token = credentialResponse.data.responseBody.access_token;
+          value[this.account.id].credential.refresh_token = credentialResponse.data.responseBody.refresh_token;
+          value[this.account.id].credential.expires_in = credentialResponse.data.responseBody.expires_in;
+          value[this.account.id].base_url = 'https://internal-apigw.central.arubanetworks.com/';
+
+          return value;
+        });
+      } else {
+        // throw { name: 'TokenNotUpdated', message: 'Token could not be updated.' };
       }
-    };
-    let credentialResponse = await axios.post(this.proxy, refreshBody);
-
-    if (credentialResponse.data.status === 200) {
-
-      console.log(`Credentials Updated, expires in ${credentialResponse.data.responseBody.expires_in}`);
-
-      accountsStore.update((value) => {
-        value[this.account.id].credential.access_token = credentialResponse.data.responseBody.access_token;
-        value[this.account.id].credential.refresh_token = credentialResponse.data.responseBody.refresh_token;
-        value[this.account.id].credential.expires_in = credentialResponse.data.responseBody.expires_in;
-        value[this.account.id].base_url = 'https://internal-apigw.central.arubanetworks.com/';
-
-        return value;
-      });
-    } else {
-      // throw { name: 'TokenNotUpdated', message: 'Token could not be updated.' };
-    }
     } finally {
       resolveMe();
     }
@@ -592,6 +602,21 @@ class Central {
     let createGroupResponse = await this.post('configuration/v3/groups', { data: { ...groupDetails } });
 
     return this.handleResponse(createGroupResponse);
+  }
+
+  async updateGroupProperties({ groupName, groupDetails }) {
+    let updateGroupPropertiesResponse = await this.patch(`configuration/v2/groups/${groupName}/properties`, {
+      data:
+        { group_properties: groupDetails.group_properties, template_info: groupDetails.template_info }
+    });
+
+    return this.handleResponse(updateGroupPropertiesResponse);
+  }
+
+  async updateGroupName({ oldGroupName, newGroupName }) {
+    let updateGroupNameResponse = await this.patch(`configuration/v1/groups/${oldGroupName}/name`, { data: { group: newGroupName } });
+
+    return this.handleResponse(updateGroupNameResponse);
   }
 
   /**
