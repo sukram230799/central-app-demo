@@ -10,6 +10,8 @@
     NavRight,
     Link,
     Block,
+    Row,
+    Col,
   } from "framework7-svelte";
   import { central } from "../js/central";
   import {
@@ -83,24 +85,7 @@
 </script>
 
 <Page>
-  <Navbar {title} backLink="Back">
-    <NavRight>
-      <Link
-        iconIos="f7:plus_square_on_square"
-        iconAurora="f7:plus_square_on_square"
-        iconMd="material:content_copy"
-        on:click={cloneGroup}
-        tooltip="Clone Group"
-      />
-      <Link
-        iconIos="f7:trash"
-        iconAurora="f7:trash"
-        iconMd="material:delete_forever"
-        on:click={deleteGroup}
-        tooltip="Delete Group"
-      />
-    </NavRight>
-  </Navbar>
+  <Navbar {title} backLink="Back" />
   <BlockTitle>Group Info</BlockTitle>
   <List>
     <ListItem>
@@ -116,6 +101,31 @@
     </ListItem>
   </List>
   <Block />
+  <BlockTitle>Actions</BlockTitle>
+  <Block strong>
+    <Row style="justify-content: normal;">
+      <Col style="display:flex; justify-content: center;">
+        <Link
+          iconIos="f7:plus_square_on_square"
+          iconAurora="f7:plus_square_on_square"
+          iconMd="material:content_copy"
+          on:click={cloneGroup}
+          tooltip="Clone Group"
+          text="Clone"
+        />
+      </Col>
+      <Col style="display:flex; justify-content: center;">
+        <Link
+          iconIos="f7:trash"
+          iconAurora="f7:trash"
+          iconMd="material:delete_forever"
+          on:click={deleteGroup}
+          tooltip="Delete Group"
+          text="Delete"
+        />
+      </Col>
+    </Row>
+  </Block>
 
   {#each Object.entries(handledEntries) as [title, data]}
     <BlockTitle>{title}</BlockTitle>

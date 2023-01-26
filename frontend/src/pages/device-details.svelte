@@ -3,28 +3,17 @@
     theme,
     f7,
     f7ready,
-    App,
-    Accordion,
-    AccordionContent,
-    Panel,
-    Views,
-    View,
-    Popup,
     Page,
     Navbar,
-    Toolbar,
     NavRight,
     Link,
     Block,
     BlockTitle,
-    LoginScreen,
-    LoginScreenTitle,
     List,
     ListItem,
-    ListInput,
-    ListButton,
-    BlockFooter,
     Searchbar,
+    Row,
+    Col,
   } from "framework7-svelte";
   import { central } from "../js/central";
 
@@ -201,20 +190,6 @@
   <Navbar title="Device Details" backLink="Back">
     <NavRight>
       <Link
-        iconIos="f7:lightbulb"
-        iconAurora="f7:lightbulb"
-        iconMd="material:lightbulb"
-        on:click={blinkLED}
-        tooltip="Blink LED"
-      />
-      <Link
-        iconIos="f7:gobackward"
-        iconAurora="f7:gobackward"
-        iconMd="material:restart_alt"
-        on:click={rebootDevice}
-        tooltip="Reboot Device"
-      />
-      <Link
         searchbarEnable=".searchbar-details"
         iconIos="f7:search"
         iconAurora="f7:search"
@@ -229,6 +204,32 @@
       disableButton={!theme.aurora}
     />
   </Navbar>
+
+  <BlockTitle>Actions</BlockTitle>
+  <Block strong>
+    <Row style="justify-content: normal;">
+      <Col style="display:flex; justify-content: center;">
+        <Link
+          iconIos="f7:lightbulb"
+          iconAurora="f7:lightbulb"
+          iconMd="material:lightbulb"
+          on:click={blinkLED}
+          tooltip="Blink LED"
+          text="Blink LED"
+        />
+      </Col>
+      <Col style="display:flex; justify-content: center;">
+        <Link
+          iconIos="f7:gobackward"
+          iconAurora="f7:gobackward"
+          iconMd="material:restart_alt"
+          on:click={rebootDevice}
+          tooltip="Reboot Device"
+          text="Reboot"
+        />
+      </Col>
+    </Row>
+  </Block>
 
   {#each Object.entries(device?.switch_type ? handledEntriesSwitch : device?.ap_deployment_mode ? handledEntriesAP : handledEntriesGateway) as [title, data]}
     <BlockTitle>{title}</BlockTitle>
