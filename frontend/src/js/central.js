@@ -166,9 +166,12 @@ class Central {
           return value;
         });
       } else {
-        // throw { name: 'TokenNotUpdated', message: 'Token could not be updated.' };
+        resolveMe();
+        throw { name: 'TokenNotUpdated', message: 'Token could not be updated.' };
       }
-    } finally {
+    } 
+    finally {
+      console.log("Resolve refreshTokenPromise")
       resolveMe();
     }
     // return credentialResponse.data.responseBody.access_token;
