@@ -1,5 +1,6 @@
 <script>
   import {
+    f7,
     Page,
     Button,
     Row,
@@ -32,14 +33,21 @@
   let credentialString = "";
   let popupOpened = false;
 
-  function onPopupOpen() {
-    account.credential = JSON.parse(credentialString);
-    QRCode.toDataURL(JSON.stringify(account), function (error, url) {
-      if (error) console.error(error);
-      var img = document.getElementById("qr-export-img");
-      img.src = url;
-      console.log("success!");
-    });
+  function openPopup() {
+    try {
+      account.credential = JSON.parse(credentialString);
+      if (account.client_id && account.client_secret && account.credential)
+        QRCode.toDataURL(JSON.stringify(account), function (error, url) {
+          if (error) console.error(error);
+          var img = document.getElementById("qr-export-img");
+          img.src = url;
+          console.log("success!");
+        });
+      else throw "";
+    } catch (e) {
+      popupOpened = false;
+      f7.toast.show({ text: "Not a valid configuration", closeTimeout: 2000 });
+    }
   }
 </script>
 
@@ -106,9 +114,7 @@
     <Block>
       <Row>
         <Col width="100">
-          <Button fill raised onClick={() => (popupOpened = true)}
-            >Generate QR Code</Button
-          >
+          <Button fill raised onClick={openPopup}>Generate QR Code</Button>
         </Col>
       </Row>
     </Block>
@@ -118,7 +124,6 @@
     class="popup-qr-export"
     opened={popupOpened}
     onPopupClosed={() => (popupOpened = false)}
-    {onPopupOpen}
   >
     <Page>
       <Navbar title="QR Export">
