@@ -292,10 +292,9 @@
       <Link
         iconIos={pinnedState ? "f7:pin_slash" : "f7:pin"}
         iconAurora={pinnedState ? "f7:pin_slash" : "f7:pin"}
-        iconMd="material:push_pin"
-        tooltip="Pin"
+        iconMd={pinnedState ? "icon:mdi mdi-pin-off" : "icon:mdi mdi-pin"}
+        tooltip={pinnedState ? "Unpin Client" : "Pin Client"}
         on:click={pinClient}
-        title="Test"
       />
       <Link
         searchbarEnable=".searchbar-details"
