@@ -327,8 +327,8 @@
       </Col>
       <Col style="display:flex; justify-content: center;">
         <Link
-          iconIos="f7:off"
-          iconAurora="f7:off"
+          iconIos="f7:power"
+          iconAurora="f7:power"
           iconMd="material:power_settings_new"
           tooltip="Disconnect Client"
           text="Disconnect"
