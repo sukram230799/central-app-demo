@@ -118,6 +118,7 @@
       return value;
     });
     currentAccountIdStore.set(selectedAccountId);
+    f7.toast.show({ text: "Credential saved", closeTimeout: 1000 });
   }
 
   function updateCredentialString() {
@@ -170,7 +171,7 @@
             accountImport = JSON.parse(decodedText);
             console.log(accountImport);
             importPopupOpened = false;
-            importAccount();
+            importAccountPrompt();
           } catch (e) {
             console.log(accountImport);
           }
@@ -189,21 +190,26 @@
     importPopupOpened = true;
   }
 
+  function importAccountPrompt() {
+    // Prevent accidental overwriting of credentials
+    if (account.client_id || account.client_secret || credentialString !== "{}")
+      f7.dialog.prompt(
+        `Overwrite "${account.name}"? Confirm by typing name.`,
+        (name) => {
+          if (name === account.name)
+            f7.dialog.confirm(
+              `Are you sure to overwrite "${account.name}"`,
+              importAccount
+            );
+        }
+      );
+    else importAccount();
+  }
+
   function importAccount() {
-    f7.dialog.prompt(
-      `Overwrite "${account.name}"? Confirm by typing name.`,
-      (name) => {
-        if (name === account.name)
-          f7.dialog.confirm(
-            `Are you sure to overwrite "${account.name}"`,
-            () => {
-              account = { ...account, ...accountImport };
-              saveCredential(true);
-              updateCredentialString();
-            }
-          );
-      }
-    );
+    account = { ...account, ...accountImport };
+    saveCredential(true);
+    updateCredentialString();
   }
 
   onDestroy(() => {
