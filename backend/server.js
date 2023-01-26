@@ -52,7 +52,7 @@ const app = express();
 // app.use(cors());
 app.use(bodyparser.json());
 app.use(express.static('www'));
-app.use('/onboard', express.static('onbaord'));
+app.use('/onboard', express.static('onboard'));
 
 app.post('/add-subscription', (request, response) => {
     if (process.env.NODE_ENV !== "production")
