@@ -38,6 +38,7 @@
       account.credential = JSON.parse(credentialString);
       if (account.client_id && account.client_secret && account.credential)
         QRCode.toDataURL(JSON.stringify(account), function (error, url) {
+          popupOpened = !error;
           if (error) console.error(error);
           var img = document.getElementById("qr-export-img");
           img.src = url;
