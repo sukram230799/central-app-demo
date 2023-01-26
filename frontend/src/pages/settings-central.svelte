@@ -34,6 +34,8 @@
   import { get } from "svelte/store";
   import { onDestroy } from "svelte";
 
+  export let f7router;
+
   /**
    * NOTE: This will overwrite the credential field on any refresh token upgrade!
    */
@@ -77,7 +79,7 @@
       .then(() => f7.preloader.show())
       .then(() => central.refreshToken())
       .then((result) => {
-        f7.toast.show({ text: "Success", closeTimeout: 1000 });
+        f7.toast.show({ text: "Success", closeTimeout: 2000 });
         console.log(result);
       })
       .catch((e) => {
@@ -96,7 +98,7 @@
       .then(() => f7.preloader.show())
       .then(() => central.getAllGroups())
       .then((result) => {
-        f7.toast.show({ text: "Success", closeTimeout: 1000 });
+        f7.toast.show({ text: "Success", closeTimeout: 2000 });
         console.log(result);
       })
       .catch((e) => {
@@ -118,7 +120,7 @@
       return value;
     });
     currentAccountIdStore.set(selectedAccountId);
-    f7.toast.show({ text: "Credential saved", closeTimeout: 1000 });
+    f7.toast.show({ text: "Credential saved", closeTimeout: 2000 });
   }
 
   function updateCredentialString() {
@@ -220,7 +222,20 @@
 </script>
 
 <Page on:pageInit={onPageInit}>
-  <Navbar title="Central Config" backLink="Back" />
+  <Navbar title="Central Config" backLink="Back">
+    <NavRight>
+      <Link
+        iconIos="f7:checkmark_alt"
+        iconAurora="f7:checkmark_alt"
+        iconMd="material:done"
+        tooltip="Save Credential"
+        onClick={() => {
+          saveCredential();
+          f7router.back();
+        }}
+      />
+    </NavRight>
+  </Navbar>
 
   <BlockTitle>Account Selector</BlockTitle>
   <List>
