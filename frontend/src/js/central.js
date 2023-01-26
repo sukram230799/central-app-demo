@@ -382,7 +382,7 @@ class Central {
   }
 
   async listGateways() {
-    let gatewaysResponse = await this.get('v1/gateways', {
+    let gatewaysResponse = await this.get('monitoring/v1/gateways', {
       params: {}
     });
 
