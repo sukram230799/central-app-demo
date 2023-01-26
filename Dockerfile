@@ -5,11 +5,6 @@ COPY ./onboard/package*.json ./
 
 RUN npm install -qy
 
-# Copy patches
-COPY ./patch/onboard ../patch/onboard
-# Apply patches
-RUN for f in ../patch/onboard/*.patch; do patch -p0 -N < "$f"; done
-
 COPY ./onboard ./
 RUN npm run build
 
