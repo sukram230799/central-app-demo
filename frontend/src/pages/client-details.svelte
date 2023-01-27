@@ -20,6 +20,8 @@
   import { central } from "../js/central";
   import { pinnedClientsStore } from "../js/svelte-store";
 
+  import { blinkLEDHandler } from "../js/operations/device-operataions";
+
   export let client;
   let loaded = false;
   let loadClass = theme.ios
@@ -226,36 +228,13 @@
   }
 
   let ledBlinking = false;
-  let ledToast;
 
   async function blinkLED() {
-    f7.preloader.show();
-    let result;
-    console.log(`LED Blink, current state ${ledBlinking ? "On" : "Off"}`);
-
-    if (!ledBlinking)
-      result = await central.blinkLEDOn({ serial: client.associated_device });
-    else
-      result = await central.blinkLEDOff({ serial: client.associated_device });
-
-    for (let i = 0; i < 10; i++) {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      let status = await central.getStatus({
-        task_id: result.task_id,
-      });
-      if (status.state !== "QUEUED") {
-        if (status.state === "SUCCESS") {
-          ledBlinking = !ledBlinking;
-          ledToast = f7.toast.create({
-            text: `Led turned ${ledBlinking ? "on" : "off"}`,
-            closeTimeout: 2000,
-          });
-          ledToast.open();
-        }
-        f7.preloader.hide();
-        break;
-      }
-    }
+    ledBlinking = await blinkLEDHandler(
+      f7,
+      client.associated_device,
+      ledBlinking
+    );
   }
 
   function pinClient() {

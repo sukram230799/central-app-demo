@@ -17,7 +17,7 @@
   import {
     cloneGroupGetName,
     deleteGroupDialog,
-  } from "../components/group-operations";
+  } from "../js/operations/group-operations";
   import GroupTemplateBubbles from "../components/group-template-bubbles.svelte";
   import GroupPropertiesBubbles from "../components/group-properties-bubbles.svelte";
 

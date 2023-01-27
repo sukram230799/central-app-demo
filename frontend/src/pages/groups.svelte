@@ -24,7 +24,7 @@
   import {
     cloneGroupGetName,
     deleteGroupDialog,
-  } from "../components/group-operations";
+  } from "../js/operations/group-operations";
 
   let groups = [];
   let detailsLoaded = false;

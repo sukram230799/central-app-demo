@@ -16,6 +16,7 @@
     Col,
   } from "framework7-svelte";
   import { central } from "../js/central";
+  import { blinkLEDHandler } from "../js/operations/device-operataions";
 
   export let device;
 
@@ -154,35 +155,9 @@
   }
 
   let ledBlinking = false;
-  let ledToast;
 
   async function blinkLED() {
-    f7.preloader.show();
-    let result;
-    console.log(`LED Blink, current state ${ledBlinking ? "On" : "Off"}`);
-
-    if (!ledBlinking)
-      result = await central.blinkLEDOn({ serial: device.serial });
-    else result = await central.blinkLEDOff({ serial: device.serial });
-
-    for (let i = 0; i < 10; i++) {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      let status = await central.getStatus({
-        task_id: result.task_id,
-      });
-      if (status.state !== "QUEUED") {
-        if (status.state === "SUCCESS") {
-          ledBlinking = !ledBlinking;
-          ledToast = f7.toast.create({
-            text: `Led turned ${ledBlinking ? "on" : "off"}`,
-            closeTimeout: 2000,
-          });
-          ledToast.open();
-        }
-        f7.preloader.hide();
-        break;
-      }
-    }
+    ledBlinking = await blinkLEDHandler(f7, device.serial, ledBlinking);
   }
 </script>
 

@@ -1,4 +1,4 @@
-import { central } from '../js/central.js'
+import { central } from '../central.js'
 
 async function cloneGroupGetName(f7, callback, oldGroupName) {
   await central.ready();
