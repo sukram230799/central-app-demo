@@ -169,7 +169,7 @@ class Central {
         resolveMe();
         throw { name: 'TokenNotUpdated', message: 'Token could not be updated.' };
       }
-    } 
+    }
     finally {
       console.log("Resolve refreshTokenPromise")
       resolveMe();
@@ -395,32 +395,70 @@ class Central {
     return this.handleResponse(clientDetailsResponse);
   }
 
-  async listAccessPoints() {
+  /**
+   * List Access Points
+   * @param {{params}} param0 Params
+   * @returns {{  "count": number,  "total": 4,  "aps": []}}
+   * Get access points. You can only specify one of group, swarm_id, label, site parameters.
+   * ---
+   * https://developer.arubanetworks.com/aruba-central/reference/apiexternal_controllerget_aps_v2
+   */
+  async listAccessPoints({ params } = {}) {
     let apsResponse = await this.get('monitoring/v2/aps', {
-      params: {}
+      params: params
     });
-
-    if (apsResponse.status === 404) return { count: 0, total: 0, aps: [] };
 
     return this.handleResponse(apsResponse);
   }
 
-  async listGateways() {
+  /**
+   * List Gateways
+   * @param {{params}} param0 Params
+   * @returns {{  "count": number,  "total": 4,  "gateways": []}}
+   * Get switches You can only specify one of group, label and stack_id parameters. 
+   * ---
+   * https://developer.arubanetworks.com/aruba-central/reference/apiexternal_controllerget_switches
+   */
+  async listGateways({ params } = {}) {
     let gatewaysResponse = await this.get('monitoring/v1/gateways', {
-      params: {}
+      params: params
     });
 
-    if (gatewaysResponse.status === 404) return { count: 0, total: 0, gateways: [] };
     return this.handleResponse(gatewaysResponse);
   }
 
-  async listSwitches() {
+  /**
+   * List Switches
+   * @param {{params}} param0 Params
+   * @returns {{  "count": number,  "total": 4,  "switches": []}}
+   * 
+   */
+  async listSwitches({ params } = {}) {
     let switchesResponse = await this.get('monitoring/v1/switches', {
-      params: {}
+      params: params
     });
 
-    if (switchesResponse.status === 404) return { count: 0, total: 0, switches: [] };
     return this.handleResponse(switchesResponse);
+  }
+
+  /**
+   * Get Switch Details
+   * @param {{serial: string}} param0 Serial of the switch
+   * @returns {Object}
+   * Get Switch details
+   * ---
+   * https://developer.arubanetworks.com/aruba-central/reference/apiexternal_controllerget_switch
+   */
+  async getSwitchDetails({ serial }) {
+    let switchResponse = await this.get(`monitoring/v1/switches/${serial}`);
+
+    return this.handleResponse(switchResponse);
+  }
+
+  async getAPDetails({ serial }) {
+    let apResponse = await this.get(`monitoring/v1/aps/${serial}`);
+
+    return this.handleResponse(apResponse);
   }
 
 

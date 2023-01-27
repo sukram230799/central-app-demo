@@ -18,7 +18,42 @@
   import { central } from "../js/central";
   import { blinkLEDHandler } from "../js/operations/device-operataions";
 
-  export let device;
+  export let device = {};
+  export let deviceSerial = "";
+
+  let loaded = false;
+  let loadClass = theme.ios
+    ? "skeleton-text skeleton-effect-pulse"
+    : "skeleton-text skeleton-effect-wave";
+
+  if (device.partial) {
+    loaded = false;
+    loadData();
+  } else {
+    loaded = true;
+    loadClass = "";
+  }
+
+  function loadData() {
+    return central
+      .ready(1)
+      .then(() => {
+        switch (device?.type) {
+          case "WIRELESS":
+            return central.getAPDetails({ serial: deviceSerial });
+          case "WIRED":
+            return central.getSwitchDetails({ serial: deviceSerial });
+        }
+      })
+      .then((deviceDetails) => (device = deviceDetails))
+      .catch((e) => {
+        f7.toast.show({ text: JSON.stringify(e), setTimeout: 10000 });
+      })
+      .finally(() => {
+        loaded = true;
+        loadClass = "";
+      });
+  }
 
   const deviceAP = {
     ap_deployment_mode: "IAP",
@@ -212,11 +247,12 @@
       {#each Object.entries(data) as [key, description]}
         {#if typeof description === "object"}
           <ListItem
+            class={loadClass}
             title={description.title}
             after={`${device[key]} ${description.unit}`}
           />
         {:else}
-          <ListItem title={description} after={device[key]} />
+          <ListItem class={loadClass} title={description} after={device[key]} />
         {/if}
       {/each}
     </List>
@@ -229,14 +265,14 @@
   <List>
     {#each Object.entries(device) as [title, data]}
       {#if !Array.isArray(data)}
-        <ListItem {title} after={data} />
+        <ListItem class={loadClass} {title} after={data} />
       {:else}
-        <ListItem {title} />
+        <ListItem class={loadClass} {title} />
         <li>
           <ul>
             {#each data as dataEntry}
               {#each Object.entries(dataEntry) as [subTitle, subData]}
-                <ListItem title={subTitle} after={subData} />
+                <ListItem class={loadClass} title={subTitle} after={subData} />
               {/each}
             {/each}
           </ul>

@@ -158,7 +158,18 @@
     },
     "AP Info": {
       connected_device_type: "Type",
-      associated_device: "Device",
+      associated_device: {
+        title: "Device",
+        href: "/devices/details/",
+        routeProps: (client) => ({
+          device: {
+            serial: client.associated_device,
+            partial: true,
+            type: "WIRELESS",
+          },
+          deviceSerial: client.associated_device,
+        }),
+      },
       associated_device_name: "Name",
       associated_device_mac: "MAC",
       group_name: "Group",
@@ -183,7 +194,18 @@
     },
     "Switch Info": {
       connected_device_type: "Type",
-      associated_device: "Device",
+      associated_device: {
+        title: "Device",
+        href: "/devices/details/",
+        routeProps: (client) => ({
+          device: {
+            serial: client.associated_device,
+            partial: true,
+            type: "WIRED",
+          },
+          deviceSerial: client.associated_device,
+        }),
+      },
       associated_device_name: "Name",
       associated_device_mac: "MAC",
       group_name: "Group",
@@ -325,7 +347,13 @@
           <ListItem
             class={loadClass}
             title={description.title}
-            after={`${client[key]} ${description.unit}`}
+            href={description.href}
+            routeProps={description.routeProps
+              ? description.routeProps(client)
+              : undefined}
+            after={description.unit !== undefined
+              ? `${client[key]} ${description.unit}`
+              : client[key]}
           />
         {:else}
           <ListItem class={loadClass} title={description} after={client[key]} />
