@@ -23,6 +23,8 @@
   import { blinkLEDHandler } from "../js/operations/device-operataions";
 
   export let client;
+  export let icons;
+
   let loaded = false;
   let loadClass = theme.ios
     ? "skeleton-text skeleton-effect-pulse"
@@ -267,7 +269,7 @@
         closeTimeout: 2000,
       });
     } else {
-      pinnedClientsStore.add(client);
+      pinnedClientsStore.add({ ...client, icons });
       f7.toast.show({
         text: `Pinned`,
         closeTimeout: 2000,

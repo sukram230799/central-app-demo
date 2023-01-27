@@ -12,7 +12,7 @@
     Icon,
     Searchbar,
   } from "framework7-svelte";
-  import { onDestroy } from "svelte/internal";
+  import { onDestroy, onMount } from "svelte";
 
   import { central } from "../js/central";
   import { pinnedClientsStore } from "../js/svelte-store";
@@ -93,12 +93,17 @@
   ];*/
   let pinnedClients = [];
 
-  const pinnedClientsStoreUnsub = pinnedClientsStore.subscribe(
-    (pinnedClientsResult) => {
-      pinnedClients = Object.values(pinnedClientsResult);
-      console.log(pinnedClients);
-    }
-  );
+  let pinnedClientsStoreUnsub;
+  onMount(() => {
+    pinnedClientsStoreUnsub = pinnedClientsStore.subscribe(
+      (pinnedClientsResult) => {
+        pinnedClients = Object.values(pinnedClientsResult);
+        console.log(pinnedClients);
+      }
+    );
+
+    loadData();
+  });
 
   onDestroy(() => {
     console.log("onDestroy");
@@ -119,7 +124,50 @@
     }
   }
 
-  loadData();
+  function getClientIcon(client) {
+    if (client?.os_type?.toLowerCase().includes("android"))
+      return {
+        ios: "f7:logo_android",
+        aurora: "f7:logo_android",
+        md: "material:android",
+      };
+    else if (client?.os_type?.toLowerCase().includes("ios"))
+      return {
+        ios: "f7:logo_ios",
+        aurora: "f7:logo_ios",
+        md: "f7:logo_ios",
+      };
+    else if (client?.os_type?.toLowerCase().includes("windows"))
+      return {
+        ios: "f7:logo_windows",
+        aurora: "f7:logo_windows",
+        md: "f7:logo_windows",
+      };
+    else if (client?.os_type?.toLowerCase().includes("macos"))
+      return {
+        ios: "f7:logo_macos",
+        aurora: "f7:logo_macos",
+        md: "f7:logo_macos",
+      };
+    else if (client?.os_type?.toLowerCase().includes("google"))
+      return {
+        ios: "f7:logo_google",
+        aurora: "f7:logo_google",
+        md: "f7:logo_google",
+      };
+    else if (client.client_type === "WIRELESS")
+      return {
+        ios: "f7:wifi",
+        aurora: "f7:wifi",
+        md: "material:wifi",
+      };
+    else
+      return {
+        ios: "material:cable",
+        aurora: "material:cable",
+        md: "material:cable",
+      };
+  }
 
   function loadMore(done) {
     loadData().then(() => done());
@@ -168,9 +216,18 @@
                   (client) => client.macaddr === pinnedClient.macaddr
                 )[0]
               : { ...pinnedClient, partial: true },
+            icons: pinnedClient.icons,
           }}
         >
-          <Icon ios="f7:pin" aurora="f7:pin" md="material:push_pin" />
+          <Icon
+            ios={pinnedClient?.icons?.ios ? pinnedClient.icons.ios : "f7:pin"}
+            aurora={pinnedClient?.icons?.aurora
+              ? pinnedClient.icons.aurora
+              : "f7:pin"}
+            md={pinnedClient?.icons?.md
+              ? pinnedClient.icons.md
+              : "material:push_pin"}
+          />
         </ListItem>
       {/each}
     </List>
@@ -178,7 +235,7 @@
   <BlockTitle>Clients</BlockTitle>
   <List class="search-list">
     {#if !loaded}
-      {#each [{ ios: "f7:logo_android", aurora: "f7:logo_android", md: "material:android" }, { ios: "f7:logo_ios", aurora: "f7:logo_ios", md: "f7:logo_ios" }, { ios: "f7:logo_windows", aurora: "f7:logo_windows", md: "f7:logo_windows" }, { ios: "f7:logo_macos", aurora: "f7:logo_macos", md: "f7:logo_macos" }, { ios: "f7:logo_google", aurora: "f7:logo_google", md: "f7:logo_google" }, { ios: "f7:wifi", aurora: "f7:wifi", md: "material:wifi" }, { ios: "material:cable", aurora: "material:cable", md: "material:cable" }].sort((a, b) => 0.5 - Math.random()) as icon}
+      {#each [{ ios: "f7:logo_android", aurora: "f7:logo_android", md: "material:android" }, { ios: "f7:logo_ios", aurora: "f7:logo_ios", md: "f7:logo_ios" }, { ios: "f7:logo_windows", aurora: "f7:logo_windows", md: "f7:logo_windows" }, { ios: "f7:logo_macos", aurora: "f7:logo_macos", md: "f7:logo_macos" }, { ios: "f7:logo_google", aurora: "f7:logo_google", md: "f7:logo_google" }, { ios: "f7:wifi", aurora: "f7:wifi", md: "material:wifi" }, { ios: "material:cable", aurora: "material:cable", md: "material:cable" }].sort((a, b) => 0.5 - Math.random()) as icons}
         <ListItem
           class={theme.ios
             ? "skeleton-text skeleton-effect-pulse"
@@ -188,94 +245,23 @@
           header="CN20304050 - Access Point"
           href="#"
         >
-          <!-- <i slot="media" class="icon demo-list-icon" /> -->
-          <!-- logo_windows logo_android logo_ios logo_macos logo_google-->
-          {#if true}
-            <Icon
-              slot="media"
-              ios={icon.ios}
-              aurora={icon.aurora}
-              md={icon.md}
-            />
-          {/if}
+          <Icon ios={icons.ios} aurora={icons.aurora} md={icons.md} />
         </ListItem>
       {/each}
     {/if}
     {#each clients as client}
-      <!-- <ListItem
-        footer={`${client.macaddr} ${client.ip_address}`}
-        title={client.name ? client.name : client.macaddr}
-        header={`${client.associated_device} ${client.associated_device_name}`}
-        href="#"
-      >
-      {#if true}
-        <Icon
-          slot="media"
-          ios="f7:logo_android"
-          aurora="f7:logo_android"
-          md="material:android"
-        />
-        {/if}
-      </ListItem> -->
       <ListItem
         footer={`${client.macaddr} – ${client.ip_address}`}
         title={client.name ? client.name : client.macaddr}
         header={`${client.associated_device} – ${client.associated_device_name}`}
         href="/clients/details/"
-        routeProps={{ client: client }}
+        routeProps={{ client: client, icons: getClientIcon(client) }}
       >
-        <!-- <i slot="media" class="icon demo-list-icon" /> -->
-        <!-- logo_windows logo_android logo_ios logo_macos logo_google-->
-        {#if client?.os_type?.toLowerCase().includes("android")}
-          <Icon
-            slot="media"
-            ios="f7:logo_android"
-            aurora="f7:logo_android"
-            md="material:android"
-          />
-        {:else if client?.os_type?.toLowerCase().includes("ios")}
-          <Icon
-            slot="media"
-            ios="f7:logo_ios"
-            aurora="f7:logo_ios"
-            md="f7:logo_ios"
-          />
-        {:else if client?.os_type?.toLowerCase().includes("windows")}
-          <Icon
-            slot="media"
-            ios="f7:logo_windows"
-            aurora="f7:logo_windows"
-            md="f7:logo_windows"
-          />
-        {:else if client?.os_type?.toLowerCase().includes("macos")}
-          <Icon
-            slot="media"
-            ios="f7:logo_macos"
-            aurora="f7:logo_macos"
-            md="f7:logo_macos"
-          />
-        {:else if client?.os_type?.toLowerCase().includes("google")}
-          <Icon
-            slot="media"
-            ios="f7:logo_google"
-            aurora="f7:logo_google"
-            md="f7:logo_google"
-          />
-        {:else if client.client_type === "WIRELESS"}
-          <Icon
-            slot="media"
-            ios="f7:wifi"
-            aurora="f7:wifi"
-            md="material:wifi"
-          />
-        {:else}
-          <Icon
-            slot="media"
-            ios="material:cable"
-            aurora="material:cable"
-            md="material:cable"
-          />
-        {/if}
+        <Icon
+          ios={getClientIcon(client).ios}
+          aurora={getClientIcon(client).aurora}
+          md={getClientIcon(client).md}
+        />
       </ListItem>
     {/each}
     {#if loaded && !clients?.length}
