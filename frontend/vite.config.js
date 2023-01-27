@@ -12,13 +12,16 @@ module.exports = async function () {
   return {
     plugins: [
       svelte({
-        preprocess: reactivePreprocess(),
+        // preprocess: [reactivePreprocess()],
       }),
       VitePWA({
+        workbox: {
+          cleanupOutdatedCaches: true,
+        },
         strategies: 'injectManifest',
         srcDir: '',
         injectManifest: {
-          maximumFileSizeToCacheInBytes: 10*1024*1024,
+          maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
           globPatterns: [
             '**/*.{woff,woff2,js,css,png,jpg,svg,html}'
           ],
@@ -32,6 +35,7 @@ module.exports = async function () {
     base: '',
     publicDir: PUBLIC_DIR,
     build: {
+      sourceMap: true,
       outDir: BUILD_DIR,
       assetsInlineLimit: 0,
       emptyOutDir: true,
