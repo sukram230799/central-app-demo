@@ -14,6 +14,7 @@
   } from "framework7-svelte";
 
   import { central } from "../js/central";
+  import { selectedFilterStore } from "../js/svelte-store";
 
   let devices = []; /* = [
     {
@@ -88,13 +89,26 @@
       vlan: 1,
     },
   ];*/
+  let filters = {};
+
+  selectedFilterStore.subscribe(
+    (selectedFilters) => (filters = filterTranslator(selectedFilters))
+  );
+
+  function filterTranslator(allFilters) {
+    return {
+      group: allFilters.group,
+      label: allFilters.label,
+      site: allFilters.site,
+    };
+  }
 
   async function loadData() {
     await central.ready(3);
     const deviceLists = await Promise.all([
-      central.listAccessPoints(),
-      central.listGateways(),
-      central.listSwitches(),
+      central.listAccessPoints({ filters }),
+      central.listGateways({ filters }),
+      central.listSwitches({ filters }),
     ]);
     console.log(deviceLists);
     devices = [

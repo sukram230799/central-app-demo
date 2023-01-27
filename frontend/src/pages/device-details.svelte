@@ -197,7 +197,7 @@
 </script>
 
 <Page>
-  <Navbar title="Device Details" backLink="Back">
+  <Navbar title={device.name ? device.name : "Device Details"} backLink="Back">
     <NavRight>
       <Link
         searchbarEnable=".searchbar-details"
