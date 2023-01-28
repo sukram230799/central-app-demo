@@ -73,8 +73,7 @@
     loadData(false).then(() => done());
   }
 
-  function cloneGroup() {
-    const groupName = this.$$scope.ctx.slice(-1)[0];
+  function cloneGroup(groupName) {
     console.log("clone", groupName);
     cloneGroupGetName(f7, groupCloned, groupName);
   }
@@ -87,9 +86,7 @@
     f7.swipeout.close(".swipeout");
   }
 
-  function deleteGroup() {
-    console.log(this);
-    const groupName = this.$$scope.ctx.slice(-1)[0];
+  function deleteGroup(groupName) {
     console.log("delete", groupName);
     deleteGroupDialog(f7, groupDelted, groupName);
   }
@@ -97,7 +94,7 @@
   function groupDelted(isDeleted, groupName) {
     if (isDeleted) {
       groupStore.delete(groupName);
-    loadData(true);
+      loadData(true);
     }
     f7.swipeout.close(".swipeout");
   }
@@ -145,7 +142,7 @@
     {#each groups as group}
       {#if detailsLoaded}
         <ListItem
-          swipeout={false}
+          swipeout
           disabled={false && !detailsLoaded}
           title={group}
           href="/groups/details/"
@@ -161,16 +158,16 @@
                 : {},
           }}
         >
-          <!--
           <SwipeoutActions left>
-            <SwipeoutButton overswipe color="red" onClick={deleteGroup}
-              >Delete</SwipeoutButton
+            <SwipeoutButton
+              overswipe
+              color="red"
+              onClick={() => deleteGroup(group)}>Delete</SwipeoutButton
             >
-            <SwipeoutButton color="orange" onClick={cloneGroup}
+            <SwipeoutButton color="orange" onClick={() => cloneGroup(group)}
               >Clone</SwipeoutButton
             >
           </SwipeoutActions>
-          -->
           <svelte:fragment slot="subtitle">
             <GroupTemplateBubbles
               groupTemplateInfo={groupsTemplateInfo[group]}
