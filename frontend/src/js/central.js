@@ -403,9 +403,9 @@ class Central {
    * ---
    * https://developer.arubanetworks.com/aruba-central/reference/apiexternal_controllerget_aps_v2
    */
-  async listAccessPoints({ params } = {}) {
+  async listAccessPoints({ filters } = {}) {
     let apsResponse = await this.get('monitoring/v2/aps', {
-      params: params
+      params: filters
     });
 
     return this.handleResponse(apsResponse);
@@ -419,9 +419,9 @@ class Central {
    * ---
    * https://developer.arubanetworks.com/aruba-central/reference/apiexternal_controllerget_switches
    */
-  async listGateways({ params } = {}) {
+  async listGateways({ filters } = {}) {
     let gatewaysResponse = await this.get('monitoring/v1/gateways', {
-      params: params
+      params: filters
     });
 
     return this.handleResponse(gatewaysResponse);
@@ -433,9 +433,9 @@ class Central {
    * @returns {{  "count": number,  "total": 4,  "switches": []}}
    * 
    */
-  async listSwitches({ params } = {}) {
+  async listSwitches({ filters } = {}) {
     let switchesResponse = await this.get('monitoring/v1/switches', {
-      params: params
+      params: filters
     });
 
     return this.handleResponse(switchesResponse);
