@@ -36,7 +36,7 @@ RUN npm install
 
 COPY --from=onboard /usr/app/onboard/www/ ./onboard/
 COPY --from=client /usr/app/frontend/www/ ./www/
-COPY ./backend/server.js ./
+COPY ./backend/* ./
 
 EXPOSE 26799
 
