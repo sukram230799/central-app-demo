@@ -348,9 +348,9 @@ class Central {
     return this.handleResponse(clientsResponse);
   }
 
-  async listUnifiedClientsFiltered() {
+  async listUnifiedClientsAutoFiltered() {
     // debugger;
-    let params = {
+    let filters = {
       group: this.filters.group, site: this.filters.site, label: this.filters.label,
       client_status: this.filters.clientStatus, network: this.filters.network,
       serial: this.filters.serial, swarm_id: this.filters.swarmId, cluster_id: this.filters.clusterId, band: this.filters.band,
@@ -363,10 +363,14 @@ class Central {
       show_usage: 'usage' in this.filters.additionalFields,
       show_signal_db: 'signal_db' in this.filters.additionalFields,
     }
+    return await this.listUnifiedClientsFiltered({ filters });
+  }
+
+  async listUnifiedClientsFiltered({ filters }) {
     if (this.filters.clientType === 'both') {
       const [wiredResponse, wirelsessResponse] = await Promise.all([
-        this.listUnifiedClients({ ...params, client_type: 'WIRED' }),
-        this.listUnifiedClients({ ...params, client_type: 'WIRELESS' }),
+        this.listUnifiedClients({ ...filters, client_type: 'WIRED' }),
+        this.listUnifiedClients({ ...filters, client_type: 'WIRELESS' }),
       ]);
       return {
         count: wiredResponse.count + wirelsessResponse.count,
@@ -378,7 +382,7 @@ class Central {
         ]
       };
     }
-    return await this.listUnifiedClients(params);
+    return await this.listUnifiedClients(filters);
   }
 
   /**
@@ -723,6 +727,12 @@ class Central {
       }
     });
     return this.handleResponse(propertiesResponse);
+  }
+
+  async moveDevicesToGroup({ group, serials }) {
+    let moveDevicesResponse = await this.post('configuration/v1/devices/move', { data: { group, serials } });
+
+    return this.handleResponse(moveDevicesResponse);
   }
 
   async listTroubleshootingCommands({ device_type }) {
