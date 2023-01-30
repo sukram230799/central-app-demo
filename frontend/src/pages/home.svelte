@@ -111,7 +111,7 @@
       <div>
         <div style="padding-left: 1em; padding-right: 1em; text-align: center;">
           <BlockTitle medium>Welcome!</BlockTitle>
-          <img style="width: 50%;" src="../full-icon.svg" alt="icon" />
+          <img style="width: 50%;" src="/full-icon.svg" alt="icon" />
         </div>
       </div>
       <BlockTitle>Easy Setup</BlockTitle>
