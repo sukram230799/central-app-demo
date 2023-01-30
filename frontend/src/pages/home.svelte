@@ -102,7 +102,7 @@
     }}
   >
     <Page>
-      <Navbar title="Welcome">
+      <Navbar title="Central Toolkit">
         <NavRight>
           <Link popupClose>Let's go</Link>
         </NavRight>
@@ -122,8 +122,8 @@
           href="#"
           on:click={() =>
             navigator.clipboard.writeText(
-              "https://central.wuest.dev/onboarding/"
-            )}>https://central.wuest.dev/onboarding/</a
+              "https://central.wuest.dev/onboard"
+            )}>https://central.wuest.dev/onboard</a
         > on a desktop and then scan the QR Code in the Central Settings.</Block
       >
       <BlockTitle>Install as App</BlockTitle>
