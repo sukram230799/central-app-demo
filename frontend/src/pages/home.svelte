@@ -111,6 +111,7 @@
       <div>
         <div style="padding-left: 1em; padding-right: 1em; text-align: center;">
           <BlockTitle medium>Welcome!</BlockTitle>
+          <img style="width: 50%;" src="../full-icon.svg" alt="icon" />
         </div>
       </div>
       <BlockTitle>Easy Setup</BlockTitle>
@@ -121,9 +122,8 @@
         <a
           href="#"
           on:click={() =>
-            navigator.clipboard.writeText(
-              "https://central.wuest.dev/onboard"
-            )}>https://central.wuest.dev/onboard</a
+            navigator.clipboard.writeText("https://central.wuest.dev/onboard")}
+          >https://central.wuest.dev/onboard</a
         > on a desktop and then scan the QR Code in the Central Settings.</Block
       >
       <BlockTitle>Install as App</BlockTitle>
@@ -178,6 +178,7 @@
 
   <BlockTitle>Other</BlockTitle>
   <List>
+    <ListItem link="/license/" title="Licenses" />
     <ListItem link="/about/" title="About / Impressum" />
   </List>
 </Page>

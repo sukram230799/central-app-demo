@@ -1,6 +1,7 @@
 
 import HomePage from '../pages/home.svelte';
 import AboutPage from '../pages/about.svelte';
+import LicensePage from '../pages/licenses.svelte';
 import FormPage from '../pages/form.svelte';
 // import FirmwarePage from '../pages/firmware.svelte';
 import ClientsPage from '../pages/clients.svelte';
@@ -76,6 +77,10 @@ var routes = [
   {
     path: '/about/',
     component: AboutPage,
+  },
+  {
+    path: '/license/',
+    component: LicensePage,
   },
   {
     path: '/form/',
