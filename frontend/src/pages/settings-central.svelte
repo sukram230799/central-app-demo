@@ -116,6 +116,7 @@
   function saveCredential(directCredential = false) {
     accountsStore.update((value) => {
       if (!directCredential) account.credential = JSON.parse(credentialString);
+      account.name = account.name.trim();
       value[selectedAccountId] = account;
       return value;
     });
@@ -198,7 +199,7 @@
       f7.dialog.prompt(
         `Overwrite "${account.name}"? Confirm by typing name.`,
         (name) => {
-          if (name === account.name)
+          if (name.trimEnd() === account.name)
             f7.dialog.confirm(
               `Are you sure to overwrite "${account.name}"`,
               importAccount
