@@ -4,6 +4,10 @@ const bodyparser = require('body-parser');
 const axios = require('axios').default;
 var cors = require('cors');
 
+const centralBaseUrlObject = require('./central-base-url.json');
+
+const centralBaseUrl = Object.values(centralBaseUrlObject)
+
 
 const vapidDetails = {
     publicKey: process.env.VAPID_PUBLIC_KEY,
@@ -93,8 +97,12 @@ app.post('/notify-all', (request, response) => {
     }
 });
 
+function checkIfStringStartsWith(str, substrs) {
+    return substrs.some(substr => str.startsWith(substr));
+}
+
 app.post('/api-proxy', async (request, response) => {
-    if (!request?.body?.url?.startsWith('https://internal-apigw.central.arubanetworks.com/'))
+    if (!checkIfStringStartsWith(request?.body?.url, centralBaseUrl))
         return response.sendStatus(403);
     if (process.env.NODE_ENV !== "production")
         console.log(request.body);
