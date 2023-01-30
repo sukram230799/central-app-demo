@@ -328,7 +328,14 @@
         class="display-flex justify-content-center align-items-center"
       > -->
       <div>
-        <div style="margin-top: 50%" id="import-qr-reader" width="600px" />
+        {#if !(navigator.mediaDevices && navigator.mediaDevices.enumerateDevices)}
+          <div
+            style="padding-left: 1em; padding-right: 1em; text-align: center;"
+          >
+            <BlockTitle medium>Camera not supported!</BlockTitle>
+          </div>
+        {/if}
+        <div id="import-qr-reader" width="600px" />
 
         <div style="padding-left: 1em; padding-right: 1em;">
           Remember: A credential can only be used on one device at a time!
