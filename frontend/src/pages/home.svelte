@@ -1,7 +1,9 @@
 <script>
   import {
     theme,
+    AccordionContent,
     Page,
+    Popup,
     Navbar,
     NavTitle,
     NavTitleLarge,
@@ -12,10 +14,15 @@
     BlockTitle,
     List,
     ListItem,
+    f7ready,
+    Icon,
   } from "framework7-svelte";
+  import { onMount } from "svelte";
   import { central } from "../js/central";
+  import { newUserStore } from "../js/svelte-store";
 
   let centralReady = false;
+  let welcomePopupOpen = false;
 
   async function backgroundSync() {
     const status = await navigator.permissions.query({
@@ -44,19 +51,21 @@
   function onPageInit(event) {}
 
   central.ready().then(() => (centralReady = true));
+
+  function onWelcomePopupOpen() {}
+
+  onMount(() =>
+    f7ready(() => {
+      newUserStore.subscribe((newUser) => {
+        if (newUser) welcomePopupOpen = true;
+      });
+    })
+  );
 </script>
 
 <Page name="home" {onPageInit}>
   <!-- Top Navbar -->
   <Navbar large sliding={false}>
-    <!-- <NavLeft>
-      <Link
-        iconIos="f7:menu"
-        iconAurora="f7:menu"
-        iconMd="material:menu"
-        panelOpen="left"
-      />
-    </NavLeft> -->
     <NavTitle sliding>Central Toolkit</NavTitle>
     <NavRight>
       <Link
@@ -81,12 +90,67 @@
     />
     <NavTitleLarge>Central Toolkit</NavTitleLarge>
   </Navbar>
-  <!-- Toolbar -->
-  <!-- <Toolbar bottom>
-    <Link>Left Link</Link>
-    <Link>Right Link</Link>
-  </Toolbar> -->
-  <!-- Page content -->
+
+  <Popup
+    swipeToClose={true}
+    class="popup-welcome"
+    opened={!centralReady && welcomePopupOpen}
+    onPopupOpen={onWelcomePopupOpen}
+    onPopupClosed={() => {
+      newUserStore.set(false);
+      welcomePopupOpen = false;
+    }}
+  >
+    <Page>
+      <Navbar title="Welcome">
+        <NavRight>
+          <Link popupClose>Let's go</Link>
+        </NavRight>
+      </Navbar>
+
+      <div>
+        <div style="padding-left: 1em; padding-right: 1em; text-align: center;">
+          <BlockTitle medium>Welcome!</BlockTitle>
+        </div>
+      </div>
+      <BlockTitle>Easy Setup</BlockTitle>
+      <Block
+        >This app needs your Central Credentials to access the details. All
+        credentials are saved locally on the device.<br />
+        You can enter the Credentials either manually or head to
+        <a
+          href="#"
+          on:click={() =>
+            navigator.clipboard.writeText(
+              "https://central.wuest.dev/onboarding/"
+            )}>https://central.wuest.dev/onboarding/</a
+        > on a desktop and then scan the QR Code in the Central Settings.</Block
+      >
+      <BlockTitle>Install as App</BlockTitle>
+      <List accordionList>
+        <ListItem accordionItem title="Android" opened={theme.md}>
+          <AccordionContent>
+            <Block>
+              On Android you should see an "Add Central Toolkit to Home Screen".
+              Click on it to install the App.
+            </Block>
+          </AccordionContent>
+        </ListItem>
+        <ListItem accordionItem title="iOS" opened={theme.ios}>
+          <AccordionContent>
+            <Block
+              >On iOS you can go to <Icon
+                f7="square_arrow_up"
+                size="14"
+                color="black"
+              /> Share -> "Add to Home Screen" to install the App.</Block
+            >
+          </AccordionContent>
+        </ListItem>
+      </List>
+    </Page>
+  </Popup>
+
   <Block strong>
     <p>Simple Central Client Demo Project.</p>
   </Block>
@@ -111,57 +175,9 @@
     <ListItem link="/settings/camera/" title="Camera Settings" />
     <ListItem link="/settings/central/" title="Central Settings" />
   </List>
-  <!-- <BlockTitle>Modals</BlockTitle>
-  <Block strong>
-    <Row>
-      <Col width="50">
-        <Button fill raised popupOpen="#my-popup">Popup</Button>
-      </Col>
-      <Col width="50">
-        <Button fill raised loginScreenOpen="#my-login-screen"
-          >Login Screen</Button
-        >
-      </Col>
-    </Row>
-    <Row>
-      <Col width="50">
-        <Button fill raised onClick={console.log("Not implemented")}>---</Button
-        >
-      </Col>
-      <Col width="50">
-        <Button fill raised onClick={backgroundSync}>Background</Button>
-      </Col>
-    </Row>
-  </Block>
-
-  <BlockTitle>Panels</BlockTitle>
-  <Block strong>
-    <Row>
-      <Col width="50">
-        <Button fill raised panelOpen="left">Left Panel</Button>
-      </Col>
-      <Col width="50">
-        <Button fill raised panelOpen="right">Right Panel</Button>
-      </Col>
-    </Row>
-  </Block> -->
 
   <BlockTitle>Other</BlockTitle>
   <List>
     <ListItem link="/about/" title="About / Impressum" />
-    <!-- <ListItem link="/form/" title="Form" /> -->
-    <!--
-    <ListItem
-      title="Dynamic (Component) Route"
-      link="/dynamic-route/blog/45/post/125/?foo=bar#about"
-    />
-    <ListItem
-      title="Default Route (404)"
-      link="/load-something-that-doesnt-exist/"
-    />
-    <ListItem
-      title="Request Data & Load"
-      link="/request-and-load/user/123456/"
-    /> -->
   </List>
 </Page>
