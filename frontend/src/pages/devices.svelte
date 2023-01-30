@@ -11,10 +11,17 @@
     ListItem,
     Icon,
     Searchbar,
+    SwipeoutActions,
+    SwipeoutButton,
+    f7,
+    Actions,
+    ActionsGroup,
+    ActionsButton,
+    ActionsLabel,
   } from "framework7-svelte";
 
   import { central } from "../js/central";
-  import { selectedFilterStore } from "../js/svelte-store";
+  import { groupStore, selectedFilterStore } from "../js/svelte-store";
 
   let devices = []; /* = [
     {
@@ -91,6 +98,14 @@
   ];*/
   let filters = {};
 
+  let checkbox = false;
+  let moveActionsOpen = false;
+  let selectedDevices = [];
+
+  let groups;
+
+  groupStore.subscribe((groupsList) => (groups = groupsList));
+
   selectedFilterStore.subscribe(
     (selectedFilters) => (filters = filterTranslator(selectedFilters))
   );
@@ -118,10 +133,82 @@
     ];
   }
 
+  function getDeviceIcon(device) {
+    if (device?.switch_type)
+      return {
+        ios: "material:cable",
+        aurora: "material:cable",
+        md: "material:cable",
+      };
+    else if (device?.ap_deployment_mode)
+      return {
+        ios: "f7:wifi",
+        aurora: "f7:wifi",
+        md: "material:wifi",
+      };
+    else
+      return {
+        ios: "material:router",
+        aurora: "material:router",
+        md: "material:router",
+      };
+  }
+
   loadData();
 
   function loadMore(done) {
     loadData().then(() => done());
+  }
+
+  function onSelectedDeviceChange(serial) {
+    if (selectedDevices.includes(serial))
+      selectedDevices.splice(selectedDevices.indexOf(serial), 1);
+    else selectedDevices.push(serial);
+  }
+
+  function moveDeviceClick(device) {
+    f7.swipeout.close(".swipeout");
+    selectedDevices = [device.serial];
+    moveDeviceShowSelection();
+  }
+
+  function toggleCheckbox() {
+    checkbox = !checkbox;
+    if (checkbox)
+      f7.toast.show({ text: "Select Devices to Move", closeTimeout: 2000 });
+    else if (selectedDevices.length) moveDeviceShowSelection();
+  }
+
+  function moveDeviceShowSelection() {
+    moveActionsOpen = true;
+  }
+
+  function moveActionsClick(group) {
+    f7.dialog.confirm(
+      `Move devices to group "${group}"`,
+      "Move Devices?",
+      () => {
+        f7.preloader.show();
+        central
+          .moveDevicesToGroup({ serials: selectedDevices, group })
+          .then((message) => {
+            f7.toast.show({ text: message, closeTimeout: 2000 });
+          })
+          .catch((e) => {
+            console.log(e);
+            f7.toast.show({
+              text: e?.options?.responseBody?.description
+                ? e.options.responseBody.description
+                : JSON.stringify(e),
+              closeTimeout: 8000,
+            });
+          })
+          .finally(() => {
+            loadData();
+            f7.preloader.hide();
+          });
+      }
+    );
   }
 </script>
 
@@ -129,6 +216,13 @@
   <Navbar title="Devices" backLink="Back"
     ><NavRight>
       <!---->
+      <Link
+        iconIos="f7:folder"
+        iconAurora="f7:folder"
+        iconMd="icon:mdi mdi-folder"
+        onClick={toggleCheckbox}
+        tooltip="Move to Group"
+      />
       <Link
         iconIos="f7:line_horizontal_3_decrease"
         iconAurora="f7:line_horizontal_3_decrease"
@@ -151,6 +245,22 @@
       disableButton={!theme.aurora}
     />
   </Navbar>
+  <Actions
+    opened={moveActionsOpen}
+    onActionsClosed={() => (moveActionsOpen = false)}
+  >
+    <ActionsGroup>
+      <ActionsLabel>Move to Group</ActionsLabel>
+      {#each groups as group}
+        <ActionsButton onClick={() => moveActionsClick(group)}
+          >{group}</ActionsButton
+        >
+      {/each}
+    </ActionsGroup>
+    <ActionsGroup>
+      <ActionsButton color="red">Cancel</ActionsButton>
+    </ActionsGroup>
+  </Actions>
   <BlockTitle>Devices</BlockTitle>
   <List class="search-list">
     {#if !devices.length}
@@ -179,33 +289,29 @@
     {/if}
     {#each devices as device}
       <ListItem
+        {checkbox}
+        checked={selectedDevices.includes(device.serial)}
+        onChange={() => onSelectedDeviceChange(device.serial)}
+        swipeout={!checkbox}
         header={`${device.group_name}`}
         title={device.name ? device.name : device.macaddr}
         footer={`${device.serial} – ${device.macaddr}`}
-        href="/devices/details/"
+        href={checkbox ? false : "/devices/details/"}
         routeProps={{ device: device }}
       >
-        {#if device?.switch_type}
-          <Icon
-            slot="media"
-            ios="material:cable"
-            aurora="material:cable"
-            md="material:cable"
-          />
-        {:else if device?.ap_deployment_mode}
-          <Icon
-            slot="media"
-            ios="f7:wifi"
-            aurora="f7:wifi"
-            md="material:wifi"
-          />
-        {:else}
-          <Icon
-            slot="media"
-            ios="material:router"
-            aurora="material:router"
-            md="material:router"
-          />
+        <Icon
+          slot="after"
+          ios={getDeviceIcon(device).ios}
+          aurora={getDeviceIcon(device).aurora}
+          md={getDeviceIcon(device).md}
+        />
+        {#if !checkbox}
+          <SwipeoutActions>
+            <SwipeoutButton
+              color="orange"
+              onClick={() => moveDeviceClick(device)}>Move</SwipeoutButton
+            >
+          </SwipeoutActions>
         {/if}
       </ListItem>
     {/each}
