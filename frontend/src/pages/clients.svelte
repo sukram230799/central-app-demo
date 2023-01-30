@@ -93,6 +93,8 @@
   ];*/
   let pinnedClients = [];
 
+  export let filters = {};
+
   let pinnedClientsStoreUnsub;
   onMount(() => {
     pinnedClientsStoreUnsub = pinnedClientsStore.subscribe(
@@ -111,9 +113,22 @@
     pinnedClients = [];
   });
 
+  async function loadDataSwitcher() {
+    if (
+      filters &&
+      Object.keys(filters).length === 0 &&
+      Object.getPrototypeOf(filters) === Object.filters
+    ) {
+      return await central.listUnifiedClientsFiltered({
+        ...filters,
+      });
+    }
+    return await central.listUnifiedClientsAutoFiltered();
+  }
+
   async function loadData() {
     try {
-      const clientList = await central.listUnifiedClientsFiltered();
+      const clientList = await loadDataSwitcher();
       console.log(clientList);
       clients = clientList.clients;
       loaded = true;
@@ -258,6 +273,7 @@
         routeProps={{ client: client, icons: getClientIcon(client) }}
       >
         <Icon
+          slot="after"
           ios={getClientIcon(client).ios}
           aurora={getClientIcon(client).aurora}
           md={getClientIcon(client).md}
