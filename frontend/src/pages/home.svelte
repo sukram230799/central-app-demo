@@ -3,21 +3,19 @@
     theme,
     Page,
     Navbar,
-    NavLeft,
     NavTitle,
     NavTitleLarge,
     NavRight,
     Link,
-    Toolbar,
     Searchbar,
     Block,
     BlockTitle,
     List,
     ListItem,
-    Row,
-    Col,
-    Button,
   } from "framework7-svelte";
+  import { central } from "../js/central";
+
+  let centralReady = false;
 
   async function backgroundSync() {
     const status = await navigator.permissions.query({
@@ -44,6 +42,8 @@
   }
 
   function onPageInit(event) {}
+
+  central.ready().then(() => (centralReady = true));
 </script>
 
 <Page name="home" {onPageInit}>
@@ -91,14 +91,20 @@
     <p>Simple Central Client Demo Project.</p>
   </Block>
 
-  <BlockTitle>Navigation</BlockTitle>
-  <List>
-    <!-- <ListItem link="/firmware/" title="Firmware" /> -->
-    <ListItem link="/clients/" title="Clients" />
-    <ListItem link="/devices/" title="Devices" />
-    <ListItem link="/groups/" title="Groups" />
-    <ListItem link="/troubleshooting/" title="Troubleshooting" />
-  </List>
+  {#if centralReady}
+    <BlockTitle>Navigation</BlockTitle>
+    <List>
+      <!-- <ListItem link="/firmware/" title="Firmware" /> -->
+      <ListItem link="/clients/" title="Clients" />
+      <ListItem link="/devices/" title="Devices" />
+      <ListItem link="/groups/" title="Groups" />
+      <ListItem
+        disabled={!centralReady}
+        link="/troubleshooting/"
+        title="Troubleshooting"
+      />
+    </List>
+  {/if}
 
   <BlockTitle>Settings</BlockTitle>
   <List>
