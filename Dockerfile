@@ -1,4 +1,4 @@
-FROM node:16 as onboard
+FROM node:18 as onboard
 
 WORKDIR /usr/app/onboard/
 COPY ./onboard/package*.json ./
@@ -8,7 +8,7 @@ RUN npm install -qy
 COPY ./onboard ./
 RUN npm run build
 
-FROM node:16 as client
+FROM node:18 as client
 
 WORKDIR /usr/app/frontend/
 COPY ./frontend/package*.json ./
@@ -24,7 +24,7 @@ COPY ./frontend ./
 RUN npm run build
 
 
-FROM node:16
+FROM node:18
 
 WORKDIR /usr/src/app
 
