@@ -133,17 +133,19 @@
   async function verifyBeforeSave(testAccount = account) {}
 
   async function saveCredential(directCredential = false) {
+    if (!directCredential) account.credential = JSON.parse(credentialString);
     try {
       account = await central.testToken(account);
       accountsStore.update((value) => {
-        if (!directCredential)
-          account.credential = JSON.parse(credentialString);
         account.name = account.name.trim();
         value[selectedAccountId] = account;
         return value;
       });
       currentAccountIdStore.set(selectedAccountId);
-      f7.toast.show({ text: "Credential saved", closeTimeout: 2000 });
+      f7.toast.show({
+        text: "Token working. Credential saved",
+        closeTimeout: 2000,
+      });
     } catch (e) {
       f7.toast.show({
         text: "Token not correct. Please enter new one",
@@ -199,6 +201,7 @@
           try {
             accountImport = JSON.parse(decodedText);
             console.log(accountImport);
+            html5QrCode.stop();
             importPopupOpened = false;
             importAccountPrompt();
           } catch (e) {
@@ -263,8 +266,8 @@
         iconAurora="f7:checkmark_alt"
         iconMd="material:done"
         tooltip="Save Credential"
-        onClick={() => {
-          saveCredential();
+        onClick={async () => {
+          await saveCredential();
           f7router.back();
         }}
       />
