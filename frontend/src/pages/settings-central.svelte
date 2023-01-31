@@ -130,15 +130,26 @@
       .finally(() => f7.preloader.hide());
   }
 
-  function saveCredential(directCredential = false) {
-    accountsStore.update((value) => {
-      if (!directCredential) account.credential = JSON.parse(credentialString);
-      account.name = account.name.trim();
-      value[selectedAccountId] = account;
-      return value;
-    });
-    currentAccountIdStore.set(selectedAccountId);
-    f7.toast.show({ text: "Credential saved", closeTimeout: 2000 });
+  async function verifyBeforeSave(testAccount = account) {}
+
+  async function saveCredential(directCredential = false) {
+    try {
+      account = await central.testToken(account);
+      accountsStore.update((value) => {
+        if (!directCredential)
+          account.credential = JSON.parse(credentialString);
+        account.name = account.name.trim();
+        value[selectedAccountId] = account;
+        return value;
+      });
+      currentAccountIdStore.set(selectedAccountId);
+      f7.toast.show({ text: "Credential saved", closeTimeout: 2000 });
+    } catch (e) {
+      f7.toast.show({
+        text: "Token not correct. Please enter new one",
+        closeTimeout: 2000,
+      });
+    }
   }
 
   function updateCredentialString() {
@@ -234,7 +245,6 @@
       account = testAccount;
       saveCredential(true);
       updateCredentialString();
-      centralRefresh(() => {});
     } catch (e) {
       if (e.name === "TokenNotUpdated")
         f7.toast.show({
