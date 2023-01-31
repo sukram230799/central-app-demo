@@ -1,11 +1,11 @@
 <script>
   import {
+    f7ready,
     theme,
     Page,
     Navbar,
     NavRight,
     Link,
-    Block,
     BlockTitle,
     List,
     ListItem,
@@ -15,102 +15,31 @@
   import { onDestroy, onMount } from "svelte";
 
   import { central } from "../js/central";
+
+  let subscriptions = [];
   import { pinnedClientsStore } from "../js/svelte-store";
 
   let loaded = false;
-  let clients = []; /* = [
-    {
-      associated_device: "CNG0AP01FK",
-      associated_device_mac: "80:8d:b7:aa:aa:aa",
-      associated_device_name: "IAP-315",
-      authentication_type: "",
-      band: 5,
-      channel: "124 (80 MHz)",
-      client_type: "WIRELESS",
-      connected_device_type: "AP",
-      connection: "802.11ac, 802.11k, 802.11v",
-      encryption_method: "WPA2_PSK",
-      failure_stage: "",
-      group_id: 2,
-      group_name: "Home-AP-Group",
-      health: 96,
-      ht_type: 5,
-      ip_address: "192.168.0.126",
-      label_id: [],
-      labels: [],
-      last_connection_time: 1674028811000,
-      macaddr: "30:ab:6a:aa:aa:aa",
-      manufacturer: "SAMSUNG ELECTRO-MECHANICS(THAILAND)",
-      maxspeed: 866,
-      name: "SM-N986B",
-      network: "WLAN-Aruba",
-      os_type: "Samsung Android",
-      phy_type: 1,
-      radio_mac: "80:8d:b7:2a:aa:b0",
-      radio_number: 0,
-      signal_db: -39,
-      signal_strength: 5,
-      site: "BBN-Home",
-      snr: 53,
-      speed: 866,
-      swarm_id: "a782cddd014c475d49bfb5fef62f5b312e358026137b1be38f",
-      usage: 716730,
-      user_role: "WLAN-Aruba",
-      username: "--",
-      vlan: 1,
-    },
-    {
-      associated_device: "CN8BSW01FK",
-      associated_device_mac: "54:80:28:aa:aa:50",
-      associated_device_name: "Aruba-2930F-8G-PoEP-2SFPP",
-      authentication_type: "",
-      band: "NA",
-      channel: "NA",
-      client_type: "WIRED",
-      connected_device_type: "SWITCH",
-      connection: "NA",
-      encryption_method: "NA",
-      failure_stage: "NA",
-      group_id: 38,
-      group_name: "SW-Template",
-      interface_mac: "54:80:28:aa:aa:59",
-      interface_port: "7",
-      ip_address: "192.168.0.75",
-      label_id: [],
-      labels: [],
-      last_connection_time: 1672885200000,
-      macaddr: "00:1a:e8:aa:aa:aa",
-      manufacturer: "Unify Software and Solutions GmbH & Co. KG",
-      name: "00:1a:e8:aa:aa:aa",
-      network: "NA",
-      os_type: "--",
-      site: "BBN-Home",
-      snr: "NA",
-      user_role: "unauthenticated",
-      username: "--",
-      vlan: 1,
-    },
-  ];*/
+  let clients = [];
   let pinnedClients = [];
 
   export let filters = {};
 
-  let pinnedClientsStoreUnsub;
-  onMount(() => {
-    pinnedClientsStoreUnsub = pinnedClientsStore.subscribe(
-      (pinnedClientsResult) => {
-        pinnedClients = Object.values(pinnedClientsResult);
-        console.log(pinnedClients);
-      }
-    );
-
-    loadData();
-  });
+  onMount(() =>
+    f7ready(() => {
+      subscriptions.push(
+        pinnedClientsStore.subscribe((pinnedClientsResult) => {
+          pinnedClients = Object.values(pinnedClientsResult);
+        })
+      );
+      loadData();
+    })
+  );
 
   onDestroy(() => {
-    console.log("onDestroy");
-    pinnedClientsStoreUnsub();
     pinnedClients = [];
+    subscriptions.forEach((subscription) => subscription());
+    subscriptions = [];
   });
 
   async function loadDataSwitcher() {
@@ -131,11 +60,11 @@
       const clientList = await loadDataSwitcher();
       console.log(clientList);
       clients = clientList.clients;
-      loaded = true;
     } catch (error) {
-      loaded = true;
       console.log(error);
       console.log(error.options);
+    } finally {
+      loaded = true;
     }
   }
 
@@ -182,6 +111,10 @@
         aurora: "material:cable",
         md: "material:cable",
       };
+  }
+
+  function getClientType(client) {
+    return client.client_type;
   }
 
   function loadMore(done) {
@@ -232,9 +165,12 @@
                 )[0]
               : { ...pinnedClient, partial: true },
             icons: pinnedClient.icons,
+            clientType: getClientType(pinnedClient),
+            clientMAC: pinnedClient.macaddr,
           }}
         >
           <Icon
+            slot="after"
             ios={pinnedClient?.icons?.ios ? pinnedClient.icons.ios : "f7:pin"}
             aurora={pinnedClient?.icons?.aurora
               ? pinnedClient.icons.aurora
@@ -270,7 +206,12 @@
         title={client.name ? client.name : client.macaddr}
         header={`${client.associated_device} – ${client.associated_device_name}`}
         href="/clients/details/"
-        routeProps={{ client: client, icons: getClientIcon(client) }}
+        routeProps={{
+          clientMAC: client.macaddr,
+          client: client,
+          icons: getClientIcon(client),
+          clientType: getClientType(client),
+        }}
       >
         <Icon
           slot="after"

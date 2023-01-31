@@ -1,11 +1,12 @@
 <script>
   import {
+    f7,
+    f7ready,
     theme,
     Page,
     Navbar,
     NavRight,
     Link,
-    Block,
     BlockTitle,
     List,
     ListItem,
@@ -13,102 +14,46 @@
     Searchbar,
     SwipeoutActions,
     SwipeoutButton,
-    f7,
     Actions,
     ActionsGroup,
     ActionsButton,
     ActionsLabel,
   } from "framework7-svelte";
+  import { onMount, onDestroy } from "svelte";
 
   import { central } from "../js/central";
+
+  let subscriptions = [];
   import { groupStore, selectedFilterStore } from "../js/svelte-store";
 
-  let devices = []; /* = [
-    {
-      associated_device: "CNG0AP01FK",
-      associated_device_mac: "80:8d:b7:aa:aa:aa",
-      associated_device_name: "IAP-315",
-      authentication_type: "",
-      band: 5,
-      channel: "124 (80 MHz)",
-      client_type: "WIRELESS",
-      connected_device_type: "AP",
-      connection: "802.11ac, 802.11k, 802.11v",
-      encryption_method: "WPA2_PSK",
-      failure_stage: "",
-      group_id: 2,
-      group_name: "Home-AP-Group",
-      health: 96,
-      ht_type: 5,
-      ip_address: "192.168.0.126",
-      label_id: [],
-      labels: [],
-      last_connection_time: 1674028811000,
-      macaddr: "30:ab:6a:aa:aa:aa",
-      manufacturer: "SAMSUNG ELECTRO-MECHANICS(THAILAND)",
-      maxspeed: 866,
-      name: "SM-N986B",
-      network: "WLAN-Aruba",
-      os_type: "Samsung Android",
-      phy_type: 1,
-      radio_mac: "80:8d:b7:2a:aa:b0",
-      radio_number: 0,
-      signal_db: -39,
-      signal_strength: 5,
-      site: "BBN-Home",
-      snr: 53,
-      speed: 866,
-      swarm_id: "a782cddd014c475d49bfb5fef62f5b312e358026137b1be38f",
-      usage: 716730,
-      user_role: "WLAN-Aruba",
-      username: "--",
-      vlan: 1,
-    },
-    {
-      associated_device: "CN8BSW01FK",
-      associated_device_mac: "54:80:28:aa:aa:50",
-      associated_device_name: "Aruba-2930F-8G-PoEP-2SFPP",
-      authentication_type: "",
-      band: "NA",
-      channel: "NA",
-      client_type: "WIRED",
-      connected_device_type: "SWITCH",
-      connection: "NA",
-      encryption_method: "NA",
-      failure_stage: "NA",
-      group_id: 38,
-      group_name: "SW-Template",
-      interface_mac: "54:80:28:aa:aa:59",
-      interface_port: "7",
-      ip_address: "192.168.0.75",
-      label_id: [],
-      labels: [],
-      last_connection_time: 1672885200000,
-      macaddr: "00:1a:e8:aa:aa:aa",
-      manufacturer: "Unify Software and Solutions GmbH & Co. KG",
-      name: "00:1a:e8:aa:aa:aa",
-      network: "NA",
-      os_type: "--",
-      site: "BBN-Home",
-      snr: "NA",
-      user_role: "unauthenticated",
-      username: "--",
-      vlan: 1,
-    },
-  ];*/
+  let loaded = false;
+  let devices = [];
+
   let filters = {};
 
   let checkbox = false;
   let moveActionsOpen = false;
   let selectedDevices = [];
 
-  let groups;
+  let groups = [];
 
-  groupStore.subscribe((groupsList) => (groups = groupsList));
+  onMount(() =>
+    f7ready(() => {
+      subscriptions.push(
+        groupStore.subscribe((groupsList) => (groups = groupsList)),
+        selectedFilterStore.subscribe(
+          (selectedFilters) => (filters = filterTranslator(selectedFilters))
+        )
+      );
 
-  selectedFilterStore.subscribe(
-    (selectedFilters) => (filters = filterTranslator(selectedFilters))
+      loadData();
+    })
   );
+
+  onDestroy(() => {
+    subscriptions.forEach((subscription) => subscription());
+    subscriptions = [];
+  });
 
   function filterTranslator(allFilters) {
     return {
@@ -134,13 +79,14 @@
   }
 
   function getDeviceIcon(device) {
-    if (device?.switch_type)
+    const deviceType = getDeivceType(device);
+    if (deviceType === "SWITCH")
       return {
         ios: "material:cable",
         aurora: "material:cable",
         md: "material:cable",
       };
-    else if (device?.ap_deployment_mode)
+    else if (deviceType === "IAP")
       return {
         ios: "f7:wifi",
         aurora: "f7:wifi",
@@ -154,10 +100,10 @@
       };
   }
 
-  loadData();
-
-  function loadMore(done) {
-    loadData().then(() => done());
+  function getDeivceType(device) {
+    if (device?.switch_type) return "SWITCH";
+    else if (device?.ap_deployment_mode) return "IAP";
+    else return "CONTROLLER";
   }
 
   function onSelectedDeviceChange(serial) {
@@ -200,7 +146,7 @@
               text: e?.options?.responseBody?.description
                 ? e.options.responseBody.description
                 : JSON.stringify(e),
-              closeTimeout: 8000,
+              closeTimeout: 2000,
             });
           })
           .finally(() => {
@@ -210,6 +156,10 @@
       }
     );
   }
+
+  function loadMore(done) {
+    loadData().then(() => done());
+  }
 </script>
 
 <Page ptr onPtrRefresh={loadMore}>
@@ -217,9 +167,9 @@
     ><NavRight>
       <!---->
       <Link
-        iconIos="f7:folder"
-        iconAurora="f7:folder"
-        iconMd="icon:mdi mdi-folder"
+        iconIos="f7:folder_badge_plus"
+        iconAurora="f7:folder_badge_plus"
+        iconMd="icon:mdi mdi-folder-arrow-left-right-outline"
         onClick={toggleCheckbox}
         tooltip="Move to Group"
       />
@@ -297,7 +247,11 @@
         title={device.name ? device.name : device.macaddr}
         footer={`${device.serial} – ${device.macaddr}`}
         href={checkbox ? false : "/devices/details/"}
-        routeProps={{ device: device }}
+        routeProps={{
+          device: device,
+          deviceType: getDeivceType(device),
+          deviceSerial: device.serial,
+        }}
       >
         <Icon
           slot="after"

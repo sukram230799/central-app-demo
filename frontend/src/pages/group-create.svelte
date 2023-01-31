@@ -1,6 +1,7 @@
 <script>
   import {
     f7,
+    f7ready,
     Page,
     Navbar,
     Block,
@@ -12,12 +13,12 @@
     Toggle,
     NavRight,
     Link,
-    f7ready,
   } from "framework7-svelte";
   import { central } from "../js/central";
+
+  let subscriptions = [];
   import { groupStore } from "../js/svelte-store";
 
-  export let f7router;
   export let groupName = "";
   export let oldGroupName = "";
   export let oldGroupDetails = {};
@@ -155,7 +156,7 @@
           text: e?.options?.responseBody?.description
             ? e.options.responseBody.description
             : JSON.stringify(e),
-          closeTimeout: 8000,
+          closeTimeout: 2000,
         });
         groupFailed();
       })
@@ -176,7 +177,7 @@
           text: e?.options?.responseBody?.description
             ? e.options.responseBody.description
             : JSON.stringify(e),
-          closeTimeout: 8000,
+          closeTimeout: 2000,
         });
         groupFailed();
       })
@@ -205,7 +206,7 @@
           text: e?.options?.responseBody?.description
             ? e.options.responseBody.description
             : JSON.stringify(e),
-          closeTimeout: 8000,
+          closeTimeout: 2000,
         });
         groupFailed();
       })
@@ -216,7 +217,6 @@
 
   function groupCreated() {
     groupStore.add(groupName);
-    // f7router.back();
   }
 
   function done() {

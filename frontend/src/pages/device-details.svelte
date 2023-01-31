@@ -1,58 +1,108 @@
 <script>
+  import { val } from "dom7";
   import {
-    theme,
     f7,
     f7ready,
+    theme,
     Page,
     Navbar,
     NavRight,
     Link,
     Block,
     BlockTitle,
-    List,
-    ListItem,
     Searchbar,
     Row,
     Col,
   } from "framework7-svelte";
+  import DetailsHandler from "../components/details-handler.svelte";
+
+  import { onMount } from "svelte";
+
   import { central } from "../js/central";
-  import { blinkLEDHandler } from "../js/operations/device-operataions";
+
+  import {
+    blinkLEDHandler,
+    rebootDeviceHandler,
+  } from "../js/operations/device-operations";
+  import { durationFormatter } from "human-readable";
+  import { formatBytes, formatDate, formatYesNo } from "../js/formatter";
+  import AutoDetailsHandler from "../components/auto-details-handler.svelte";
 
   export let device = {};
+  let deviceUnhandled = {};
+  export let deviceType;
   export let deviceSerial = "";
+
+  let handledEntries = [];
+  let notHandledEntries = [];
 
   let loaded = false;
   let loadClass = theme.ios
     ? "skeleton-text skeleton-effect-pulse"
     : "skeleton-text skeleton-effect-wave";
 
-  if (device.partial) {
-    loaded = false;
-    loadData();
-  } else {
-    loaded = true;
-    loadClass = "";
-  }
+  onMount(() =>
+    f7ready(() => {
+      if (device.partial) {
+        loaded = false;
+      } else {
+        loaded = true;
+        loadClass = "";
+        dataLoaded();
+      }
+      loadData();
+    })
+  );
 
   function loadData() {
     return central
       .ready(1)
       .then(() => {
-        switch (device?.type) {
-          case "WIRELESS":
+        switch (deviceType) {
+          case "IAP":
             return central.getAPDetails({ serial: deviceSerial });
-          case "WIRED":
+          case "SWITCH":
             return central.getSwitchDetails({ serial: deviceSerial });
+          case "CONTROLLER":
+            return central.getGatewayDetails({ serial: deviceSerial });
         }
       })
       .then((deviceDetails) => (device = deviceDetails))
+      .then(() => dataLoaded())
       .catch((e) => {
-        f7.toast.show({ text: JSON.stringify(e), setTimeout: 10000 });
+        f7.toast.show({
+          text: e?.options?.responseBody?.description
+            ? e.options.responseBody.description
+            : JSON.stringify(e),
+          closeTimeout: 2000,
+        });
       })
       .finally(() => {
         loaded = true;
         loadClass = "";
       });
+  }
+
+  function dataLoaded() {
+    console.log(device);
+    handledEntries = Object.keys(
+      Object.assign({}, ...Object.values(getHandler()))
+    );
+    notHandledEntries = Object.keys(device).filter(
+      (n) => !handledEntries.includes(n)
+    );
+    if (notHandledEntries.length)
+      console.log(
+        "Unhandled Entries for Device",
+        deviceType,
+        deviceSerial,
+        notHandledEntries
+      );
+
+    deviceUnhandled = Object.entries(device).reduce((obj, [key, value]) => {
+      if (notHandledEntries.includes(key)) return { ...obj, [key]: value };
+      return obj;
+    }, {});
   }
 
   const deviceAP = {
@@ -123,9 +173,23 @@
     usage: 1112664,
   };
 
-  console.log(device);
+  const entryGroupSiteLabel = {
+    group_name: "Group Name",
+    labels: "Labels",
+    labels_info: "Labels",
+    site: "Site",
+    site_info: "Site Info",
+  };
+  const entryStatus = {
+    status: "Status",
+    uptime: { title: "Uptime", format: durationFormatter(), multiplier: 1000 },
+    usage: "Usage",
+    cpu_utilization: "CPU",
+    mem_free: { title: "Mem Free", unit: "B", format: formatBytes },
+    mem_total: { title: "Mem Total", unit: "B", format: formatBytes },
+  };
 
-  let handledEntriesAP = {
+  const entriesAP = {
     Details: {
       name: "Name",
       model: "Model",
@@ -133,9 +197,17 @@
       macaddr: "MAC",
       serial: "Serial",
       firmware_version: "Firmware",
+      last_modified: {
+        title: "Last Modified",
+        format: formatDate,
+        multiplier: 1000,
+      },
     },
-    "Group / Site / Label": {
-      group_name: "Group Name",
+    "Group / Site / Label": entryGroupSiteLabel,
+    Status: {
+      ...entryStatus,
+      client_count: "Clients",
+      current_uplink_inuse: "Current Uplink",
     },
     Swarm: {
       swarm_name: "Swarm Name",
@@ -143,50 +215,53 @@
       swarm_master: "Is Swarm Master?",
     },
   };
-  let handledEntriesSwitch = {
+  const entriesSwitch = {
     Details: {
       name: "Name",
       model: "Model",
       switch_type: "Type",
+      chassis_type: { title: "Chassis", format: formatYesNo },
+      ip_address: "IP",
+      macaddr: "MAC",
+      serial: "Serial",
+      firmware_version: "Firmware",
+      updated_at: {
+        title: "Updated at",
+        format: formatDate,
+        multiplier: 1000,
+      },
+    },
+    "Group / Site / Label": entryGroupSiteLabel,
+    Status: { ...entryStatus, total_clients: "Clients" },
+  };
+  const entriesGateway = {
+    Details: {
+      name: "Name",
+      model: "Model",
+      mode: "Mode",
       ip_address: "IP",
       macaddr: "MAC",
       serial: "Serial",
       firmware_version: "Firmware",
     },
-    "Group / Site / Label": {
-      group_name: "Group Name",
-    },
+    "Group / Site / Label": entryGroupSiteLabel,
+    Status: { ...entryStatus, ap_count: "AP Count" },
   };
-  let handledEntriesGateway = {};
 
-  let rebootToast;
+  function getHandler() {
+    switch (deviceType) {
+      case "IAP":
+        return entriesAP;
+      case "SWITCH":
+        return entriesSwitch;
+      case "CONTROLLER":
+        return entriesGateway;
+    }
+    return {};
+  }
 
   async function rebootDevice() {
-    f7.dialog.confirm(
-      `Reboot the following device?<br>${device.name},<br>MAC: ${device.macaddr},<br>IP: ${device.ip_address}`,
-      "Reboot Device?",
-      async () => {
-        f7.preloader.show();
-        let result = await central.rebootDevice({ serial: device.serial });
-        for (let i = 0; i < 10; i++) {
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-          let status = await central.getStatus({
-            task_id: result.task_id,
-          });
-          if (status.state !== "QUEUED") {
-            if (status.state === "SUCCESS") {
-              rebootToast = f7.toast.create({
-                text: `Device rebooted`,
-                closeTimeout: 2000,
-              });
-              rebootToast.open();
-            }
-            f7.preloader.hide();
-            break;
-          }
-        }
-      }
-    );
+    await rebootDeviceHandler(f7, device);
   }
 
   let ledBlinking = false;
@@ -194,9 +269,13 @@
   async function blinkLED() {
     ledBlinking = await blinkLEDHandler(f7, device.serial, ledBlinking);
   }
+
+  async function loadMore(done) {
+    loadData().then(() => done());
+  }
 </script>
 
-<Page>
+<Page ptr onPtrRefresh={loadMore}>
   <Navbar title={device.name ? device.name : "Device Details"} backLink="Back">
     <NavRight>
       <Link
@@ -241,46 +320,7 @@
     </Row>
   </Block>
 
-  {#each Object.entries(device?.switch_type ? handledEntriesSwitch : device?.ap_deployment_mode ? handledEntriesAP : handledEntriesGateway) as [title, data]}
-    <BlockTitle>{title}</BlockTitle>
-    <List>
-      {#each Object.entries(data) as [key, description]}
-        {#if typeof description === "object"}
-          <ListItem
-            class={loadClass}
-            title={description.title}
-            after={`${device[key]} ${description.unit}`}
-          />
-        {:else}
-          <ListItem class={loadClass} title={description} after={device[key]} />
-        {/if}
-      {/each}
-    </List>
-  {/each}
+  <DetailsHandler {getHandler} {loadClass} details={device} />
 
-  <BlockTitle>All Info</BlockTitle>
-  <!-- <List accordionList>
-    <ListItem accordionItem title="All Info">
-      <AccordionContent> -->
-  <List>
-    {#each Object.entries(device) as [title, data]}
-      {#if !Array.isArray(data)}
-        <ListItem class={loadClass} {title} after={data} />
-      {:else}
-        <ListItem class={loadClass} {title} />
-        <li>
-          <ul>
-            {#each data as dataEntry}
-              {#each Object.entries(dataEntry) as [subTitle, subData]}
-                <ListItem class={loadClass} title={subTitle} after={subData} />
-              {/each}
-            {/each}
-          </ul>
-        </li>
-      {/if}
-    {/each}
-  </List>
-  <!-- </AccordionContent>
-    </ListItem>
-  </List> -->
+  <AutoDetailsHandler {loadClass} detailsUnhandled={deviceUnhandled} />
 </Page>

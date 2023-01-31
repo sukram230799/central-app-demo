@@ -1,5 +1,6 @@
 <script>
   import {
+    f7ready,
     theme,
     AccordionContent,
     Page,
@@ -14,11 +15,13 @@
     BlockTitle,
     List,
     ListItem,
-    f7ready,
     Icon,
   } from "framework7-svelte";
-  import { onMount } from "svelte";
+  import { getDevice } from "framework7";
+  import { onDestroy, onMount } from "svelte";
   import { central } from "../js/central";
+
+  let subscriptions = [];
   import { newUserStore } from "../js/svelte-store";
 
   let centralReady = false;
@@ -48,22 +51,32 @@
     }
   }
 
-  function onPageInit(event) {}
-
-  central.ready().then(() => (centralReady = true));
-
   function onWelcomePopupOpen() {}
+
+  let device;
 
   onMount(() =>
     f7ready(() => {
-      newUserStore.subscribe((newUser) => {
-        if (newUser) welcomePopupOpen = true;
-      });
+      device = getDevice();
+      subscriptions.push(
+        newUserStore.subscribe((newUser) => {
+          if (newUser) welcomePopupOpen = true;
+        })
+      );
+
+      central.ready().then(() => (centralReady = true));
     })
   );
+
+  onDestroy(() => {
+    subscriptions.forEach((subscription) => {
+      subscription();
+    });
+    subscriptions = [];
+  });
 </script>
 
-<Page name="home" {onPageInit}>
+<Page name="home">
   <!-- Top Navbar -->
   <Navbar large sliding={false}>
     <NavTitle sliding>Central Toolkit</NavTitle>
@@ -119,12 +132,19 @@
         >This app needs your Central Credentials to access the details. All
         credentials are saved locally on the device.<br />
         You can enter the Credentials either manually or head to
-        <a
-          href="#"
-          on:click={() =>
-            navigator.clipboard.writeText("https://central.wuest.dev/onboard")}
-          >https://central.wuest.dev/onboard</a
-        > on a desktop and then scan the QR Code in the Central Settings.</Block
+        {#if device?.desktop}
+          <Link href="https://central.wuest.dev/onboard" external
+            >https://central.wuest.dev/onboard</Link
+          >
+        {:else}
+          <a
+            href="#"
+            on:click={() =>
+              navigator.clipboard.writeText(
+                "https://central.wuest.dev/onboard"
+              )}>https://central.wuest.dev/onboard</a
+          >
+        {/if} on a desktop and then scan the QR Code in the Central Settings.</Block
       >
       <BlockTitle>Install as App</BlockTitle>
       <List accordionList>

@@ -119,7 +119,7 @@ pinnedClientsStore.add = (client) => {
     pinnedClientsAllStore.update((pinnedClientAll) => {
         const currentAccountId = get(currentAccountIdStore);
         if (!pinnedClientAll[currentAccountId]) pinnedClientAll[currentAccountId] = {};
-        pinnedClientAll[currentAccountId][client.macaddr] = { macaddr: client.macaddr, ip_address: client.ip_address, name: client.name, icons: client.icons };
+        pinnedClientAll[currentAccountId][client.macaddr] = { macaddr: client.macaddr, ip_address: client.ip_address, name: client.name, icons: client.icons, client_type: client.client_type };
         return pinnedClientAll;
     });
 }

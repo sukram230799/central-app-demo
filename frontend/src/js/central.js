@@ -133,6 +133,37 @@ class Central {
 
   refreshTokenPromise = new Promise((resolve) => resolve());
 
+  async testToken(account, sucessCallback, failureCallback) {
+    try {
+      let refreshBody = {
+        url: `${account.base_url}/oauth2/token`,
+        method: 'POST',
+        params: {
+          client_id: account.client_id,
+          client_secret: account.client_secret,
+          grant_type: 'refresh_token',
+          refresh_token: account.credential.refresh_token,
+        }
+      };
+      let credentialResponse = await axios.post(this.proxy, refreshBody);
+
+      if (credentialResponse.data.status === 200) {
+        return {
+          ...account,
+          credential: {
+            ...account.credential,
+            access_token: credentialResponse.data.responseBody.access_token,
+            refresh_token: credentialResponse.data.responseBody.refresh_token,
+            expires_in: credentialResponse.data.responseBody.expires_in,
+          }
+        }
+      }
+      else throw { name: 'TokenNotUpdated', message: 'Token could not be updated.' };
+    } catch (e) {
+      throw { name: 'TokenNotUpdated', message: 'Token could not be updated.' };
+    }
+  }
+
   async refreshToken() {
     await this.refreshTokenPromise;
     let resolveMe;
@@ -141,7 +172,6 @@ class Central {
     });
     try {
       let refreshBody = {
-        // baseUrl: baseUrl,
         url: `${this.account.base_url}/oauth2/token`,
         method: 'POST',
         params: {
@@ -161,7 +191,6 @@ class Central {
           value[this.account.id].credential.access_token = credentialResponse.data.responseBody.access_token;
           value[this.account.id].credential.refresh_token = credentialResponse.data.responseBody.refresh_token;
           value[this.account.id].credential.expires_in = credentialResponse.data.responseBody.expires_in;
-          value[this.account.id].base_url = 'https://internal-apigw.central.arubanetworks.com/';
 
           return value;
         });
@@ -448,7 +477,7 @@ class Central {
   /**
    * Get Switch Details
    * @param {{serial: string}} param0 Serial of the switch
-   * @returns {Object}
+   * @returns {{"serial":"HP-2920-24G-PoEP","name":"HP-2920-24G-PoEP","macaddr":"c8:b5:ad:c3:b2:04","model":"HP2920-24G-PoE+ Switch(J9727A)","group_name":"dual_5GHz","status":"Up","public_ip_address":"10.29.31.251","ip_address":"10.29.31.251","firmware_version":"7.3.0.4-0.0098","default_gateway":"10.8.29.254","uptime":418814421,"updated_at":1518814421,"device_mode":0,"total_clients":2,"usage":56456456,"max_power":10,"power_consumption":19,"fan_speed":"Ok","temperature":"Ok","labels":[],"site":null,"uplink_ports":[],"chassis_type":true,"cpu_utilization":19,"mem_total":34234,"mem_free":23423,"nae_aggr_status":"CRITICAL","poe_consumption":3,"switch_type":"ArubaCX","stack_id":"01008030-e0cd2100"}}
    * Get Switch details
    * ---
    * https://developer.arubanetworks.com/aruba-central/reference/apiexternal_controllerget_switch
@@ -459,10 +488,33 @@ class Central {
     return this.handleResponse(switchResponse);
   }
 
+  /**
+   * Get AccessPoint Details
+   * @param {{serial: string}} param0 
+   * @returns {{"serial":"Ap123456","name":"AP-345","macaddr":"1a:2s:3d:f3:4f:ge","swarm_id":"gjhkhguljhlkj12jh767687807676","group_name":"group1","ap_group":"ap_group2","cluster_id":"CN345677","ap_deployment_mode":"IAP","status":"Down","ip_address":"1.1.1.1","model":"AP-345","firmware_version":"8.3.0.0_63709","swarm_master":true,"cpu_utilization":56,"uptime":3600,"down_reason":"Disconnected from active controller","last_modified":45670089,"mem_total":80,"mem_free":20,"mesh_role":"Unknown","mode":"Auto","radios":[],"client_count":3,"ssid_count":16,"ethernets":[],"modem_connected":true,"current_uplink_inuse":"Ethernet","public_ip_address":"1.1.1.1","ip_address_v6":"12df:34tf:76f4:11ad:de45:12ea:11af:31dr","subnet_mask":"string","site_name":"string","swarm_name":"swarm_01","controller_name":"controller_01","sys_location":"Hardware Lab","sys_contact":"Hardwarelab.contact@noreply.com"}}
+   * Get AP Details
+   * ---
+   * https://developer.arubanetworks.com/aruba-central/reference/apiexternal_controllerget_ap
+   */
   async getAPDetails({ serial }) {
     let apResponse = await this.get(`monitoring/v1/aps/${serial}`);
 
     return this.handleResponse(apResponse);
+  }
+
+  /**
+   * Get Gateway Details
+   * @param {{ serial: string, stats_metric: boolean }} param0 
+   * @param param0.stats_metric If set, gets the uplinks and tunnels count
+   * @returns {{"serial":"MC675878","name":"Controller2","macaddr":"c8:b5:ad:c3:b2:04","group_name":"dual_5GHz","status":"Up","ip_address":"10.29.31.251","model":"MC-2345","firmware_version":"7.2.3.4-4.5.678","labels":[],"site":null,"uplinks":[],"cpu_utilization":12,"uptime":8789789,"mem_total":676868,"mem_free":5657,"firmware_backup_version":"7.2.3.4-3.4.567","mac_range":"range","role":"access","ap_count":5,"usage":7687687,"reboot_reason":"User reboot","mode":"Auto","poe_budget":12,"poe_consumption":12,"poe_available":12,"poe_supported":true,"recommended_version":"7.3.4.5-4.5.678","location":{"gps":{"latitude":37.09808,"longitude":78.078},"street_address":{"address_1":"street1","city":"Chennai","country":"India","postal_code":600018,"state":"Tamil Nadu"}},"est_status":"Enrolled","est_cert_expiry_time":"2019-08-21T14:34:52.000Z","vgw_sys_bw_limit":1024,"vgw_sys_bw_usage":700,"ntp_server_info":{"server":"ntp.xtom.com.hk","sync":1},"modem_info":{"type":"HUAWEI Mobile","hwstate":"Connected"},"uplinks_metric":{"up":4,"down":3,"total":7},"tunnels_metric":{"up":4,"down":4,"total":8},"public_ip":"string","mm_hostname":"MM123","mobility_master":"BA0003755"}}
+   * Get Gateway Details
+   * ---
+   * https://developer.arubanetworks.com/aruba-central/reference/apiexternal_controllerget_gateway
+   */
+  async getGatewayDetails({ serial, stats_metric = true }) {
+    let gatewayResponse = await this.get(`monitoring/v1/gateways/${serial}`, { params: { stats_metric } });
+
+    return this.handleResponse(gatewayResponse);
   }
 
 

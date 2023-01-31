@@ -1,6 +1,7 @@
 <script>
   import {
     f7,
+    f7ready,
     Page,
     Navbar,
     NavRight,
@@ -23,6 +24,7 @@
 
   console.log(centralBaseUrl);
 
+  let subscriptions = [];
   import {
     currentAccountStore,
     accountsStore,
@@ -32,7 +34,7 @@
 
   import { v4 as uuidv4 } from "uuid";
   import { get } from "svelte/store";
-  import { onDestroy } from "svelte";
+  import { onDestroy, onMount } from "svelte";
 
   export let f7router;
 
@@ -42,7 +44,7 @@
 
   let account = {
     id: "",
-    base_url: "",
+    base_url: centralBaseUrl.Internal,
     client_id: "",
     client_secret: "",
     credential: {},
@@ -59,28 +61,43 @@
   let importPopupOpened = false;
   let html5QrCode;
 
-  accountsStore.subscribe((value) => {
-    accountsMapping = Object.entries(value).map(([k, v]) => ({
-      id: v.id,
-      name: v.name,
-    }));
-    accountsData = value;
+  onMount(() =>
+    f7ready(() => {
+      subscriptions.push(
+        accountsStore.subscribe((value) => {
+          accountsMapping = Object.entries(value).map(([k, v]) => ({
+            id: v.id,
+            name: v.name,
+          }));
+          accountsData = value;
+        }),
+        currentAccountIdStore.subscribe((value) => {
+          selectedAccountId = value;
+          selectAccount();
+        })
+      );
+      selectAccount();
+    })
+  );
+
+  onDestroy(() => {
+    try {
+      html5QrCode?.stop();
+    } catch (err) {}
+    subscriptions.forEach((subscription) => subscription());
+    subscriptions = [];
   });
 
-  currentAccountIdStore.subscribe((value) => {
-    selectedAccountId = value;
-    // account = accountsData[selectedAccountId];
-    // updateCredentialString();
-    selectAccount();
-  });
-
-  function centralRefresh() {
+  function centralRefresh(callback) {
     return new Promise((resolve) => resolve())
       .then(() => f7.preloader.show())
       .then(() => central.refreshToken())
       .then((result) => {
         f7.toast.show({ text: "Success", closeTimeout: 2000 });
         console.log(result);
+      })
+      .then(() => {
+        if (callback) callback();
       })
       .catch((e) => {
         console.log(e);
@@ -139,7 +156,7 @@
       account = {
         id: selectedAccountId,
         name: "New Account",
-        base_url: "",
+        base_url: centralBaseUrl.Internal,
         client_id: "",
         client_secret: "",
         credential: {},
@@ -147,8 +164,6 @@
       credentialString = "{}";
     }
   }
-
-  function onPageInit(event) {}
 
   function onExportPopupOpen() {
     QRCode.toDataURL(
@@ -195,9 +210,12 @@
 
   function importAccountPrompt() {
     // Prevent accidental overwriting of credentials
-    if (account.client_id || account.client_secret || credentialString !== "{}")
+    if (
+      account.name !== "New Account" &&
+      (account.client_id || account.client_secret || credentialString !== "{}")
+    )
       f7.dialog.prompt(
-        `Overwrite "${account.name}"? Confirm by typing name.`,
+        `Overwrite "${account.name}"? Confirm by typing "${account.name}".`,
         (name) => {
           if (name.trimEnd() === account.name)
             f7.dialog.confirm(
@@ -209,20 +227,25 @@
     else importAccount();
   }
 
-  function importAccount() {
-    account = { ...account, ...accountImport };
-    saveCredential(true);
-    updateCredentialString();
-  }
-
-  onDestroy(() => {
+  async function importAccount() {
+    let testAccount = { ...account, ...accountImport };
     try {
-      html5QrCode?.stop();
-    } catch (err) {}
-  });
+      testAccount = await central.testToken(testAccount);
+      account = testAccount;
+      saveCredential(true);
+      updateCredentialString();
+      centralRefresh(() => {});
+    } catch (e) {
+      if (e.name === "TokenNotUpdated")
+        f7.toast.show({
+          text: "Token not correct. Please enter new one",
+          closeTimeout: 2000,
+        });
+    }
+  }
 </script>
 
-<Page on:pageInit={onPageInit}>
+<Page>
   <Navbar title="Central Config" backLink="Back">
     <NavRight>
       <Link
@@ -240,19 +263,21 @@
 
   <BlockTitle>Account Selector</BlockTitle>
   <List>
-    <ListInput
-      label="Account"
-      type="select"
-      bind:value={selectedAccountId}
-      on:change={() => {
-        selectAccount();
-      }}
-    >
-      {#each accountsMapping as accountMapping}
-        <option value={accountMapping.id}>{accountMapping.name}</option>
-      {/each}
-      <option value={newUUID}>New Account...</option>
-    </ListInput>
+    {#if accountsMapping}
+      <ListInput
+        label="Account"
+        type="select"
+        bind:value={selectedAccountId}
+        on:change={() => {
+          selectAccount();
+        }}
+      >
+        {#each accountsMapping as accountMapping}
+          <option value={accountMapping.id}>{accountMapping.name}</option>
+        {/each}
+        <option value={newUUID}>New Account...</option>
+      </ListInput>
+    {/if}
   </List>
 
   <BlockTitle>Actions</BlockTitle>

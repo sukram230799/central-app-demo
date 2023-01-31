@@ -1,8 +1,9 @@
 <script>
-  import { onDestroy } from "svelte";
+  import { onDestroy, onMount } from "svelte";
 
   import {
     f7,
+    f7ready,
     theme,
     Page,
     Navbar,
@@ -17,10 +18,13 @@
     SwipeoutActions,
     SwipeoutButton,
   } from "framework7-svelte";
-  import { central } from "../js/central";
-  import { groupStore } from "../js/svelte-store";
   import GroupPropertiesBubbles from "../components/group-properties-bubbles.svelte";
   import GroupTemplateBubbles from "../components/group-template-bubbles.svelte";
+
+  import { central } from "../js/central";
+
+  let subscriptions = [];
+  import { groupStore } from "../js/svelte-store";
   import {
     cloneGroupGetName,
     deleteGroupDialog,
@@ -33,8 +37,19 @@
   let groupsPropertiesResult = {};
   let groupsProperties = {};
 
-  groupStore.subscribe((groupEntries) => {
-    groups = groupEntries;
+  onMount(() =>
+    f7ready(() => {
+      subscriptions.push(
+        groupStore.subscribe((groupEntries) => {
+          groups = groupEntries;
+        })
+      );
+    })
+  );
+
+  onDestroy(() => {
+    subscriptions.forEach((subscription) => subscription());
+    subscriptions = [];
   });
 
   async function loadData(showProgressbar) {

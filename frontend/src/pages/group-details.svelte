@@ -65,7 +65,7 @@
     groupProperties = propertiesResponse.data[0].properties;
   }
 
-  const handledEntries = {};
+  const entriesGroup = {};
   let title = groupName;
   export let showAllEntries = true;
 
@@ -143,7 +143,7 @@
     </Row>
   </Block>
 
-  {#each Object.entries(handledEntries) as [title, data]}
+  {#each Object.entries(entriesGroup) as [title, data]}
     <BlockTitle>{title}</BlockTitle>
     <List>
       {#each Object.entries(data) as [key, description]}

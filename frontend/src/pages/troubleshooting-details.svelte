@@ -124,7 +124,7 @@ Flags:       a = Airslice policy; A = Airslice app monitoring; c = MBO Cellular 
 
   onMount(() => {
     central
-      .ready()
+      .ready(1)
       .then(() => {
         return central.getDevicesFromDeviceInventory({ sku_type: deviceType });
       })
