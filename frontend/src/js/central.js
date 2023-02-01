@@ -214,6 +214,31 @@ class Central {
     else throw { name: 'HTTP Error', message: `HTTP Status ${response.status}`, options: response };
   }
 
+  sliceIntoChunks(arr, chunkSize) {
+    const res = [];
+    for (let i = 0; i < arr.length; i += chunkSize) {
+      const chunk = arr.slice(i, i + chunkSize);
+      res.push(chunk);
+    }
+    return res;
+  }
+
+  /*
+   * ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   * ─██████████████─██████████████─██████████───────██████████████─██████████████─██████─────────██████─────────██████████████─
+   * ─██░░░░░░░░░░██─██░░░░░░░░░░██─██░░░░░░██───────██░░░░░░░░░░██─██░░░░░░░░░░██─██░░██─────────██░░██─────────██░░░░░░░░░░██─
+   * ─██░░██████░░██─██░░██████░░██─████░░████───────██░░██████████─██░░██████░░██─██░░██─────────██░░██─────────██░░██████████─
+   * ─██░░██──██░░██─██░░██──██░░██───██░░██─────────██░░██─────────██░░██──██░░██─██░░██─────────██░░██─────────██░░██─────────
+   * ─██░░██████░░██─██░░██████░░██───██░░██─────────██░░██─────────██░░██████░░██─██░░██─────────██░░██─────────██░░██████████─
+   * ─██░░░░░░░░░░██─██░░░░░░░░░░██───██░░██─────────██░░██─────────██░░░░░░░░░░██─██░░██─────────██░░██─────────██░░░░░░░░░░██─
+   * ─██░░██████░░██─██░░██████████───██░░██─────────██░░██─────────██░░██████░░██─██░░██─────────██░░██─────────██████████░░██─
+   * ─██░░██──██░░██─██░░██───────────██░░██─────────██░░██─────────██░░██──██░░██─██░░██─────────██░░██─────────────────██░░██─
+   * ─██░░██──██░░██─██░░██─────────████░░████───────██░░██████████─██░░██──██░░██─██░░██████████─██░░██████████─██████████░░██─
+   * ─██░░██──██░░██─██░░██─────────██░░░░░░██───────██░░░░░░░░░░██─██░░██──██░░██─██░░░░░░░░░░██─██░░░░░░░░░░██─██░░░░░░░░░░██─
+   * ─██████──██████─██████─────────██████████───────██████████████─██████──██████─██████████████─██████████████─██████████████─
+   * ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+   */
+
   async getDeviceFirmware(serial) {
     let firmwareResponse = await this.get(`firmware/v1/devices/${serial}`);
     return this.handleResponse(firmwareResponse);
@@ -720,11 +745,27 @@ class Central {
    * Get info whether a list of groups is in template mode
    * @param {[string]} groups - Groups to get info about
    * @returns {{data: [{group: string, template_details: {Wired: boolean, Wireless: boolean}}]}}
+   * Get configuration mode(UI or template mode of configuration) set per device type for the given list of groups.
+   * ---
+   * https://developer.arubanetworks.com/aruba-central/reference/apigroupsget_groups_template_data
    */
   async getGroupTemplateInfo({ groups }) {
-    let groupTemplateInfoResponse = await this.get('/configuration/v2/groups/template_info', { params: { groups: groups.join(',') } });
+    let groupsSlices = this.sliceIntoChunks(groups, 20);
 
-    return this.handleResponse(groupTemplateInfoResponse)
+    let templateInfoResponses = await Promise.all(groupsSlices.map(groupSlice => this.get('/configuration/v2/groups/template_info', { params: { groups: groupSlice.join() } })));
+
+    let templateInfoResponse = templateInfoResponses.reduce((out, entry) => {
+      return {
+        ...out,
+        headers: entry.headers,
+        responseBody: {
+          data: out.responseBody.data.concat(entry.responseBody.data),
+        },
+        status: entry.status,
+      }
+    }, { responseBody: { data: [] } });
+
+    return this.handleResponse(templateInfoResponse);
   }
 
   /**
@@ -759,7 +800,7 @@ class Central {
 
   entry = { "AOSVersion": "AOS_8X", "AllowedDevTypes": ["AccessPoints", "Gateways", "Switches"], "AllowedSwitchTypes": ["AOS_S", "AOS_CX"], "ApNetworkRole": "Standard", "Architecture": "Instant", "GwNetworkRole": "BranchGateway", "MonitorOnly": [], "MonitorOnlySwitch": false, "NewCentral": false }
   /**
-   * 
+   * Get properties set for groups
    * @param {{groups: [string]}} param0 
    * @returns {{data: [{group: string, properties: { 
    * "AOSVersion": "AOS_8X"|"AOS_10X", 
@@ -771,13 +812,26 @@ class Central {
    * "MonitorOnly": [], 
    * "MonitorOnlySwitch": false, 
    * "NewCentral": false }}]}}
+   * For each group in the provided list, the following properties for the group are returned
+   * ---
+   * https://developer.arubanetworks.com/aruba-central/reference/apigroupsget_groups_properties
    */
   async getPropertiesOfGroups({ groups }) {
-    let propertiesResponse = await this.get('configuration/v1/groups/properties', {
-      params: {
-        groups: groups.join()
+    let groupsSlices = this.sliceIntoChunks(groups, 20);
+
+    let propertiesResponses = await Promise.all(groupsSlices.map(groupSlice => this.get('configuration/v1/groups/properties', { params: { groups: groupSlice.join() } })));
+
+    let propertiesResponse = propertiesResponses.reduce((out, entry) => {
+      return {
+        ...out,
+        headers: entry.headers,
+        responseBody: {
+          data: out.responseBody.data.concat(entry.responseBody.data),
+        },
+        status: entry.status,
       }
-    });
+    }, { responseBody: { data: [] } });
+
     return this.handleResponse(propertiesResponse);
   }
 
