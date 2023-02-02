@@ -182,7 +182,7 @@
       <!-- <ListItem link="/firmware/" title="Firmware" /> -->
       <ListItem link="/clients/" title="Clients" />
       <ListItem link="/devices/" title="Devices" />
-      <ListItem link="/wlans/" title="WLANs" />
+      <!-- <ListItem link="/wlans/" title="WLANs" /> -->
       <ListItem link="/groups/" title="Groups" />
       <ListItem
         disabled={!centralReady}
