@@ -86,13 +86,14 @@
         iconAurora="f7:line_horizontal_3_decrease"
         iconMd="material:filter_list"
         panelOpen="right"
+        tooltip="Global Filter"
       />
-      <Link
+      <!-- <Link
         searchbarEnable=".searchbar-demo"
         iconIos="f7:search"
         iconAurora="f7:search"
         iconMd="material:search"
-      />
+      /> -->
     </NavRight>
     <Searchbar
       class="searchbar-demo"
@@ -181,6 +182,7 @@
       <!-- <ListItem link="/firmware/" title="Firmware" /> -->
       <ListItem link="/clients/" title="Clients" />
       <ListItem link="/devices/" title="Devices" />
+      <ListItem link="/wlans/" title="WLANs" />
       <ListItem link="/groups/" title="Groups" />
       <ListItem
         disabled={!centralReady}
