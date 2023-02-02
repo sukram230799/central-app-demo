@@ -63,7 +63,6 @@
 
     await central.ready(1);
     const groupsResponse = await central.listGroups(); // Groups are added via subscription!
-    console.log(groupsResponse.groups);
     groupsLoaded = [];
     await loadDetails(groupsResponse.groups.slice(0, 20));
   }
@@ -78,12 +77,12 @@
       detailsLoaded = true;
     } catch (e) {
       console.error(e);
-        f7.toast.show({
-          text: e?.options?.responseBody?.description
-            ? e.options.responseBody.description
-            : JSON.stringify(e),
-          closeTimeout: 2000,
-        });
+      f7.toast.show({
+        text: e?.options?.responseBody?.description
+          ? e.options.responseBody.description
+          : JSON.stringify(e),
+        closeTimeout: 2000,
+      });
     } finally {
       groupsLoaded = [...groupsLoaded, ...groupsToLoad];
       f7.progressbar.hide();
@@ -94,7 +93,6 @@
     const groupsToLoad = groupsAvailable
       .filter((group) => !groupsLoaded.includes(group))
       .slice(0, 20);
-    console.log("toLoad", groupsToLoad);
     await loadDetails(groupsToLoad);
   }
 
@@ -158,7 +156,12 @@
   let allowInfite = true;
 
   async function infiniteLoad() {
-    if (!allowInfite || groupsAvailable.length === groupsLoaded.length) return;
+    if (
+      !detailsLoaded ||
+      !allowInfite ||
+      groupsAvailable.length === groupsLoaded.length
+    )
+      return;
     allowInfite = false;
     await loadMoreDetails();
     if (
@@ -175,7 +178,7 @@
   onPtrRefresh={reload}
   infinite
   infiniteDistance={300}
-  infinitePreloader={showPreloader}
+  infinitePreloader={showPreloader && detailsLoaded}
   onInfinite={infiniteLoad}
 >
   <Navbar title="Groups" backLink="Back">
