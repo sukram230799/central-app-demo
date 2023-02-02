@@ -30,7 +30,8 @@
     deleteGroupDialog,
   } from "../js/operations/group-operations";
 
-  let groups = [];
+  let groupsAvailable = [];
+  let groupsLoaded = [];
   let detailsLoaded = false;
   let groupsTemplateInfoResult = {};
   let groupsTemplateInfo = {};
@@ -41,51 +42,75 @@
     f7ready(() => {
       subscriptions.push(
         groupStore.subscribe((groupEntries) => {
-          groups = groupEntries;
+          groupsAvailable = groupEntries;
         })
       );
+      loadDataInitial(true);
     })
   );
 
   onDestroy(() => {
     subscriptions.forEach((subscription) => subscription());
     subscriptions = [];
+    f7.progressbar.hide();
   });
 
-  async function loadData(showProgressbar) {
+  async function loadDataInitial(showProgressbar) {
     if (showProgressbar) f7.progressbar.show("red");
+
+    showPreloader = true;
+    allowInfite = true;
+
     await central.ready(1);
     const groupsResponse = await central.listGroups(); // Groups are added via subscription!
-    const groups = groupsResponse.groups;
-    await Promise.all([loadTemplateInfo(groups), loadGroupProperties(groups)]);
+    console.log(groupsResponse.groups);
+    groupsLoaded = [];
+    await loadDetails(groupsResponse.groups.slice(0, 20));
+  }
+
+  async function loadDetails(groupsToLoad) {
+    if (!groupsToLoad.length) return; // Skip empty updates
+    await Promise.all([
+      loadTemplateInfo(groupsToLoad),
+      loadGroupProperties(groupsToLoad),
+    ]);
     detailsLoaded = true;
-    if (showProgressbar) f7.progressbar.hide();
+    groupsLoaded = [...groupsLoaded, ...groupsToLoad];
+    f7.progressbar.hide();
   }
 
-  async function loadTemplateInfo(groups) {
+  async function loadMoreDetails() {
+    const groupsToLoad = groupsAvailable
+      .filter((group) => !groupsLoaded.includes(group))
+      .slice(0, 20);
+    console.log("toLoad", groupsToLoad);
+    await loadDetails(groupsToLoad);
+  }
+
+  async function loadTemplateInfo(groupsToLoad) {
     groupsTemplateInfoResult = await central.getGroupTemplateInfo({
-      groups,
+      groups: groupsToLoad,
     });
-    groupsTemplateInfo = groupsTemplateInfoResult.data.reduce((accu, value) => {
-      accu[value.group] = value.template_details;
-      return accu;
-    }, []);
+    groupsTemplateInfo = {
+      ...groupsTemplateInfo,
+      ...groupsTemplateInfoResult.data.reduce((accu, value) => {
+        accu[value.group] = value.template_details;
+        return accu;
+      }, []),
+    };
   }
 
-  async function loadGroupProperties(groups) {
+  async function loadGroupProperties(groupsToLoad) {
     groupsPropertiesResult = await central.getPropertiesOfGroups({
-      groups,
+      groups: groupsToLoad,
     });
-    groupsProperties = groupsPropertiesResult.data.reduce((accu, value) => {
-      accu[value.group] = value.properties;
-      return accu;
-    }, []);
-  }
-
-  loadData(true);
-
-  function loadMore(done) {
-    loadData(false).then(() => done());
+    groupsProperties = {
+      ...groupsProperties,
+      ...groupsPropertiesResult.data.reduce((accu, value) => {
+        accu[value.group] = value.properties;
+        return accu;
+      }, []),
+    };
   }
 
   function cloneGroup(groupName) {
@@ -96,7 +121,7 @@
   function groupCloned(isCloned, groupName) {
     if (isCloned) {
       groupStore.add(groupName);
-      loadData(true);
+      loadDataInitial(true);
     }
     f7.swipeout.close(".swipeout");
   }
@@ -109,15 +134,39 @@
   function groupDelted(isDeleted, groupName) {
     if (isDeleted) {
       groupStore.delete(groupName);
-      loadData(true);
+      loadDataInitial(true);
     }
     f7.swipeout.close(".swipeout");
   }
 
-  onDestroy(() => f7.progressbar.hide());
+  function reload(done) {
+    loadDataInitial(false).then(() => done());
+  }
+
+  let showPreloader = true;
+  let allowInfite = true;
+
+  async function infiniteLoad() {
+    if (!allowInfite || groupsAvailable.length === groupsLoaded.length) return;
+    allowInfite = false;
+    await loadMoreDetails();
+    if (
+      groupsAvailable.length > 0 &&
+      groupsAvailable.length === groupsLoaded.length
+    )
+      showPreloader = false;
+    allowInfite = true;
+  }
 </script>
 
-<Page ptr onPtrRefresh={loadMore}>
+<Page
+  ptr
+  onPtrRefresh={reload}
+  infinite
+  infiniteDistance={300}
+  infinitePreloader={showPreloader}
+  onInfinite={infiniteLoad}
+>
   <Navbar title="Groups" backLink="Back">
     <NavRight>
       <Link
@@ -143,7 +192,7 @@
   </Navbar>
   <BlockTitle>Groups</BlockTitle>
   <List class="search-groups-overview-list" mediaList>
-    {#if !groups.length}
+    {#if !groupsAvailable.length}
       {#each Array.from(Array(20).keys()) as el}
         <ListItem
           class={theme.ios
@@ -153,46 +202,8 @@
           href="#"
         />
       {/each}
-    {/if}
-    {#each groups as group}
-      {#if detailsLoaded}
-        <ListItem
-          swipeout
-          disabled={false && !detailsLoaded}
-          title={group}
-          href="/groups/details/"
-          routeProps={{
-            groupName: group,
-            groupProperties:
-              groupsProperties && groupsProperties[group]
-                ? groupsProperties[group]
-                : {},
-            groupTemplateInfo:
-              groupsTemplateInfo && groupsTemplateInfo[group]
-                ? groupsTemplateInfo[group]
-                : {},
-          }}
-        >
-          <SwipeoutActions left>
-            <SwipeoutButton
-              overswipe
-              color="red"
-              onClick={() => deleteGroup(group)}>Delete</SwipeoutButton
-            >
-            <SwipeoutButton color="orange" onClick={() => cloneGroup(group)}
-              >Clone</SwipeoutButton
-            >
-          </SwipeoutActions>
-          <svelte:fragment slot="subtitle">
-            <GroupTemplateBubbles
-              groupTemplateInfo={groupsTemplateInfo[group]}
-            />
-          </svelte:fragment>
-          <svelte:fragment slot="text">
-            <GroupPropertiesBubbles groupProperties={groupsProperties[group]} />
-          </svelte:fragment>
-        </ListItem>
-      {:else}
+    {:else if !groupsLoaded.length}
+      {#each groupsAvailable as group}
         <ListItem
           disabled={false && !detailsLoaded}
           title={group}
@@ -203,7 +214,43 @@
             groupTemplateInfo: {},
           }}
         />
-      {/if}
+      {/each}
+    {/if}
+    {#each groupsLoaded as group}
+      <ListItem
+        swipeout
+        disabled={false && !detailsLoaded}
+        title={group}
+        href="/groups/details/"
+        routeProps={{
+          groupName: group,
+          groupProperties:
+            groupsProperties && groupsProperties[group]
+              ? groupsProperties[group]
+              : {},
+          groupTemplateInfo:
+            groupsTemplateInfo && groupsTemplateInfo[group]
+              ? groupsTemplateInfo[group]
+              : {},
+        }}
+      >
+        <SwipeoutActions left>
+          <SwipeoutButton
+            overswipe
+            color="red"
+            onClick={() => deleteGroup(group)}>Delete</SwipeoutButton
+          >
+          <SwipeoutButton color="orange" onClick={() => cloneGroup(group)}
+            >Clone</SwipeoutButton
+          >
+        </SwipeoutActions>
+        <svelte:fragment slot="subtitle">
+          <GroupTemplateBubbles groupTemplateInfo={groupsTemplateInfo[group]} />
+        </svelte:fragment>
+        <svelte:fragment slot="text">
+          <GroupPropertiesBubbles groupProperties={groupsProperties[group]} />
+        </svelte:fragment>
+      </ListItem>
     {/each}
   </List>
 </Page>
