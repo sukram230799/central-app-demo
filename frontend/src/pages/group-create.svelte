@@ -151,7 +151,7 @@
         groupCreated();
       })
       .catch((e) => {
-        console.log(e);
+        console.error(e);
         f7.toast.show({
           text: e?.options?.responseBody?.description
             ? e.options.responseBody.description
@@ -172,7 +172,7 @@
         groupCreated();
       })
       .catch((e) => {
-        console.log(e);
+        console.error(e);
         f7.toast.show({
           text: e?.options?.responseBody?.description
             ? e.options.responseBody.description
@@ -201,7 +201,7 @@
         groupCreated();
       })
       .catch((e) => {
-        console.log(e);
+        console.error(e);
         f7.toast.show({
           text: e?.options?.responseBody?.description
             ? e.options.responseBody.description

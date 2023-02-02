@@ -41,7 +41,7 @@ function cloneGroupDisplay(f7, callback, oldGroupName, newGroupName, upgradeArch
       if (callback) callback(true, newGroupName);
     })
     .catch((e) => {
-      console.log(e);
+      console.errror(e);
       f7.toast.show({
         text: e?.options?.responseBody?.description
           ? e.options.responseBody.description
@@ -70,7 +70,7 @@ function deleteGroupDialog(f7, callback, groupName) {
               f7.toast.show({ text: message, closeTimeout: 2000 })
             })
             .catch((e) => {
-              console.log(e);
+              console.errror(e);
               f7.toast.show({
                 text: e?.options?.responseBody?.description
                   ? e.options.responseBody.description

@@ -121,7 +121,7 @@ app.post('/api-proxy', async (request, response) => {
             console.log(centralResponse);
     } catch (e) {
         if (process.env.NODE_ENV !== "production")
-            console.log(e)
+            console.errror(e)
         centralResponse = e.response;
     }
 

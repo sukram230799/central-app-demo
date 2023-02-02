@@ -141,7 +141,7 @@
             f7.toast.show({ text: message, closeTimeout: 2000 });
           })
           .catch((e) => {
-            console.log(e);
+            console.errror(e);
             f7.toast.show({
               text: e?.options?.responseBody?.description
                 ? e.options.responseBody.description
