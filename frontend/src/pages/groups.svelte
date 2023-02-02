@@ -69,14 +69,25 @@
   }
 
   async function loadDetails(groupsToLoad) {
-    if (!groupsToLoad.length) return; // Skip empty updates
-    await Promise.all([
-      loadTemplateInfo(groupsToLoad),
-      loadGroupProperties(groupsToLoad),
-    ]);
-    detailsLoaded = true;
-    groupsLoaded = [...groupsLoaded, ...groupsToLoad];
-    f7.progressbar.hide();
+    try {
+      if (!groupsToLoad.length) return; // Skip empty updates
+      await Promise.all([
+        loadTemplateInfo(groupsToLoad),
+        loadGroupProperties(groupsToLoad),
+      ]);
+      detailsLoaded = true;
+    } catch (e) {
+      console.error(e);
+        f7.toast.show({
+          text: e?.options?.responseBody?.description
+            ? e.options.responseBody.description
+            : JSON.stringify(e),
+          closeTimeout: 2000,
+        });
+    } finally {
+      groupsLoaded = [...groupsLoaded, ...groupsToLoad];
+      f7.progressbar.hide();
+    }
   }
 
   async function loadMoreDetails() {
