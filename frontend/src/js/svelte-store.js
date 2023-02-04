@@ -1,7 +1,7 @@
 import { writable, derived, get } from 'svelte/store';
 
-const newUserStore = writable(localStorage.newUser ? JSON.parse(localStorage.newUser) : true);
-newUserStore.subscribe((value) => localStorage.newUser = JSON.stringify(value));
+const newUserStore = writable(localStorage.credentials ? !Object.keys(JSON.parse(localStorage.credentials)).length : true);
+// newUserStore.subscribe((value) => localStorage.newUser = JSON.stringify(value));
 
 const needRefreshStore = writable({ updateAvailable: false, updateSW: null });
 const doRefreshStore = writable({ doRefresh: false });
