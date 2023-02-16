@@ -30,7 +30,7 @@ async function blinkLEDHandler(f7, serial, ledBlinking) {
       }
     }
   } catch (e) {
-    console.errror(e);
+    console.error(e);
     f7.toast.show({
       text: e?.options?.responseBody?.description
         ? e.options.responseBody.description

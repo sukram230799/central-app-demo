@@ -61,8 +61,8 @@
       console.log(clientList);
       clients = clientList.clients;
     } catch (error) {
-      console.log(error);
-      console.log(error.options);
+      console.error(error);
+      console.error(error.options);
     } finally {
       loaded = true;
     }
