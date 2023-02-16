@@ -1,0 +1,3 @@
+central.wuest.dev {
+  reverse_proxy http://mba-svelte:26799
+}

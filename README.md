@@ -4,10 +4,31 @@
 
 ## Install
 
-To host this app it is best to use docker-compose. This builds the fronten and run it together with the backend.
+To host this app it is best to use docker-compose. This builds the frontend and runs it together with the backend. **Please add an https reverse-proxy like Caddy to secure the communication.** The sevice is opened on port 26799.
 
 ``` sh
 docker-compose up -d
+```
+
+To change caddy change these line in [`docker-compose.yml`](docker-compose.yml) and edit the [`Caddyfile`](Caddyfile). Change `central.wuest.dev` to your domain. Caddy will automatically get an SSL-Certificate from Let's Encrypt.
+
+``` yaml
+caddy:
+  image: caddy:2-alpine
+  restart: unless-stopped
+  ports:
+    - "80:80"
+    - "443:443"
+  volumes:
+    - ./Caddyfile:/etc/caddy/Caddyfile
+    - ./caddy_data:/data
+    - ./caddy_config:/config
+```
+
+``` Caddyfile
+central.wuest.dev {
+  reverse_proxy http://mba-svelte:26799
+}
 ```
 
 ## Add as an App
