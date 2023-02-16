@@ -173,7 +173,7 @@ Flags:       a = Airslice policy; A = Airslice app monitoring; c = MBO Cellular 
     </ListItem>
   </List>
   <Block>
-    <Button raised fill on:click={run}>Run</Button>
+    <Button raised fill on:click={run} disabled={!serialNumber}>Run</Button>
   </Block>
   {#if running || failed}
     <List simpleList>
