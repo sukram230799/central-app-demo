@@ -48,3 +48,6 @@ www/
 /*CN*.jpg
 
 licenses.json
+*_orig.png
+screenshots/**/*.xcf
+maskable*
