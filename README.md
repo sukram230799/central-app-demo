@@ -33,13 +33,19 @@ central.wuest.dev {
 
 ## Add as an App
 
-### iOS
-
 Go to your Domain or use the public version available on [https://central.wuest.dev](https://central.wuest.dev).
+
+### iOS
 
 Press on the **Share**-Button, scroll Down and click on **Add to Home Screen**. You can edit the name and then click on **Add** to add is an App.
 
 ![Add as APP iOS](./screenshots/iOS/Install/Instructions_small.png)
+
+### Android
+
+Press on the **Add Central Toolkit to Home Screen** or select the options menu and click **Install app**. Then click **Install** in the dialog.
+
+![Add as App Android](./screenshots/Android/Install/Instructions.png)
 
 ## Screenshots
 
