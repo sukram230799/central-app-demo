@@ -168,7 +168,7 @@
           placeholder="Pease choose..."
         >
           {#each $labelStore as label}
-            <option value={label}>{label}</option>
+            <option value={label.label_name}>{label.label_name}</option>
           {/each}
         </ListInput>
         <ListInput
