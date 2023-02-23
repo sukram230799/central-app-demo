@@ -275,7 +275,7 @@
   }
 
   async function disconnectClient() {
-    await disconnectClientHandler();
+    await disconnectClientHandler(f7, client);
   }
 
   let ledBlinking = false;
