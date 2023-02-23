@@ -15,6 +15,7 @@
     Link,
   } from "framework7-svelte";
   import { central } from "../js/central";
+  import { errorToast } from "../js/operations/error-toast";
 
   let subscriptions = [];
   import { groupStore } from "../js/svelte-store";
@@ -152,12 +153,7 @@
       })
       .catch((e) => {
         console.error(e);
-        f7.toast.show({
-          text: e?.options?.responseBody?.description
-            ? e.options.responseBody.description
-            : JSON.stringify(e),
-          closeTimeout: 2000,
-        });
+        errorToast(f7, e, { defaultTimeout: 2000 });
         groupFailed();
       })
       .then(() => {
@@ -173,12 +169,7 @@
       })
       .catch((e) => {
         console.error(e);
-        f7.toast.show({
-          text: e?.options?.responseBody?.description
-            ? e.options.responseBody.description
-            : JSON.stringify(e),
-          closeTimeout: 2000,
-        });
+        errorToast(f7, e, { defaultTimeout: 2000 });
         groupFailed();
       })
       .finally(() => {
@@ -202,12 +193,7 @@
       })
       .catch((e) => {
         console.error(e);
-        f7.toast.show({
-          text: e?.options?.responseBody?.description
-            ? e.options.responseBody.description
-            : JSON.stringify(e),
-          closeTimeout: 2000,
-        });
+        errorToast(f7, e, { defaultTimeout: 2000 });
         groupFailed();
       })
       .finally(() => {

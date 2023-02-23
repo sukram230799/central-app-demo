@@ -1,5 +1,4 @@
 <script>
-  import { val } from "dom7";
   import {
     f7,
     f7ready,
@@ -27,6 +26,7 @@
   import { durationFormatter } from "human-readable";
   import { formatBytes, formatDate, formatYesNo } from "../js/formatter";
   import AutoDetailsHandler from "../components/auto-details-handler.svelte";
+  import { errorToast } from "../js/operations/error-toast";
 
   export let device = {};
   let deviceUnhandled = {};
@@ -70,12 +70,8 @@
       .then((deviceDetails) => (device = deviceDetails))
       .then(() => dataLoaded())
       .catch((e) => {
-        f7.toast.show({
-          text: e?.options?.responseBody?.description
-            ? e.options.responseBody.description
-            : JSON.stringify(e),
-          closeTimeout: 2000,
-        });
+        console.error(e);
+        errorToast(f7, e, { defaultTimeout: 2000 });
       })
       .finally(() => {
         loaded = true;

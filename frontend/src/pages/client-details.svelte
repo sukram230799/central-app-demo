@@ -26,6 +26,7 @@
   import { disconnectClientHandler } from "../js/operations/client-operations";
   import { formatBytes, formatDate, formatYesNo } from "../js/formatter";
   import AutoDetailsHandler from "../components/auto-details-handler.svelte";
+  import { errorToast } from "../js/operations/error-toast";
 
   export let client = {};
   let clientUnhandled = {};
@@ -73,12 +74,8 @@
       .then((clientDetails) => (client = clientDetails))
       .then(() => dataLoaded())
       .catch((e) => {
-        f7.toast.show({
-          text: e?.options?.responseBody?.description
-            ? e.options.responseBody.description
-            : JSON.stringify(e),
-          closeTimeout: 2000,
-        });
+        console.error(e);
+        errorToast(f7, e, { defaultTimeout: 2000 });
       })
       .finally(() => {
         loaded = true;

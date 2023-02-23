@@ -22,6 +22,7 @@
   import { onMount, onDestroy } from "svelte";
 
   import { central } from "../js/central";
+  import { errorToast } from "../js/operations/error-toast";
 
   let subscriptions = [];
   import { groupStore, selectedFilterStore } from "../js/svelte-store";
@@ -64,6 +65,7 @@
   }
 
   async function loadData() {
+    try {
     await central.ready(3);
     const deviceLists = await Promise.all([
       central.listAccessPoints({ filters }),
@@ -76,6 +78,12 @@
       ...deviceLists[1].gateways,
       ...deviceLists[2].switches,
     ];
+    } catch (e) {
+      console.error(e);
+      errorToast(f7, e);
+    } finally {
+      loaded = true;
+    }
   }
 
   function getDeviceIcon(device) {

@@ -29,6 +29,7 @@
     cloneGroupGetName,
     deleteGroupDialog,
   } from "../js/operations/group-operations";
+  import { errorToast } from "../js/operations/error-toast";
 
   let groupsAvailable = [];
   let groupsLoaded = [];
@@ -77,12 +78,7 @@
       detailsLoaded = true;
     } catch (e) {
       console.error(e);
-      f7.toast.show({
-        text: e?.options?.responseBody?.description
-          ? e.options.responseBody.description
-          : JSON.stringify(e),
-        closeTimeout: 2000,
-      });
+      errorToast(f7, e, { defaultTimeout: 2000 });
     } finally {
       groupsLoaded = [...groupsLoaded, ...groupsToLoad];
       f7.progressbar.hide();

@@ -35,6 +35,7 @@
   import { v4 as uuidv4 } from "uuid";
   import { get } from "svelte/store";
   import { onDestroy, onMount } from "svelte";
+  import { errorToast } from "../js/operations/error-toast";
 
   export let f7router;
 
@@ -83,7 +84,7 @@
   onDestroy(() => {
     try {
       html5QrCode?.stop();
-    } catch (err) {}
+    } catch (e) {}
     subscriptions.forEach((subscription) => subscription());
     subscriptions = [];
   });
@@ -120,12 +121,7 @@
       })
       .catch((e) => {
         console.error(e);
-        f7.toast.show({
-          text: e?.options?.responseBody?.description
-            ? e.options.responseBody.description
-            : `Error: ${JSON.stringify(e)}`,
-          closeTimeout: 8000,
-        });
+        errorToast(f7, e);
       })
       .finally(() => f7.preloader.hide());
   }

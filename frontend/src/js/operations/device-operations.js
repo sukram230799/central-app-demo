@@ -1,4 +1,5 @@
 import { central } from "../central";
+import { errorToast } from "./error-toast";
 
 async function blinkLEDHandler(f7, serial, ledBlinking) {
   f7.preloader.show();
@@ -31,12 +32,7 @@ async function blinkLEDHandler(f7, serial, ledBlinking) {
     }
   } catch (e) {
     console.error(e);
-    f7.toast.show({
-      text: e?.options?.responseBody?.description
-        ? e.options.responseBody.description
-        : JSON.stringify(e),
-      closeTimeout: 8000,
-    });
+    errorToast(f7, e)
   } finally {
     f7.preloader.hide();
     return ledBlinking;

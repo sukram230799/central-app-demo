@@ -1,4 +1,5 @@
 import { central } from '../central.js'
+import { errorToast } from './error-toast.js';
 
 async function cloneGroupGetName(f7, callback, oldGroupName) {
   await central.ready();
@@ -42,12 +43,7 @@ function cloneGroupDisplay(f7, callback, oldGroupName, newGroupName, upgradeArch
     })
     .catch((e) => {
       console.error(e);
-      f7.toast.show({
-        text: e?.options?.responseBody?.description
-          ? e.options.responseBody.description
-          : JSON.stringify(e),
-        closeTimeout: 8000,
-      });
+      errorToast(f7, e);
       if (callback) callback(false, newGroupName);
     })
     .finally(() => {
@@ -71,12 +67,7 @@ function deleteGroupDialog(f7, callback, groupName) {
             })
             .catch((e) => {
               console.error(e);
-              f7.toast.show({
-                text: e?.options?.responseBody?.description
-                  ? e.options.responseBody.description
-                  : JSON.stringify(e),
-                closeTimeout: 8000,
-              });
+              errorToast(f7, e);
               if (callback) callback(false, groupName);
             })
             .finally(() => {

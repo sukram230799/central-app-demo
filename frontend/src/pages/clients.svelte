@@ -1,5 +1,6 @@
 <script>
   import {
+    f7,
     f7ready,
     theme,
     Page,
@@ -15,6 +16,7 @@
   import { onDestroy, onMount } from "svelte";
 
   import { central } from "../js/central";
+  import { errorToast } from "../js/operations/error-toast";
 
   let subscriptions = [];
   import { pinnedClientsStore } from "../js/svelte-store";
@@ -60,9 +62,9 @@
       const clientList = await loadDataSwitcher();
       console.log(clientList);
       clients = clientList.clients;
-    } catch (error) {
-      console.error(error);
-      console.error(error.options);
+    } catch (e) {
+      console.error(e);
+      errorToast(f7, e);
     } finally {
       loaded = true;
     }

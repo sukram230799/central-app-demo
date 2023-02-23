@@ -47,7 +47,7 @@
     cameraStore.update(() => items.find((obj) => obj.id === id));
     try {
       await html5QrCode?.stop();
-    } catch (err) {}
+    } catch (e) {}
 
     html5QrCode = new Html5Qrcode("reader");
     html5QrCode
@@ -77,7 +77,7 @@
   onDestroy(() => {
     try {
       html5QrCode?.stop();
-    } catch (err) {}
+    } catch (e) {}
 
     subscriptions.forEach((subscription) => subscription());
     subscriptions = [];
