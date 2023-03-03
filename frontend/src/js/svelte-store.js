@@ -131,6 +131,28 @@ pinnedClientsStore.delete = (client_macaddr) => {
     });
 }
 
+const notificationSettingsCacheStore = writable(localStorage.notificationSettings ? JSON.parse(localStorage.notificationSettings) : {});
+notificationSettingsCacheStore.subscribe((value) => localStorage.notificationSettings = JSON.stringify(value));
+const notificationSettingsStore = derived([notificationSettingsCacheStore, currentAccountIdStore], ([$notificationSettingsCacheStore, $currentAccountId]) => $currentAccountId in $notificationSettingsCacheStore ? $notificationSettingsCacheStore[$currentAccountId] : {});
+notificationSettingsStore.update = (notificationSettings) => {
+    notificationSettingsCacheStore.update((notificationSettingsCache) => {
+        const currentAccountId = get(currentAccountIdStore);
+        notificationSettingsCache[currentAccountId] = notificationSettings;
+        return notificationSettingsCache;
+    });
+}
+
+const webhookCacheStore = writable(localStorage.webhooks ? JSON.parse(localStorage.webhooks) : {})
+webhookCacheStore.subscribe((value) => localStorage.webhooks = JSON.stringify(value));
+const webhookStore = derived([webhookCacheStore, currentAccountIdStore], ([$webhookCacheStore, $currentAccountId]) => $currentAccountId in $webhookCacheStore ? $webhookCacheStore[$currentAccountId] : null);
+webhookStore.update = (webhook) => {
+    webhookCacheStore.update((webhookCache) => {
+        const currentAccountId = get(currentAccountIdStore);
+        webhookCache[currentAccountId] = webhook;
+        return webhookCache;
+    });
+}
+
 export {
     newUserStore,
     needRefreshStore as needRefreshStore,
@@ -152,5 +174,7 @@ export {
     siteStore,
     labelStore,
     pinnedClientsStore,
+    notificationSettingsStore,
+    webhookStore,
 };
 

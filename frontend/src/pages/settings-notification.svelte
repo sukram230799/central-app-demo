@@ -10,6 +10,8 @@
     Button,
     Link,
     f7,
+    List,
+    ListItem,
   } from "framework7-svelte";
   const debug = process.env.NODE_ENV !== "production";
 
@@ -69,7 +71,7 @@
       </Row>
     {/if}
   </Block>
-  <BlockTitle>How-To</BlockTitle>
+  <BlockTitle>How-To (manual)</BlockTitle>
   <Block>
     <ol
       style="padding: 0;
@@ -89,4 +91,9 @@
       <li>Under Webhook select "{central.generateWebhookName()}".</li>
     </ol>
   </Block>
+  <BlockTitle>Configure here</BlockTitle>
+  <Block>This may break your existing alerts. Use with caution.</Block>
+  <List>
+    <ListItem href="/settings/notification/alerts" title="Select Alerts" />
+  </List>
 </Page>

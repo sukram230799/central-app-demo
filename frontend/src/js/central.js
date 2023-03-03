@@ -994,7 +994,7 @@ class Central {
   /**
    * Add Webhook
    * @param {{ url: string}} 
-   * @returns {{ data: { url: string} }}
+   * @returns {{ name: string, wid: string }}
    * Add webhook
    * ---
    * https://developer.arubanetworks.com/aruba-central/reference/apidispatcher_external_apiadd_webhook_api

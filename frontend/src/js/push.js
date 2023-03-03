@@ -1,5 +1,7 @@
 import axios from "axios";
+import { get } from "svelte/store";
 import { central } from "./central";
+import { webhookStore } from "./svelte-store";
 
 const VAPID_PUBLIC_KEY =
   process.env.VAPID_PUBLIC_KEY;
@@ -32,10 +34,16 @@ class Push {
     let webhooks = await central.listWebhooks();
     let webhook = webhooks.settings.find(webhook => webhook.name === central.generateWebhookName());
 
-    if (webhook)
-      await central.updateWebhook({ wid: webhook.wid, url })
+    let wid;
+
+    if (webhook) {
+      wid = webhook.wid
+      await central.updateWebhook({ wid, url })
+    }
     else
-      await central.addWebhook({ url });
+      wid = await central.addWebhook({ url }).wid;
+
+    webhookStore.update(wid);
   }
 
   async unregisterPush() {
@@ -55,6 +63,61 @@ class Push {
       { subscription });
 
     return response;
+  }
+
+  async addAlert(alert) {
+    let alertSettings = await central.listNotificationSettings();
+    let alertSetting = alertSettings.settings.find(alertSetting => alertSetting.type === alert.name);
+
+    let wid = get(webhookStore);
+
+    if (alertSetting) {
+      let rules = alertSetting.rules;
+
+      rules[0].webhooks.push(wid)
+      if (!rules[0].delivery_options.includes("Webhook")) rules[0].delivery_options.push("Webhook")
+
+      await central.updateNotificationSetting({
+        settings_id: alertSetting.id, setting: {
+          ...alertSetting,
+          active: true,
+          rules: rules
+        }
+      });
+    } else {
+      await central.addNotificationSetting({
+        type: alert.name, active: true, rules: [
+          {
+            severity: "Warning",
+            delivery_options: ["Webhook"],
+            webhooks: [wid]
+          }
+        ]
+      });
+    }
+    await central.listNotificationSettings();
+  }
+
+  async removeAlert(alert) {
+    let alertSettings = await central.listNotificationSettings();
+    let alertSetting = alertSettings.settings.find(alertSetting => alertSetting.type === alert.name);
+
+    let wid = get(webhookStore);
+    if (alertSetting) {
+      let rules = alertSetting.rules;
+
+      rules[0].webhooks.splice(rules[0].webhooks.indexOf(wid), 1);
+      if (!rules[0].webhooks.length) rules[0].delivery_options.splice(rules[0].delivery_options.indexOf("Webhook"), 1);
+
+      await central.updateNotificationSetting({
+        settings_id: alertSetting.id, setting: {
+          ...alertSetting,
+          active: true,
+          rules: rules
+        }
+      });
+      await central.listNotificationSettings();
+    }
   }
 
   /* Utility functions. */

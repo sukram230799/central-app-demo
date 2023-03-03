@@ -90,6 +90,14 @@ var routes = [
     component: NotificationSettingsPage,
   },
   {
+    path: '/settings/notification/alerts',
+    component: NotificationWebhookSettingsPage,
+  },
+  {
+    path: '/settings/notification/alerts/category',
+    component: NotificationWebhookCategorySettingsPage,
+  },
+  {
     path: '/about/',
     component: AboutPage,
   },
