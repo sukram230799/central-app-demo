@@ -192,7 +192,7 @@
   <BlockTitle>Settings</BlockTitle>
   <List>
     <ListItem link="/settings/camera/" title="Camera Settings" />
-    <ListItem link="/settings/central/" title="Central Settings" />
+    <ListItem link="/settings/notification/" title="Notification Settings" />
   </List>
 
   <BlockTitle>Other</BlockTitle>

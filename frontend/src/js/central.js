@@ -1,8 +1,9 @@
 import axios from 'axios';
+import { get } from 'svelte/store';
 import {
   currentAccountStore, accountsStore,
   selectedFilterStore, selectedFilterDefaults, timeRanges,
-  groupCacheStore, labelCacheStore, siteCacheStore,
+  groupCacheStore, labelCacheStore, siteCacheStore, currentAccountIdStore,
 } from './svelte-store.js';
 
 // const proxy = `${window.location.origin}/api-proxy`;
@@ -119,6 +120,16 @@ class Central {
    */
   async patch(path, options = {}) {
     return await this.request(path, { ...options, method: 'PATCH' });
+  }
+
+  /**
+ * Send PUT request via proxy
+ * @param {string} path Path to request from central api
+ * @param {{ data: {}, headers: {}, params: {} }} options Options to pass to central
+ * @returns {Object}
+ */
+  async put(path, options = {}) {
+    return await this.request(path, { ...options, method: 'PUT' });
   }
 
   /**
@@ -929,9 +940,12 @@ class Central {
   }
 
   /**
-   * 
+   * List notifications
    * @param {{ customer_id, group, label, serial, site, from_timestamp, to_timestamp, severity, type, search, calculate_total: boolean, ack: boolean, fields, offset: int, limit: int }} params 
    * @returns {{"count":1,"total":84,"notifications":[{"id":"AWLTCw983zA1xiLvI9DF","severity":"Major","customer_id":"f28b6bc3e46c42a88bc27ff4713496fa","device_id":"SN1000012","details":{},"nid":"4","settings_id":"f28b6bc3e46c42a88bc27ff4713496fa-4","timestamp":1523958870,"group_name":"IAP 5GHz","labels":["dual_5GHz"],"type":"AP disconnected","acknowledged":false,"description":"AP with Name IAP_345_1 and MAC address c8:b5:ad:c3:b2:02 disconnected","state":"Open","acknowledged_by":"user1","acknowledged_timestamp":1523958870,"created_timestamp":1523958870}]}}
+   * Get notifications. You can only specify one of group, label parameters.
+   * ---
+   * https://developer.arubanetworks.com/aruba-central/reference/apinotifications_external_apiget_notifications_api
    */
   async listNotifications(params = {}) {
     let response = await this.get('central/v1/notifications', {
@@ -940,6 +954,96 @@ class Central {
 
     return this.handleResponse(response)
   }
+
+  /* NOTIFICATION SETTINGS */
+
+  /**
+   * List Notification Settings
+   * @param {{ search: string, limit: int, offset: int, sort}} params
+   * @returns {{"count":1,"settings":[{"setting_id":"201610195243-1254","type":"CONNECTED_CLIENTS","rules":[{"severity":"Critical","delivery_options":["Email"],"emails":["someone@something.com","sometwo@something.com"],"webhooks":["e829a0f6-1e36-42fe-bafd-631443cbd581","e26450be-4dac-435b-ac01-15d8f9667eb8"],"group":["group-1","group-2"],"label":["label-1","label-2"],"site":["Arizona-Site","California-2"],"device_id":["SN7323721","SN8462537"],"transform_func":"percentage","conditions":[{"expression":{"value":50,"operator":">="},"severity":"Warning"}],"filters":[{"key":"band","values":"5 GHz","operator":"in"}],"duration":10,"aggr_context":"swarm","value":"string"}],"active":true,"created_ts":1523609395.009575,"created_by":"someone@something.com","updated_ts":1523612330.82353,"updated_by":"someone@something.com"}]}} 
+   * Get a list of settings
+   * ---
+   * https://developer.arubanetworks.com/aruba-central/reference/apinotifications_external_apiget_settings_api
+   */
+  async listNotificationSettings(params = {}) {
+    let response = await this.get('central/v1/notifications/settings', { params });
+
+    return this.handleResponse(response);
+  }
+
+
+  /* WEBHOOKS */
+
+  /**
+   * List webhooks
+   * @returns {{ "count": 1,  "settings": [{"wid": "e26450be-4dac-435b-ac01-15d8f9667eb8","name": "AAA","updated_ts": 1523956927,"urls": ["https://example.org/webhook1","https://example.org/webhook1"],"secure_token": {"token": "KEu5ZPTi44UO4MnMiOqz","ts": 1573461177}}]}}
+   * Get a list of webhooks
+   * ---
+   * https://developer.arubanetworks.com/aruba-central/reference/apidispatcher_external_apiget_webhooks_api
+   * */
+  async listWebhooks() {
+    let response = await this.get('central/v1/webhooks');
+
+    return this.handleResponse(response);
+  }
+
+  generateWebhookName() {
+    return `Central Toolkit - ${get(currentAccountIdStore)}`
+  }
+
+  /**
+   * Add Webhook
+   * @param {{ url: string}} 
+   * @returns {{ data: { url: string} }}
+   * Add webhook
+   * ---
+   * https://developer.arubanetworks.com/aruba-central/reference/apidispatcher_external_apiadd_webhook_api
+   */
+  async addWebhook({ url }) {
+    let response = await this.post('central/v1/webhooks', {
+      data: {
+        name: this.generateWebhookName(),
+        urls: [url]
+      }
+    });
+
+    return this.handleResponse(response);
+  }
+
+  /**
+   * Update webhook settings
+   * @param {{ wid: string, url: string}} 
+   * @returns {{ data: { url: string} }}
+   * Update webhook settings
+   * ---
+   * https://developer.arubanetworks.com/aruba-central/reference/apidispatcher_external_apiupdate_webhook_api
+   */
+  async updateWebhook({ wid, url }) {
+    let response = await this.put(`central/v1/webhooks/${wid}`, {
+      data: {
+        name: `Central Toolkit - ${get(currentAccountIdStore)}`,
+        urls: [url]
+      }
+    });
+
+    return this.handleResponse(response);
+  }
+
+  /**
+   * Delete Webhook
+   * @param {{ wid: string}}
+   * @returns {{"wid": "e26450be-4dac-435b-ac01-15d8f9667eb8"}}
+   * Delete Webhook
+   * ---
+   * https://developer.arubanetworks.com/aruba-central/reference/apidispatcher_external_apidelete_webhook_api
+   */
+  async deleteWebhook({ wid }) {
+    let response = await this.delete(`central/v1/webhooks/${wid}`);
+
+    return this.handleResponse(response);
+  }
+
+
 }
 
 export const central = new Central();

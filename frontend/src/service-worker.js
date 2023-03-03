@@ -14,18 +14,18 @@ self.addEventListener('push', event => {
     let data = event.data.json();
     const image = 'https://central.wuest.dev/icons/512x512.png';
     const options = {
-        body: data.options.body,
+        body: data.description,
         icon: image
     }
     self.registration.showNotification(
-        data.title,
+        data.alert_type,
         options
     );
 });
 
 self.addEventListener('notificationclick', event => {
     event.notification.close();
-    event.waitUntil(self.clients.openWindow('https://web.dev'));
+    event.waitUntil(self.clients.openWindow(`https://${process.env.HOST}`));
 });
 
 

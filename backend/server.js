@@ -2,12 +2,14 @@ const express = require('express');
 const webpush = require('web-push');
 const bodyparser = require('body-parser');
 const axios = require('axios').default;
-var cors = require('cors');
+const low = require('lowdb');
+const FileSync = require('lowdb/adapters/FileSync');
+const adapter = new FileSync('.data/db.json');
+const db = low(adapter);
 
 const centralBaseUrlObject = require('./central-base-url.json');
 
 const centralBaseUrl = Object.values(centralBaseUrlObject)
-
 
 const vapidDetails = {
     publicKey: process.env.VAPID_PUBLIC_KEY,
@@ -15,15 +17,13 @@ const vapidDetails = {
     subject: process.env.VAPID_SUBJECT
 };
 
+const host = process.env.HOST;
 
-function sendNotifications(subscriptions) {
-    // Create the notification content.
-    const notification = JSON.stringify({
-        title: "Hello, Notifications!",
-        options: {
-            body: `ID: ${Math.floor(Math.random() * 100)}`
-        }
-    });
+db.defaults({
+    subscriptions: []
+}).write();
+
+function sendNotifications(subscriptions, notification) {
     // Customize how the push service should attempt to deliver the push message.
     // And provide authentication information.
     const options = {
@@ -50,56 +50,75 @@ function sendNotifications(subscriptions) {
     });
 }
 
-subs = {};
-
 const app = express();
 // app.use(cors());
 app.use(bodyparser.json());
 app.use(express.static('www'));
 app.use('/onboard', express.static('onboard'));
 
-app.post('/add-subscription', (request, response) => {
-    if (process.env.NODE_ENV !== "production")
-        console.log(`Subscribing ${request.body.endpoint}`);
-    subs[request.body.endpoint] = request.body
-    response.sendStatus(200);
-});
-
-app.post('/remove-subscription', (request, response) => {
-    if (process.env.NODE_ENV !== "production")
-        console.log(`Unsubscribing ${request.body.endpoint}`);
-    delete subs[request.body.endpoint];
-    response.sendStatus(200);
-});
-
-app.post('/notify-me', (request, response) => {
-    if (process.env.NODE_ENV !== "production")
-        console.log(`Notifying ${request.body.endpoint}`);
-    const subscription =
-        subs[request.body.endpoint];
-    sendNotifications([subscription]);
-    response.sendStatus(200);
-});
-
-app.post('/notify-all', (request, response) => {
+app.post('/webhook-register', (request, response) => {
     if (process.env.NODE_ENV !== "production") {
-        console.log('Notifying all subscribers');
-        console.log(subs);
-        console.log(typeof subs);
+        console.log(`Subscribing ${request.body.endpoint}`);
+        db.get('subscriptions')
+            .push(request.body)
+            .write();
     }
-    const subscriptions =
-        Object.values(subs);
-    if (subscriptions.length > 0) {
-        sendNotifications(subscriptions);
-        response.sendStatus(200);
-    } else {
-        response.sendStatus(409);
+
+    response.send({ url: `https://${host}/webhook/` + Buffer.from(JSON.stringify(request.body)).toString("base64") })
+});
+
+app.post('/webhook-unregister', (request, response) => {
+    if (process.env.NODE_ENV !== "production") {
+        console.log(`Unsubscribing ${request.body.endpoint}`);
+        db.get('subscriptions')
+            .remove({ endpoint: request.body.endpoint })
+            .write();
     }
+
+    response.sendStatus(200);
+});
+
+app.post('/webhook-test', (request, response) => {
+    if (process.env.NODE_ENV !== "production") {
+        console.log(`Notifying ${request.body.endpoint}`);
+        const subscription =
+            db.get('subscriptions').find({ endpoint: request.body.endpoint }).value();
+        sendNotifications([subscription], JSON.stringify({
+            "timestamp": 1677862473,
+            "nid": 1250,
+            "alert_type": "AP_CPU_OVER_UTILIZATION",
+            "severity": "Major",
+            "details": {
+                "threshold": "20"
+            },
+            "description": "This is a sample webhook message. Please ignore this",
+            "text": "This is a sample webhook message. Please ignore this",
+            "setting_id": "CID-1250",
+            "device_id": "TEST123456",
+            "state": "Open",
+            "operation": "create",
+            "webhook": "38853888-3391-40af-b7a8-470828512428",
+            "cluster_hostname": "internal-ui.central.arubanetworks.com"
+        }));
+    }
+    
+    response.sendStatus(200);
 });
 
 function checkIfStringStartsWith(str, substrs) {
     return substrs.some(substr => str.startsWith(substr));
 }
+
+app.post('/webhook/:endpoint', async (request, response) => {
+    if (process.env.NODE_ENV !== "production")
+        console.log(request.params.endpoint);
+    const endpoint = JSON.parse(Buffer.from(request.params.endpoint, 'base64').toString('utf-8'));
+    if (process.env.NODE_ENV !== "production")
+        console.log(endpoint);
+
+    sendNotifications([endpoint]);
+    response.sendStatus(200);
+});
 
 app.post('/api-proxy', async (request, response) => {
     if (!checkIfStringStartsWith(request?.body?.url, centralBaseUrl))

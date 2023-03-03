@@ -10,6 +10,7 @@ import DevicesPage from '../pages/devices.svelte';
 import DeviceDetailsPage from '../pages/device-details.svelte';
 import CameraSettingsPage from '../pages/settings-camera.svelte';
 import CentralSettingsPage from '../pages/settings-central.svelte';
+import NotificationSettingsPage from '../pages/settings-notification.svelte';
 import TroubleshootingPage from '../pages/troubleshooting.svelte';
 import TroubleshootingDetailsPage from '../pages/troubleshooting-details.svelte';
 import GroupsPage from '../pages/groups.svelte';
@@ -83,6 +84,10 @@ var routes = [
   {
     path: '/settings/central',
     component: CentralSettingsPage,
+  },
+  {
+    path: '/settings/notification',
+    component: NotificationSettingsPage,
   },
   {
     path: '/about/',
