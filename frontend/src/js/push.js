@@ -37,6 +37,16 @@ class Push {
     else
       await central.addWebhook({ url });
   }
+
+  async unregisterPush() {
+    let webhooks = await central.listWebhooks();
+    let webhook = webhooks.settings.find(webhook => webhook.name === central.generateWebhookName());
+
+    if (webhook)
+    return await central.deleteWebhook({ wid: webhook.wid });
+    else return true;
+  }
+
   async notifyMe() {
     const registration = await navigator.serviceWorker.getRegistration();
     const subscription = await registration.pushManager.getSubscription();

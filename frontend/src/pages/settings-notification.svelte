@@ -8,6 +8,7 @@
     Row,
     Col,
     Button,
+    Link,
     f7,
   } from "framework7-svelte";
   const debug = process.env.NODE_ENV !== "production";
@@ -19,6 +20,10 @@
 
   function registerServiceWorker() {
     return push.registerServiceWorker().catch((e) => errorToast(f7, e));
+  }
+
+  function unregisterServiceWorker() {
+    return push.unregisterServiceWorker().catch((e) => errorToast(f7, e));
   }
 
   function subscribeToPush() {
@@ -41,27 +46,47 @@
     {#if debug}
       <Row>
         <Col
-          ><Button raised on:click={registerServiceWorker}>Register SW</Button
+          ><Button raised onClick={registerServiceWorker}>Register SW</Button
           ></Col
         >
         <Col
-          ><Button raised disabled tooltip="Not saved on backend"
+          ><Button raised onClick={unregisterServiceWorker}
             >Unregister SW</Button
           ></Col
         >
       </Row>
     {/if}
     <Row>
-      <Col><Button raised on:click={subscribeToPush}>Subscribe</Button></Col>
+      <Col><Button raised onClick={subscribeToPush}>Subscribe</Button></Col>
       <Col
-        ><Button raised on:click={unsubscribeFromPush}>Unsubscribe</Button></Col
+        ><Button raised onClick={unsubscribeFromPush}>Unsubscribe</Button></Col
       >
     </Row>
     {#if debug}
       <Row>
-        <Col><Button raised on:click={notifyMe}>Notify me</Button></Col>
+        <Col><Button raised onClick={notifyMe}>Notify me</Button></Col>
         <Col><Button raised>Notify all</Button></Col>
       </Row>
     {/if}
+  </Block>
+  <BlockTitle>How-To</BlockTitle>
+  <Block>
+    <ol
+      style="padding: 0;
+    margin-left: 1em;"
+    >
+      <li>
+        On your desktop go to your Central Instance via <Link
+          external
+          target="_blank"
+          href="https://common.cloud.hpe.com"
+          >https://common.cloud.hpe.com/</Link
+        >.
+      </li>
+      <li>Then go to Alerts & Events.</li>
+      <li>Click on Configure in the top left.</li>
+      <li>Select which Alerts you want to receive.</li>
+      <li>Under Webhook select "{central.generateWebhookName()}".</li>
+    </ol>
   </Block>
 </Page>
