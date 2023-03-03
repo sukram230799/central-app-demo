@@ -37,24 +37,12 @@ class Push {
     else
       await central.addWebhook({ url });
   }
-
-  async unregisterPush() {
-    const registration = await navigator.serviceWorker.getRegistration();
-    const subscription = await registration.pushManager.getSubscription();
-
-    let backendResponse = await axios.post(`${window.location.origin}/webhook-unregister`,
-      { endpoint: subscription.endpoint });
-
-    await subscription.unsubscribe(subscription);
-    return backendResponse;
-  }
-
   async notifyMe() {
     const registration = await navigator.serviceWorker.getRegistration();
     const subscription = await registration.pushManager.getSubscription();
 
     let response = await axios.post(`${window.location.origin}/webhook-test`,
-      { endpoint: subscription.endpoint });
+      { subscription });
 
     return response;
   }

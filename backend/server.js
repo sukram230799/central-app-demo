@@ -2,10 +2,6 @@ const express = require('express');
 const webpush = require('web-push');
 const bodyparser = require('body-parser');
 const axios = require('axios').default;
-const low = require('lowdb');
-const FileSync = require('lowdb/adapters/FileSync');
-const adapter = new FileSync('.data/db.json');
-const db = low(adapter);
 
 const centralBaseUrlObject = require('./central-base-url.json');
 
@@ -18,10 +14,6 @@ const vapidDetails = {
 };
 
 const host = process.env.HOST;
-
-db.defaults({
-    subscriptions: []
-}).write();
 
 function sendNotifications(subscriptions, notification) {
     // Customize how the push service should attempt to deliver the push message.
@@ -57,51 +49,33 @@ app.use(express.static('www'));
 app.use('/onboard', express.static('onboard'));
 
 app.post('/webhook-register', (request, response) => {
-    if (process.env.NODE_ENV !== "production") {
+    if (process.env.NODE_ENV !== "production")
         console.log(`Subscribing ${request.body.endpoint}`);
-        db.get('subscriptions')
-            .push(request.body)
-            .write();
-    }
 
     response.send({ url: `https://${host}/webhook/` + Buffer.from(JSON.stringify(request.body)).toString("base64") })
 });
 
-app.post('/webhook-unregister', (request, response) => {
-    if (process.env.NODE_ENV !== "production") {
-        console.log(`Unsubscribing ${request.body.endpoint}`);
-        db.get('subscriptions')
-            .remove({ endpoint: request.body.endpoint })
-            .write();
-    }
-
-    response.sendStatus(200);
-});
-
 app.post('/webhook-test', (request, response) => {
-    if (process.env.NODE_ENV !== "production") {
-        console.log(`Notifying ${request.body.endpoint}`);
-        const subscription =
-            db.get('subscriptions').find({ endpoint: request.body.endpoint }).value();
-        sendNotifications([subscription], JSON.stringify({
-            "timestamp": 1677862473,
-            "nid": 1250,
-            "alert_type": "AP_CPU_OVER_UTILIZATION",
-            "severity": "Major",
-            "details": {
-                "threshold": "20"
-            },
-            "description": "This is a sample webhook message. Please ignore this",
-            "text": "This is a sample webhook message. Please ignore this",
-            "setting_id": "CID-1250",
-            "device_id": "TEST123456",
-            "state": "Open",
-            "operation": "create",
-            "webhook": "38853888-3391-40af-b7a8-470828512428",
-            "cluster_hostname": "internal-ui.central.arubanetworks.com"
-        }));
-    }
-    
+    if (process.env.NODE_ENV !== "production")
+        console.log(`Notifying ${request.body.subscription.endpoint}`);
+    sendNotifications([request.body.subscription], JSON.stringify({
+        "timestamp": 1677862473,
+        "nid": 1250,
+        "alert_type": "AP_CPU_OVER_UTILIZATION",
+        "severity": "Major",
+        "details": {
+            "threshold": "20"
+        },
+        "description": "This is a sample webhook message. Please ignore this",
+        "text": "This is a sample webhook message. Please ignore this",
+        "setting_id": "CID-1250",
+        "device_id": "TEST123456",
+        "state": "Open",
+        "operation": "create",
+        "webhook": "38853888-3391-40af-b7a8-470828512428",
+        "cluster_hostname": "internal-ui.central.arubanetworks.com"
+    }));
+
     response.sendStatus(200);
 });
 

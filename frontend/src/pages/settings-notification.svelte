@@ -21,10 +21,6 @@
     return push.registerServiceWorker().catch((e) => errorToast(f7, e));
   }
 
-  function unregisterServiceWorker() {
-    return push.unregisterServiceWorker().catch((e) => errorToast(f7, e));
-  }
-
   function subscribeToPush() {
     return push.registerPush().catch((e) => errorToast(f7, e));
   }
@@ -49,7 +45,7 @@
           ></Col
         >
         <Col
-          ><Button raised on:click={unregisterServiceWorker}
+          ><Button raised disabled tooltip="Not saved on backend"
             >Unregister SW</Button
           ></Col
         >
