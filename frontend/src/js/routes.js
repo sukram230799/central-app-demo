@@ -11,6 +11,8 @@ import DeviceDetailsPage from '../pages/device-details.svelte';
 import CameraSettingsPage from '../pages/settings-camera.svelte';
 import CentralSettingsPage from '../pages/settings-central.svelte';
 import NotificationSettingsPage from '../pages/settings-notification.svelte';
+import NotificationWebhookSettingsPage from '../pages/settings-notification-webhook.svelte';
+import NotificationWebhookCategorySettingsPage from '../pages/settings-notification-webhook-category.svelte';
 import TroubleshootingPage from '../pages/troubleshooting.svelte';
 import TroubleshootingDetailsPage from '../pages/troubleshooting-details.svelte';
 import GroupsPage from '../pages/groups.svelte';
