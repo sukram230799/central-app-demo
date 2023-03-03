@@ -893,6 +893,53 @@ class Central {
 
     return this.handleResponse(outputResponse);
   }
+
+
+  /**
+   * List Notification Types
+   * @returns {{ "count": 1, "total": 68, "types": [{ "id": 1554, "name": "CFG_SET_ADVERTISEMENT_FAILURE", "desc": "CFG-SET advertisement failure", "category": "GATEWAY" }]}}
+   * 
+   * Get types. AutoPagination
+   * ---
+   * https://developer.arubanetworks.com/aruba-central/reference/apinotifications_external_apiget_types_api
+   */
+  async listNotificationTypes() {
+    let limit = 1000;
+    let offset = 0;
+    let nTypes = [];
+    while (true) {
+      let response = this.handleResponse(await this.get('central/v1/notifications/types', {
+        params: { limit, offset }
+      }));
+
+      nTypes.push(...response.types);
+
+      if (response.count < limit)
+        // No more entries expected. Break loop
+        break;
+
+      offset += limit;
+    }
+
+    return {
+      count: nTypes.length,
+      total: nTypes.length,
+      types: nTypes
+    };
+  }
+
+  /**
+   * 
+   * @param {{ customer_id, group, label, serial, site, from_timestamp, to_timestamp, severity, type, search, calculate_total: boolean, ack: boolean, fields, offset: int, limit: int }} params 
+   * @returns {{"count":1,"total":84,"notifications":[{"id":"AWLTCw983zA1xiLvI9DF","severity":"Major","customer_id":"f28b6bc3e46c42a88bc27ff4713496fa","device_id":"SN1000012","details":{},"nid":"4","settings_id":"f28b6bc3e46c42a88bc27ff4713496fa-4","timestamp":1523958870,"group_name":"IAP 5GHz","labels":["dual_5GHz"],"type":"AP disconnected","acknowledged":false,"description":"AP with Name IAP_345_1 and MAC address c8:b5:ad:c3:b2:02 disconnected","state":"Open","acknowledged_by":"user1","acknowledged_timestamp":1523958870,"created_timestamp":1523958870}]}}
+   */
+  async listNotifications(params = {}) {
+    let response = await this.get('central/v1/notifications', {
+      params
+    });
+
+    return this.handleResponse(response)
+  }
 }
 
 export const central = new Central();

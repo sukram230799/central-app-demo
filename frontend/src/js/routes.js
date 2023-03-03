@@ -15,6 +15,8 @@ import TroubleshootingDetailsPage from '../pages/troubleshooting-details.svelte'
 import GroupsPage from '../pages/groups.svelte';
 import GroupDetailsPage from '../pages/group-details.svelte';
 import GroupCreatePage from '../pages/group-create.svelte';
+import NotificationsPage from '../pages/notifications.svelte';
+import NotificationDetailsPage from '../pages/notification-details.svelte';
 
 
 import DynamicRoutePage from '../pages/dynamic-route.svelte';
@@ -65,6 +67,14 @@ var routes = [
   {
     path: '/groups/details/',
     component: GroupDetailsPage,
+  },
+  {
+    path: '/notifications/',
+    component: NotificationsPage,
+  },
+  {
+    path: '/notifications/details',
+    component: NotificationDetailsPage,
   },
   {
     path: '/settings/camera',

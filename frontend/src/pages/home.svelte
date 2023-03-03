@@ -184,11 +184,8 @@
       <ListItem link="/devices/" title="Devices" />
       <!-- <ListItem link="/wlans/" title="WLANs" /> -->
       <ListItem link="/groups/" title="Groups" />
-      <ListItem
-        disabled={!centralReady}
-        link="/troubleshooting/"
-        title="Troubleshooting"
-      />
+      <ListItem link="/troubleshooting/" title="Troubleshooting" />
+      <ListItem link="/notifications/" title="Notifications" />
     </List>
   {/if}
 

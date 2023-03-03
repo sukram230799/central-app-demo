@@ -12,20 +12,52 @@
   <List class="search-list">
     {#each Object.entries(data) as [key, description]}
       {#if typeof description === "object"}
-        <ListItem
-          class={loadClass}
-          title={description.title}
-          href={description.href}
-          routeProps={description.routeProps
-            ? description.routeProps(details)
-            : undefined}
-          after={unitHumanReadable(
-            details[key],
-            description.unit,
-            description.format,
-            description.multiplier
-          )}
-        />
+        {#if description.asTitle}
+          <ListItem
+            class={loadClass}
+            title={unitHumanReadable(
+              details[key],
+              description.unit,
+              description.format,
+              description.multiplier
+            )}
+            href={description.href}
+            routeProps={description.routeProps
+              ? description.routeProps(details)
+              : undefined}
+            mediaItem={true}
+          />
+        {:else if description.asFooter}
+          <ListItem
+            class={loadClass}
+            title={description.title}
+            href={description.href}
+            routeProps={description.routeProps
+              ? description.routeProps(details)
+              : undefined}
+            footer={unitHumanReadable(
+              details[key],
+              description.unit,
+              description.format,
+              description.multiplier
+            )}
+          />
+        {:else}
+          <ListItem
+            class={loadClass}
+            title={description.title}
+            href={description.href}
+            routeProps={description.routeProps
+              ? description.routeProps(details)
+              : undefined}
+            after={unitHumanReadable(
+              details[key],
+              description.unit,
+              description.format,
+              description.multiplier
+            )}
+          />
+        {/if}
       {:else}
         <ListItem class={loadClass} title={description} after={details[key]} />
       {/if}

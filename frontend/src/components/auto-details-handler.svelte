@@ -6,9 +6,10 @@
 </script>
 
 <BlockTitle>Further Details</BlockTitle>
-<List>
+<List class="search-list">
   {#each Object.entries(detailsUnhandled) as [title, data]}
     {#if Array.isArray(data)}
+      <!-- ARRAY -->
       <ListItem class={loadClass} {title} />
       <li>
         <ul>
@@ -17,23 +18,45 @@
               <ListItem class={loadClass} after={dataEntry} />
             {:else if !!dataEntry}
               {#each Object.entries(dataEntry) as [subTitle, subData]}
-                <ListItem class={loadClass} title={subTitle} after={subData} />
+                {#if typeof subData !== "string" || subData?.length < 30}
+                  <ListItem
+                    class={loadClass}
+                    title={subTitle}
+                    after={subData}
+                  />
+                {:else}
+                  <ListItem
+                    class={loadClass}
+                    title={subTitle}
+                    footer={subData}
+                  />
+                {/if}
               {/each}
             {/if}
           {/each}
         </ul>
       </li>
     {:else if data !== null && typeof data === "object"}
+      <!-- OBJECT -->
       <ListItem class={loadClass} {title} />
       <li>
         <ul>
           {#each Object.entries(data) as [subTitle, subData]}
-            <ListItem class={loadClass} title={subTitle} after={subData} />
+            {#if typeof subData !== "string" || subData?.length < 30}
+              <ListItem class={loadClass} title={subTitle} after={subData} />
+            {:else}
+              <ListItem class={loadClass} title={subTitle} footer={subData} />
+            {/if}
           {/each}
         </ul>
       </li>
     {:else}
-      <ListItem class={loadClass} {title} after={data} />
+      <!-- STRING -->
+      {#if typeof data !== "string" || data?.length < 30}
+        <ListItem class={loadClass} {title} after={data} />
+      {:else}
+        <ListItem class={loadClass} {title} footer={data} />
+      {/if}
     {/if}
   {/each}
 </List>
