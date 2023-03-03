@@ -17,6 +17,8 @@
     ListItem,
     Icon,
   } from "framework7-svelte";
+  const debug = process.env.NODE_ENV !== "production";
+
   import { getDevice } from "framework7";
   import { onDestroy, onMount } from "svelte";
   import { central } from "../js/central";
@@ -102,7 +104,7 @@
       searchIn=".item-title"
       disableButton={!theme.aurora}
     />
-    <NavTitleLarge>Central Toolkit</NavTitleLarge>
+    <NavTitleLarge>{debug ? "DEV Central Toolkit" : "Central Toolkit"}</NavTitleLarge>
   </Navbar>
 
   <Popup
