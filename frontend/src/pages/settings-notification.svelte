@@ -39,6 +39,10 @@
   function notifyMe() {
     return push.notifyMe().catch((e) => errorToast(f7, e));
   }
+
+  function testWebhook() {
+    return central.testWebhook().catch((e) => errorToast(f7, e));
+  }
 </script>
 
 <Page>
@@ -63,6 +67,9 @@
       <Col
         ><Button raised onClick={unsubscribeFromPush}>Unsubscribe</Button></Col
       >
+    </Row>
+    <Row>
+      <Col><Button raised onClick={testWebhook}>Test Webhook</Button></Col>
     </Row>
     {#if debug}
       <Row>

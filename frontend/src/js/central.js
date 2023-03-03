@@ -3,7 +3,7 @@ import { get } from 'svelte/store';
 import {
   currentAccountStore, accountsStore,
   selectedFilterStore, selectedFilterDefaults, timeRanges,
-  groupCacheStore, labelCacheStore, siteCacheStore, currentAccountIdStore,
+  groupCacheStore, labelCacheStore, siteCacheStore, currentAccountIdStore, notificationSettingsStore, webhookStore,
 } from './svelte-store.js';
 
 // const proxy = `${window.location.origin}/api-proxy`;
@@ -968,7 +968,59 @@ class Central {
   async listNotificationSettings(params = {}) {
     let response = await this.get('central/v1/notifications/settings', { params });
 
-    return this.handleResponse(response);
+    let result = this.handleResponse(response);
+
+    notificationSettingsStore.update(result.settings);
+
+    return result;
+  }
+
+  /**
+   * Add Notification Setting
+   * @param {{ type: string, rules: Array, active:boolean = true }} param0 
+   * @returns {{ "result": "201610195243-1252" }}
+   * Add Notification Setting
+   * PLEASE DO REFRESH WITH `listNotificationSettings`
+   * ---
+   * https://developer.arubanetworks.com/aruba-central/reference/apinotifications_external_apiadd_setting_api
+   */
+  async addNotificationSetting({ type, rules, active = true }) {
+    let response = await this.post('central/v1/notifications/settings', {
+      data: {
+        type, rules, active
+      }
+    })
+
+    return this.handleResponse(response)
+  }
+
+  /**
+   * Delete Notification Setting
+   * @param {{setting_id: string}} param0 
+   * @returns 
+   * Delete Notification Setting
+   * PLEASE DO REFRESH WITH `listNotificationSettings`
+   * ---
+   * https://developer.arubanetworks.com/aruba-central/reference/apinotifications_external_apidelete_setting_api
+   */
+  async deleteNotificationSetting({ settings_id }) {
+    let response = await this.delete(`central/v1/notifications/settings/${settings_id}`);
+
+    return this.handleResponse(response)
+  }
+
+  /**
+   * Update Notification Settings
+   * @param {{ settings_id: string, setting: { type: string, rules: Array, active:boolean = true } }} param0 
+   * @returns 
+   * Update Notification Settings
+   * ---
+   * https://developer.arubanetworks.com/aruba-central/reference/apinotifications_external_apiupdate_setting_api
+   */
+  async updateNotificationSetting({ settings_id, setting }) {
+    let response = await this.put(`central/v1/notifications/settings/${settings_id}`, { data: setting });
+
+    return this.handleResponse(response)
   }
 
 
@@ -1043,6 +1095,13 @@ class Central {
     return this.handleResponse(response);
   }
 
+  /** Test Webhook */
+  async testWebhook({ wid } = {}) {
+    if (!wid) wid = get(webhookStore);
+    let response = await this.get(`central/v1/webhooks/${wid}/ping`)
+
+    return this.response(response);
+  }
 
 }
 
