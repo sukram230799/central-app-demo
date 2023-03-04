@@ -81,7 +81,9 @@
 <Page name="home">
   <!-- Top Navbar -->
   <Navbar large sliding={false}>
-    <NavTitle sliding>Central Toolkit</NavTitle>
+    <NavTitle sliding
+      >{debug ? "DEV Central Toolkit" : "Central Toolkit"}</NavTitle
+    >
     <NavRight>
       <Link
         iconIos="f7:line_horizontal_3_decrease"
