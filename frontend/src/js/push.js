@@ -11,7 +11,6 @@ class Push {
   async registerServiceWorker() {
     return await navigator.serviceWorker
       .register("./service-worker.dev.js")
-
   }
 
   async unregisterServiceWorker() {
@@ -40,8 +39,10 @@ class Push {
       wid = webhook.wid
       await central.updateWebhook({ wid, url })
     }
-    else
-      wid = await central.addWebhook({ url }).wid;
+    else {
+      let result = await central.addWebhook({ url });
+      wid = result.wid;
+    }
 
     webhookStore.update(wid);
   }
@@ -50,9 +51,16 @@ class Push {
     let webhooks = await central.listWebhooks();
     let webhook = webhooks.settings.find(webhook => webhook.name === central.generateWebhookName());
 
+    let result;
+
     if (webhook)
-    return await central.deleteWebhook({ wid: webhook.wid });
-    else return true;
+      result = await central.deleteWebhook({ wid: webhook.wid });
+    else result = true;
+
+    // Remove wid/webhook id
+    webhookStore.update(null);
+
+    return result;
   }
 
   async notifyMe() {
