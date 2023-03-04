@@ -167,7 +167,7 @@
           E-Mail: sukram230799@wuest.dev
         </p>
 
-        <p>Quelle: <a href="https://www.e-recht24.de">e-recht24.de</a></p>
+        <p>Quelle: <Link external href="https://www.e-recht24.de">e-recht24.de</Link></p>
       </Block>
     </Page>
   </Popup>
