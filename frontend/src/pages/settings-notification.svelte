@@ -19,6 +19,11 @@
   import { errorToast } from "../js/operations/error-toast";
 
   import { push } from "../js/push";
+  import { webhookStore } from "../js/svelte-store";
+
+  let noWID = true;
+
+  webhookStore.subscribe((wid) => (noWID = !wid));
 
   function registerServiceWorker() {
     return push.registerServiceWorker().catch((e) => errorToast(f7, e));
@@ -41,16 +46,24 @@
   }
 
   function testWebhook() {
-    return central.testWebhook().catch((e) => errorToast(f7, e));
+    return central
+      .testWebhook()
+      .then(() =>
+        f7.toast.show({
+          title: "Success. You should receive a notification",
+          closeTimeout: 2000,
+        })
+      )
+      .catch((e) => errorToast(f7, e));
   }
 </script>
 
-<Page>
-  <Navbar title="Notification" backLink="Back" />
-  <BlockTitle>Manage Subscription</BlockTitle>
+<Page class="grid-demo">
+  <Navbar title="Notification Settings" backLink="Back" />
+  <BlockTitle>Manage Notification Subscription</BlockTitle>
   <Block strong>
     Please note: Web Notifications are currently not supported on iOS. You can
-    enable it from iOS Version 16.4.
+    try to enable them from iOS version 16.4 onwards.
   </Block>
   <Block>
     {#if debug}
@@ -59,21 +72,36 @@
           ><Button raised onClick={registerServiceWorker}>Register SW</Button
           ></Col
         >
-        <Col
-          ><Button raised onClick={unregisterServiceWorker}
-            >Unregister SW</Button
-          ></Col
-        >
+        <Col>
+          <Button raised onClick={unregisterServiceWorker}>
+            Unregister SW
+          </Button>
+        </Col>
       </Row>
     {/if}
     <Row>
+      <Col>
+        Click on subscribe to enable notifiactions and register your device as a
+        Webhook in Central. With unsubscribe you can remove the subscription and
+        the Webhook in Central.
+      </Col>
+    </Row><Row>
       <Col><Button raised onClick={subscribeToPush}>Subscribe</Button></Col>
       <Col
         ><Button raised onClick={unsubscribeFromPush}>Unsubscribe</Button></Col
       >
-    </Row>
-    <Row>
-      <Col><Button raised onClick={testWebhook}>Test Webhook</Button></Col>
+    </Row><Row>
+      <Col>
+        Once you are subscribed you can test the Central Notification. They are
+        triggered directly via Central. Once you click should receive a psuh
+        notifiaction within a few seconds.
+      </Col>
+    </Row><Row>
+      <Col
+        ><Button raised onClick={testWebhook} disabled={noWID}
+          >Test Central Notification</Button
+        ></Col
+      >
     </Row>
     {#if debug}
       <Row>
@@ -125,3 +153,9 @@
     />
   </List>
 </Page>
+
+<style>
+  :global(.grid-demo div[class*="col"]) {
+    margin-bottom: 15px;
+  }
+</style>
