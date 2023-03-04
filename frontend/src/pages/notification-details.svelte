@@ -97,7 +97,7 @@
   // Custom per category handler
   const entries = {
     Details: {
-      description: { title: "Details", asFooter: true },
+      description: { title: "Description", asFooter: true },
       created_timestamp: {
         title: "Date Created",
         format: durationFormatter(),
@@ -128,11 +128,20 @@
   }
 
   // Actions
+  function toggleAcknowledged() {}
 </script>
 
 <Page>
   <Navbar title={notification.type} backLink="Back">
     <NavRight>
+      <Link
+        iconIos={alert.acknowledged ? "f7:eye_fill" : "f7:eye_slash_fill"}
+        iconAurora={alert.acknowledged ? "f7:eye_fill" : "f7:eye_slash_fill"}
+        iconMd={alert.acknowledged
+          ? "material:visibility"
+          : "material:visibility_off"}
+        onClick={toggleAcknowledged}
+      />
       <Link
         searchbarEnable=".searchbar-details"
         iconIos="f7:search"
