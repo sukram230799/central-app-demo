@@ -74,7 +74,6 @@
       .then((clientDetails) => (client = clientDetails))
       .then(() => dataLoaded())
       .catch((e) => {
-        console.error(e);
         errorToast(f7, e, { defaultTimeout: 2000 });
       })
       .finally(() => {

@@ -152,7 +152,6 @@
         groupCreated();
       })
       .catch((e) => {
-        console.error(e);
         errorToast(f7, e, { defaultTimeout: 2000 });
         groupFailed();
       })
@@ -168,7 +167,6 @@
         groupCreated();
       })
       .catch((e) => {
-        console.error(e);
         errorToast(f7, e, { defaultTimeout: 2000 });
         groupFailed();
       })
@@ -192,7 +190,6 @@
         groupCreated();
       })
       .catch((e) => {
-        console.error(e);
         errorToast(f7, e, { defaultTimeout: 2000 });
         groupFailed();
       })

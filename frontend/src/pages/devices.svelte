@@ -79,7 +79,6 @@
       ...deviceLists[2].switches,
     ];
     } catch (e) {
-      console.error(e);
       errorToast(f7, e);
     } finally {
       loaded = true;
