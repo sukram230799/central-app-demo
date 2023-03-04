@@ -48,6 +48,10 @@
 <Page>
   <Navbar title="Notification" backLink="Back" />
   <BlockTitle>Manage Subscription</BlockTitle>
+  <Block strong>
+    Please note: Web Notifications are currently not supported on iOS. You can
+    enable it from iOS Version 16.4.
+  </Block>
   <Block>
     {#if debug}
       <Row>
@@ -80,6 +84,10 @@
   </Block>
   <BlockTitle>How-To (manual)</BlockTitle>
   <Block>
+    To receive push notifications on your device, you have to subscribe to the
+    Alerts from Central. The recommended way is to use your desktop and enable
+    it directly in Central. The instructions can be found below. You can also
+    try it directly from within the App.
     <ol
       style="padding: 0;
     margin-left: 1em;"
@@ -95,12 +103,25 @@
       <li>Then go to Alerts & Events.</li>
       <li>Click on Configure in the top left.</li>
       <li>Select which Alerts you want to receive.</li>
-      <li>Under Webhook select "{central.generateWebhookName()}".</li>
+      <li>Once you selected an alert enable the Webhook checkbox.</li>
+      <li>
+        In the filed next to Webhook select "{central.generateWebhookName()}".
+      </li>
+      <li>Then click on save.</li>
+      <li>Once the Alert triggers you should receive a notifiaction.</li>
     </ol>
   </Block>
-  <BlockTitle>Configure here</BlockTitle>
-  <Block>This may break your existing alerts. Use with caution.</Block>
+  <BlockTitle>Configure directly in App</BlockTitle>
+  <Block
+    >Please be advised that it might have unintended consequences. <b
+      >If you rely on Alerts and Webhooks for security critical systems, the
+      editing directly in the App might not be ideal for you.</b
+    > You can still use the manual instructions above if you want to try push notifications.</Block
+  >
   <List>
-    <ListItem href="/settings/notification/alerts" title="Select Alerts" />
+    <ListItem
+      href="/settings/notification/alerts"
+      title="Select Alerts (use with caution)"
+    />
   </List>
 </Page>
