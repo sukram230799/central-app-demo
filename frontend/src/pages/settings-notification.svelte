@@ -34,11 +34,21 @@
   }
 
   function subscribeToPush() {
-    return push.registerPush().catch((e) => errorToast(f7, e));
+    return push.registerPush()      .then(() =>
+        f7.toast.show({
+          text: "Success! You can add alerts now.",
+          closeTimeout: 2000,
+        })
+      ).catch((e) => errorToast(f7, e));
   }
 
   function unsubscribeFromPush() {
-    return push.unregisterPush().catch((e) => errorToast(f7, e));
+    return push.unregisterPush()      .then(() =>
+        f7.toast.show({
+          text: "Success! Your subscription was removed.",
+          closeTimeout: 2000,
+        })
+      ).catch((e) => errorToast(f7, e));
   }
 
   function notifyMe() {
