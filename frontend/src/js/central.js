@@ -1100,7 +1100,7 @@ class Central {
     if (!wid) wid = get(webhookStore);
     let response = await this.get(`central/v1/webhooks/${wid}/ping`)
 
-    return this.response(response);
+    return this.handleResponse(response);
   }
 
 }
