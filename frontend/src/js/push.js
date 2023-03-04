@@ -73,6 +73,13 @@ class Push {
     return response;
   }
 
+  async filterWebhooks(webhooks) {
+    // Get webhooks from central
+    let validWebhooks = (await central.listWebhooks()).settings.map(webhook => webhook.wid);
+    // Filter against validWebhooks
+    return webhooks.filter(webhook => validWebhooks.includes(webhook));
+  }
+
   async addAlert(alert) {
     let alertSettings = await central.listNotificationSettings();
     let alertSetting = alertSettings.settings.find(alertSetting => alertSetting.type === alert.name);
@@ -82,8 +89,27 @@ class Push {
     if (alertSetting) {
       let rules = alertSetting.rules;
 
-      rules[0].webhooks.push(wid)
-      if (!rules[0].delivery_options.includes("Webhook")) rules[0].delivery_options.push("Webhook")
+      if (rules === undefined) {
+        rules = {
+          severity: "Warning",
+          delivery_options: ["Webhook"],
+          webhooks: [wid]
+        }
+      }
+      else {
+        if (!rules[0].delivery_options) {
+          rules[0].delivery_options = ['Webhook'];
+          rules[0].webhooks = [];
+        }
+        else if (!rules[0].delivery_options.includes("Webhook")) {
+          rules[0].delivery_options.push("Webhook");
+          rules[0].webhooks = [];
+        }
+        rules[0].webhooks.push(wid)
+        rules[0].webhooks.sort()
+
+        rules[0].webhooks = await this.filterWebhooks(rules[0].webhooks);
+      }
 
       await central.updateNotificationSetting({
         settings_id: alertSetting.id, setting: {
@@ -115,13 +141,19 @@ class Push {
       let rules = alertSetting.rules;
 
       rules[0].webhooks.splice(rules[0].webhooks.indexOf(wid), 1);
-      if (!rules[0].webhooks.length) rules[0].delivery_options.splice(rules[0].delivery_options.indexOf("Webhook"), 1);
+
+      rules[0].webhooks = await this.filterWebhooks(rules[0].webhooks);
+
+      if (!rules[0].webhooks.length) {
+        rules[0].delivery_options.splice(rules[0].delivery_options.indexOf("Webhook"), 1);
+        rules[0].webhooks = undefined;
+      }
 
       await central.updateNotificationSetting({
         settings_id: alertSetting.id, setting: {
-          ...alertSetting,
           active: true,
-          rules: rules
+          rules: rules,
+          type: alertSetting.type
         }
       });
       await central.listNotificationSettings();
