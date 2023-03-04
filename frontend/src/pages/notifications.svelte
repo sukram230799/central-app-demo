@@ -38,7 +38,11 @@
         (notifiactionTypesResponse) =>
           (notifiactionTypes = notifiactionTypesResponse.types)
       )
-      .then(() => central.listNotifications({ from_timestamp: 1672731167 }))
+      .then(() =>
+        central.listNotifications({
+          from_timestamp: Math.floor(Date.now() / 1000 - 60 * 60 * 24 * 30),
+        })
+      )
       .then(
         (notifactionResponse) =>
           (notifications = notifactionResponse.notifications)
@@ -70,19 +74,38 @@
 </script>
 
 <Page>
-  <Navbar title="Notification" backLink="Back" />
+  <Navbar title="Notifications" backLink="Back" />
   <BlockTitle>Notifications</BlockTitle>
+
+  {#if !loaded}
+    <List>
+      {#each ["Critical", "Major", "Minor", "Warning", "Critical", "Major", "Minor", "Warning", "Critical", "Major", "Minor", "Warning"] as severity}
+        <ListItem
+          class={theme.ios
+            ? "skeleton-text skeleton-effect-pulse"
+            : "skeleton-text skeleton-effect-wave"}
+          header={severity + " - " + "2023-03-04 09:46:07 UTC"}
+          title="Notification Type"
+          footer={("x".repeat(80) + "\n").repeat(3)}
+          href="#"
+        />
+      {/each}
+    </List>
+  {/if}
   <List>
     {#each notifications as notification}
       <ListItem
-        footer={notification.description.split("\n")[0]}
+        header={notification.severity + " - " + notification.details.time}
         title={getNotificationType(notification).desc}
-        header={notification.severity}
+        footer={notification.description.split("\n")[0]}
         href="/notifications/details/"
         routeProps={{
           notification: notification,
         }}
       />
     {/each}
+    {#if loaded && !notifications?.length}
+      <ListItem>No entries</ListItem>
+    {/if}
   </List>
 </Page>
