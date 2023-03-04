@@ -50,7 +50,7 @@
       .testWebhook()
       .then(() =>
         f7.toast.show({
-          title: "Success. You should receive a notification",
+          text: "Success. You should receive a notification",
           closeTimeout: 2000,
         })
       )
