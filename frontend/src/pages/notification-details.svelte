@@ -152,10 +152,10 @@
           "Alert reopen is not supported"
         )
           f7.toast.show({
-            text: "Reopen currently not supported by Central API",
+            text: "Alert reopen currently not supported by Central API",
             closeTimeout: 2000,
           });
-        errorToast(f7, e);
+        else errorToast(f7, e);
       })
       .finally(() => f7.preloader.hide());
   }
