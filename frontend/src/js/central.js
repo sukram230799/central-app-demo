@@ -955,6 +955,36 @@ class Central {
     return this.handleResponse(response)
   }
 
+  /**
+   * Acknowledge Notifications by ID List / All
+   * @param {{notificationIds: [string]}} param0 
+   * @returns 
+   * Update notifications. This is used for acknowledging a list of notifications. This is an async operation.
+   * ---
+   * https://developer.arubanetworks.com/aruba-central/reference/apinotifications_external_apiacknowledge_notifications
+   */
+  async acknowledgeNotifications({ notificationIds }) {
+    let response = await this.post('central/v1/notifications', { data: notificationIds });
+
+    return this.handleResponse(response);
+  }
+
+  /**
+   * Acknowledge Notification
+   * @param {{ notification_id: string, acknowledged: boolean }} param 
+   * @param {boolean} param.acknowledged Notification acknowledgement status. Currently acknowledge is only supported and unacknowledge is not supported.
+   * @returns 
+   * Update a notification. This is used for acknowledging a notification.
+   * 
+   * ---
+   * https://developer.arubanetworks.com/aruba-central/reference/apinotifications_external_apiacknowledge_notification
+   */
+  async acknowledgeNotification({ notification_id, acknowledged }) {
+    let response = await this.patch(`central/v1/notifications/${notification_id}`, { data: { acknowledged: acknowledged } });
+
+    return this.handleResponse(response);
+  }
+
   /* NOTIFICATION SETTINGS */
 
   /**

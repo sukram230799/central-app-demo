@@ -21,6 +21,7 @@
   import { errorToast } from "../js/operations/error-toast";
   import { durationFormatter } from "human-readable";
   import { formatBytes, formatDate, formatYesNo } from "../js/formatter";
+  import { central } from "../js/central";
 
   export let notification = {};
   let notificationUnhandled = {};
@@ -60,7 +61,7 @@
   let notHandledEntries = [];
 
   // Dummy Data
-  const dummyAlert = {
+  const dummyNotification = {
     acknowledged: false,
     created_timestamp: 1677145316.0,
     customer_id: "da3...",
@@ -128,16 +129,49 @@
   }
 
   // Actions
-  function toggleAcknowledged() {}
+  function toggleAcknowledged() {
+    return central
+      .ready()
+      .then(() => f7.preloader.show())
+      .then(() =>
+        central.acknowledgeNotification({
+          notification_id: notification.id,
+          acknowledged: !notification.acknowledged,
+        })
+      )
+      .then(() => {
+        notification.acknowledged = !notification.acknowledged;
+        f7.toast.show({
+          text: notification.acknowledged ? "Acknowledged" : "Reopened",
+          closeTimeout: 2000,
+        });
+      })
+      .catch((e) => {
+        if (
+          e?.options?.responseBody?.description ===
+          "Alert reopen is not supported"
+        )
+          f7.toast.show({
+            text: "Reopen currently not supported by Central API",
+            closeTimeout: 2000,
+          });
+        errorToast(f7, e);
+      })
+      .finally(() => f7.preloader.hide());
+  }
 </script>
 
 <Page>
   <Navbar title={notification.type} backLink="Back">
     <NavRight>
       <Link
-        iconIos={alert.acknowledged ? "f7:eye_fill" : "f7:eye_slash_fill"}
-        iconAurora={alert.acknowledged ? "f7:eye_fill" : "f7:eye_slash_fill"}
-        iconMd={alert.acknowledged
+        iconIos={notification.acknowledged
+          ? "f7:eye_fill"
+          : "f7:eye_slash_fill"}
+        iconAurora={notification.acknowledged
+          ? "f7:eye_fill"
+          : "f7:eye_slash_fill"}
+        iconMd={notification.acknowledged
           ? "material:visibility"
           : "material:visibility_off"}
         onClick={toggleAcknowledged}
