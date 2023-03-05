@@ -34,25 +34,39 @@
   }
 
   function subscribeToPush() {
-    return push.registerPush()      .then(() =>
+    return push
+      .registerPush()
+      .then(() =>
         f7.toast.show({
           text: "Success! You can add alerts now.",
           closeTimeout: 2000,
         })
-      ).catch((e) => errorToast(f7, e));
+      )
+      .catch((e) => errorToast(f7, e));
   }
 
   function unsubscribeFromPush() {
-    return push.unregisterPush()      .then(() =>
+    return push
+      .unregisterPush()
+      .then(() =>
         f7.toast.show({
           text: "Success! Your subscription was removed.",
           closeTimeout: 2000,
         })
-      ).catch((e) => errorToast(f7, e));
+      )
+      .catch((e) => errorToast(f7, e));
   }
 
   function notifyMe() {
-    return push.notifyMe().catch((e) => errorToast(f7, e));
+    return push
+      .notifyMe()
+      .then(() =>
+        f7.toast.show({
+          text: "Success! You should receive a notification from the backend. Use Test Central Notification to test the full path.",
+          closeTimeout: 5000,
+        })
+      )
+      .catch((e) => errorToast(f7, e));
   }
 
   function testWebhook() {
@@ -107,18 +121,14 @@
         notifiaction within a few seconds.
       </Col>
     </Row><Row>
+      <Col><Button raised onClick={notifyMe}>Test Notification</Button></Col>
+    </Row><Row>
       <Col
         ><Button raised onClick={testWebhook} disabled={noWID}
           >Test Central Notification</Button
         ></Col
       >
     </Row>
-    {#if debug}
-      <Row>
-        <Col><Button raised onClick={notifyMe}>Notify me</Button></Col>
-        <Col><Button raised>Notify all</Button></Col>
-      </Row>
-    {/if}
   </Block>
   <BlockTitle>How-To (manual)</BlockTitle>
   <Block>
