@@ -23,7 +23,8 @@
     let wid = get(webhookStore);
     selectedAlerts = alerts.map((alert) => {
       let setting = settings.find((setting) => setting.type === alert.name);
-      return !!setting?.rules.find((rule) => rule?.webhooks?.includes(wid));
+      if (!setting?.active) return false;
+      return !!setting?.rules?.find((rule) => rule?.webhooks?.includes(wid));
     });
   });
 
