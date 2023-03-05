@@ -196,10 +196,12 @@
 
   <BlockTitle>Settings</BlockTitle>
   <List>
-    <ListItem
-      link="/settings/notification/"
-      title="Alerts & Notifications Settings"
-    />
+    {#if centralReady}
+      <ListItem
+        link="/settings/notification/"
+        title="Alerts & Notifications Settings"
+      />
+    {/if}
     <ListItem link="/settings/camera/" title="Camera Settings" />
     <ListItem link="/settings/central/" title="Central Settings" />
     
