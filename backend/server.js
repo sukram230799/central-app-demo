@@ -49,34 +49,44 @@ app.use(express.static('www'));
 app.use('/onboard', express.static('onboard'));
 
 app.post('/webhook-register', (request, response) => {
-    if (process.env.NODE_ENV !== "production")
-        console.log(`Subscribing ${request.body.endpoint}`);
+    try {
+        if (process.env.NODE_ENV !== "production")
+            console.log(`Subscribing ${request.body.endpoint}`);
 
-    response.send({ url: `https://${host}/webhook/` + Buffer.from(JSON.stringify(request.body)).toString("base64") })
+        response.send({ url: `https://${host}/webhook/` + Buffer.from(JSON.stringify(request.body)).toString("base64") });
+    } catch (e) {
+        if (process.env.NODE_ENV !== "production")
+            console.error(e);
+    }
 });
 
 app.post('/webhook-test', (request, response) => {
-    if (process.env.NODE_ENV !== "production")
-        console.log(`Notifying ${request.body.subscription.endpoint}`);
-    sendNotifications([request.body.subscription], JSON.stringify({
-        "timestamp": 1677862473,
-        "nid": 1250,
-        "alert_type": "AP_CPU_OVER_UTILIZATION",
-        "severity": "Major",
-        "details": {
-            "threshold": "20"
-        },
-        "description": "This is a sample webhook message. Please ignore this",
-        "text": "This is a sample webhook message. Please ignore this",
-        "setting_id": "CID-1250",
-        "device_id": "TEST123456",
-        "state": "Open",
-        "operation": "create",
-        "webhook": "38853888-3391-40af-b7a8-470828512428",
-        "cluster_hostname": "internal-ui.central.arubanetworks.com"
-    }));
+    try {
+        if (process.env.NODE_ENV !== "production")
+            console.log(`Notifying ${request.body.subscription.endpoint}`);
+        sendNotifications([request.body.subscription], JSON.stringify({
+            "timestamp": 1677862473,
+            "nid": 1250,
+            "alert_type": "TEST",
+            "severity": "Major",
+            "details": {
+                "threshold": "20"
+            },
+            "description": "This is a sample notification from the backend. Please ignore this",
+            "text": "This is a sample notification from the backend. Please ignore this",
+            "setting_id": "CID-1250",
+            "device_id": "TEST123456",
+            "state": "Open",
+            "operation": "create",
+            "webhook": null,
+            "cluster_hostname": "internal-ui.central.arubanetworks.com"
+        }));
 
-    response.sendStatus(200);
+        response.sendStatus(200);
+    } catch (e) {
+        if (process.env.NODE_ENV !== "production")
+            console.error(e);
+    }
 });
 
 function checkIfStringStartsWith(str, substrs) {
@@ -84,47 +94,57 @@ function checkIfStringStartsWith(str, substrs) {
 }
 
 app.post('/webhook/:endpoint', async (request, response) => {
-    if (process.env.NODE_ENV !== "production")
-        console.log(request.params.endpoint);
-    const endpoint = JSON.parse(Buffer.from(request.params.endpoint, 'base64').toString('utf-8'));
-    if (process.env.NODE_ENV !== "production")
-        console.log(endpoint);
+    try {
+        if (process.env.NODE_ENV !== "production")
+            console.log(request.params.endpoint);
+        const endpoint = JSON.parse(Buffer.from(request.params.endpoint, 'base64').toString('utf-8'));
+        if (process.env.NODE_ENV !== "production")
+            console.log(endpoint);
 
-    sendNotifications([endpoint]);
-    response.sendStatus(200);
+        sendNotifications([endpoint]);
+        response.sendStatus(200);
+    } catch (e) {
+        if (process.env.NODE_ENV !== "production")
+            console.error(e);
+    }
 });
 
 app.post('/api-proxy', async (request, response) => {
-    if (!checkIfStringStartsWith(request?.body?.url, centralBaseUrl))
-        return response.sendStatus(403);
-    if (process.env.NODE_ENV !== "production")
-        console.log(request.body);
-
-    let centralResponse;
     try {
-        centralResponse = await axios.request({
-            // baseURL: request.body.baseURL,
-            url: request.body.url,
-            data: request.body.data,
-            headers: request.body.headers,
-            params: request.body.params,
-            method: request.body.method,
-        });
+        if (!checkIfStringStartsWith(request?.body?.url, centralBaseUrl))
+            return response.sendStatus(403);
         if (process.env.NODE_ENV !== "production")
-            console.log(centralResponse);
+            console.log(request.body);
+
+        let centralResponse;
+        try {
+            centralResponse = await axios.request({
+                // baseURL: request.body.baseURL,
+                url: request.body.url,
+                data: request.body.data,
+                headers: request.body.headers,
+                params: request.body.params,
+                method: request.body.method,
+            });
+            if (process.env.NODE_ENV !== "production")
+                console.log(centralResponse);
+        } catch (e) {
+            if (process.env.NODE_ENV !== "production")
+                console.error(e);
+            centralResponse = e.response;
+        }
+
+        let transformedResponse = {
+            status: centralResponse.status,
+            headers: centralResponse.headers,
+            responseBody: centralResponse.data,
+        }
+
+        response.send(transformedResponse);
     } catch (e) {
         if (process.env.NODE_ENV !== "production")
-            console.error(e)
-        centralResponse = e.response;
+            console.error(e);
     }
-
-    let transformedResponse = {
-        status: centralResponse.status,
-        headers: centralResponse.headers,
-        responseBody: centralResponse.data,
-    }
-
-    response.send(transformedResponse);
 });
 
 app.get('/', (request, response) => {
