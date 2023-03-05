@@ -184,20 +184,25 @@
     <BlockTitle>Navigation</BlockTitle>
     <List>
       <!-- <ListItem link="/firmware/" title="Firmware" /> -->
+      <ListItem link="/notifications/" title="Alerts & Notifications" />
       <ListItem link="/clients/" title="Clients" />
       <ListItem link="/devices/" title="Devices" />
       <!-- <ListItem link="/wlans/" title="WLANs" /> -->
       <ListItem link="/groups/" title="Groups" />
       <ListItem link="/troubleshooting/" title="Troubleshooting" />
-      <ListItem link="/notifications/" title="Notifications" />
+
     </List>
   {/if}
 
   <BlockTitle>Settings</BlockTitle>
   <List>
+    <ListItem
+      link="/settings/notification/"
+      title="Alerts & Notifications Settings"
+    />
     <ListItem link="/settings/camera/" title="Camera Settings" />
     <ListItem link="/settings/central/" title="Central Settings" />
-    <ListItem link="/settings/notification/" title="Notification Settings" />
+    
   </List>
 
   <BlockTitle>Other</BlockTitle>
