@@ -107,7 +107,8 @@
       <Col>
         Click on subscribe to enable notifiactions and register your device as a
         Webhook in Central. With unsubscribe you can remove the subscription and
-        the Webhook in Central.
+        the Webhook in Central. Please keep in mind that there exists a limit in
+        Central for how many webhooks you can register per account.
       </Col>
     </Row><Row>
       <Col><Button raised onClick={subscribeToPush}>Subscribe</Button></Col>
@@ -117,7 +118,7 @@
     </Row><Row>
       <Col>
         Once you are subscribed you can test the Central Notification. They are
-        triggered directly via Central. Once you click should receive a psuh
+        triggered directly via Central. Once you click should receive a push
         notifiaction within a few seconds.
       </Col>
     </Row><Row>
