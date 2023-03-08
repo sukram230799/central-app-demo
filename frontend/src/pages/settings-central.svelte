@@ -233,7 +233,7 @@
   }
 
   async function importAccount() {
-    let testAccount = { ...account, ...accountImport };
+    let testAccount = { ...account, ...accountImport, id: selectedAccountId };
     try {
       testAccount = await central.testToken(testAccount);
       account = testAccount;
