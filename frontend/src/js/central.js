@@ -476,12 +476,10 @@ class Central {
   async listAccessPoints({ filters } = {}) {
     let apsResponse = await this.get('monitoring/v2/aps', {
       params: {
-        filters: {
-          ...filters,
-          group: this.filters.group ? this.filters.group : null,
-          site: this.filters.site ? this.filters.site : null,
-          label: this.filters.label ? this.filters.label : null,
-        }
+        ...filters,
+        group: this.filters.group ? this.filters.group : null,
+        site: this.filters.site ? this.filters.site : null,
+        label: this.filters.label ? this.filters.label : null,
       }
     });
 
@@ -499,12 +497,10 @@ class Central {
   async listGateways({ filters } = {}) {
     let gatewaysResponse = await this.get('monitoring/v1/gateways', {
       params: {
-        filters: {
-          ...filters,
-          group: this.filters.group ? this.filters.group : null,
-          site: this.filters.site ? this.filters.site : null,
-          label: this.filters.label ? this.filters.label : null,
-        }
+        ...filters,
+        group: this.filters.group ? this.filters.group : null,
+        site: this.filters.site ? this.filters.site : null,
+        label: this.filters.label ? this.filters.label : null,
       }
     });
 
@@ -520,12 +516,10 @@ class Central {
   async listSwitches({ filters } = {}) {
     let switchesResponse = await this.get('monitoring/v1/switches', {
       params: {
-        filters: {
-          ...filters,
-          group: this.filters.group ? this.filters.group : null,
-          site: this.filters.site ? this.filters.site : null,
-          label: this.filters.label ? this.filters.label : null,
-        }
+        ...filters,
+        group: this.filters.group ? this.filters.group : null,
+        site: this.filters.site ? this.filters.site : null,
+        label: this.filters.label ? this.filters.label : null,
       }
     });
 
