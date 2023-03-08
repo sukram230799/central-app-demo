@@ -101,13 +101,13 @@
       description: { title: "Description", asFooter: true },
       created_timestamp: {
         title: "Date Created",
-        format: durationFormatter(),
-        multiplier: 1,
+        format: formatDate,
+        multiplier: 1000,
       },
       timestamp: {
         title: "Date",
-        format: durationFormatter(),
-        multiplier: 1,
+        format: formatDate,
+        multiplier: 1000,
       },
       acknowledged: { title: "Acknowledged", format: formatYesNo },
       severity: "Severity",
