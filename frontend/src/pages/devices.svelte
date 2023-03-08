@@ -276,5 +276,8 @@
         {/if}
       </ListItem>
     {/each}
+    {#if loaded && !devices?.length}
+      <ListItem>No entries</ListItem>
+    {/if}
   </List>
 </Page>
