@@ -23,57 +23,57 @@ const currentAccountStore = derived(
 const timeRanges = ["3H", "1D", "1W", "1M", "3M"];
 
 const selectedFilterNames = {
-    clientType: 'Client Type',
-    group: 'Group',
-    label: 'Label',
-    site: 'Site',
-    timeRange: 'Time Range',
-    clientStatus: 'Connection Status',
-    network: 'Network Name',
-    serial: 'Serial',
-    swarmId: 'Swarm Id',
-    clusterId: 'Cluster Id',
-    band: 'Band',
-    stackId: 'Stack Id',
-    osType: 'OS Type',
-    field: 'Field Filter',
-    additionalFields: 'Additional Fields'
+  clientType: 'Client Type',
+  group: 'Group',
+  label: 'Label',
+  site: 'Site',
+  timeRange: 'Time Range',
+  clientStatus: 'Connection Status',
+  network: 'Network Name',
+  serial: 'Serial',
+  swarmId: 'Swarm Id',
+  clusterId: 'Cluster Id',
+  band: 'Band',
+  stackId: 'Stack Id',
+  osType: 'OS Type',
+  field: 'Field Filter',
+  additionalFields: 'Additional Fields'
 }
 
 const selectedFilterDefaultsOld = {
-    clientType: 'both',
-    group: '',
-    label: '',
-    site: '',
-    timeRange: 0,
-    clientStatus: 'CONNECTED',
-    network: '',
-    serial: '',
-    swarmId: '',
-    clusterId: '',
-    band: '',
-    stackId: '',
-    osType: '',
-    field: [],
-    additionalFields: ['usage', 'manufacturer', 'signal_db'],
+  clientType: 'both',
+  group: '',
+  label: '',
+  site: '',
+  timeRange: 0,
+  clientStatus: 'CONNECTED',
+  network: '',
+  serial: '',
+  swarmId: '',
+  clusterId: '',
+  band: '',
+  stackId: '',
+  osType: '',
+  field: [],
+  additionalFields: ['usage', 'manufacturer', 'signal_db'],
 };
 
 const selectedFilterDefaults = {
-    clientType: 'both',
-    group: null,
-    label: null,
-    site: null,
-    timeRange: 0,
-    clientStatus: 'CONNECTED',
-    network: null,
-    serial: null,
-    swarmId: null,
-    clusterId: null,
-    band: null,
-    stackId: null,
-    osType: null,
-    field: [],
-    additionalFields: ['usage', 'manufacturer', 'signal_db'],
+  clientType: 'both',
+  group: '',
+  label: '',
+  site: '',
+  timeRange: 0,
+  clientStatus: 'CONNECTED',
+  network: undefined,
+  serial: undefined,
+  swarmId: undefined,
+  clusterId: undefined,
+  band: undefined,
+  stackId: undefined,
+  osType: undefined,
+  field: [],
+  additionalFields: ['usage', 'manufacturer', 'signal_db'],
 };
 
 const selectedFilterStore = writable(localStorage.selectedFilter ? JSON.parse(localStorage.selectedFilter) : { ...selectedFilterDefaults });
@@ -131,6 +131,28 @@ pinnedClientsStore.delete = (client_macaddr) => {
     });
 }
 
+const notificationSettingsCacheStore = writable(localStorage.notificationSettings ? JSON.parse(localStorage.notificationSettings) : {});
+notificationSettingsCacheStore.subscribe((value) => localStorage.notificationSettings = JSON.stringify(value));
+const notificationSettingsStore = derived([notificationSettingsCacheStore, currentAccountIdStore], ([$notificationSettingsCacheStore, $currentAccountId]) => $currentAccountId in $notificationSettingsCacheStore ? $notificationSettingsCacheStore[$currentAccountId] : {});
+notificationSettingsStore.update = (notificationSettings) => {
+    notificationSettingsCacheStore.update((notificationSettingsCache) => {
+        const currentAccountId = get(currentAccountIdStore);
+        notificationSettingsCache[currentAccountId] = notificationSettings;
+        return notificationSettingsCache;
+    });
+}
+
+const webhookCacheStore = writable(localStorage.webhooks ? JSON.parse(localStorage.webhooks) : {})
+webhookCacheStore.subscribe((value) => localStorage.webhooks = JSON.stringify(value));
+const webhookStore = derived([webhookCacheStore, currentAccountIdStore], ([$webhookCacheStore, $currentAccountId]) => $currentAccountId in $webhookCacheStore ? $webhookCacheStore[$currentAccountId] : null);
+webhookStore.update = (webhook) => {
+    webhookCacheStore.update((webhookCache) => {
+        const currentAccountId = get(currentAccountIdStore);
+        webhookCache[currentAccountId] = webhook;
+        return webhookCache;
+    });
+}
+
 export {
     newUserStore,
     needRefreshStore as needRefreshStore,
@@ -152,5 +174,7 @@ export {
     siteStore,
     labelStore,
     pinnedClientsStore,
+    notificationSettingsStore,
+    webhookStore,
 };
 

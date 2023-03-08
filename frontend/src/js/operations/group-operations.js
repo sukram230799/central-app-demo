@@ -42,7 +42,6 @@ function cloneGroupDisplay(f7, callback, oldGroupName, newGroupName, upgradeArch
       if (callback) callback(true, newGroupName);
     })
     .catch((e) => {
-      console.error(e);
       errorToast(f7, e);
       if (callback) callback(false, newGroupName);
     })
@@ -66,7 +65,6 @@ function deleteGroupDialog(f7, callback, groupName) {
               f7.toast.show({ text: message, closeTimeout: 2000 })
             })
             .catch((e) => {
-              console.error(e);
               errorToast(f7, e);
               if (callback) callback(false, groupName);
             })

@@ -17,6 +17,8 @@
     ListItem,
     Icon,
   } from "framework7-svelte";
+  const debug = process.env.NODE_ENV !== "production";
+
   import { getDevice } from "framework7";
   import { onDestroy, onMount } from "svelte";
   import { central } from "../js/central";
@@ -79,7 +81,9 @@
 <Page name="home">
   <!-- Top Navbar -->
   <Navbar large sliding={false}>
-    <NavTitle sliding>Central Toolkit</NavTitle>
+    <NavTitle sliding
+      >{debug ? "DEV Central Toolkit" : "Central Toolkit"}</NavTitle
+    >
     <NavRight>
       <Link
         iconIos="f7:line_horizontal_3_decrease"
@@ -102,7 +106,7 @@
       searchIn=".item-title"
       disableButton={!theme.aurora}
     />
-    <NavTitleLarge>Central Toolkit</NavTitleLarge>
+    <NavTitleLarge>{debug ? "DEV Central Toolkit" : "Central Toolkit"}</NavTitleLarge>
   </Navbar>
 
   <Popup
@@ -180,19 +184,27 @@
     <BlockTitle>Navigation</BlockTitle>
     <List>
       <!-- <ListItem link="/firmware/" title="Firmware" /> -->
+      <ListItem link="/notifications/" title="Alerts & Notifications" />
       <ListItem link="/clients/" title="Clients" />
       <ListItem link="/devices/" title="Devices" />
       <!-- <ListItem link="/wlans/" title="WLANs" /> -->
       <ListItem link="/groups/" title="Groups" />
       <ListItem link="/troubleshooting/" title="Troubleshooting" />
-      <ListItem link="/notifications/" title="Notifications" />
+
     </List>
   {/if}
 
   <BlockTitle>Settings</BlockTitle>
   <List>
+    {#if centralReady}
+      <ListItem
+        link="/settings/notification/"
+        title="Alerts & Notifications Settings"
+      />
+    {/if}
     <ListItem link="/settings/camera/" title="Camera Settings" />
     <ListItem link="/settings/central/" title="Central Settings" />
+    
   </List>
 
   <BlockTitle>Other</BlockTitle>

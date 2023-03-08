@@ -51,3 +51,4 @@ licenses.json
 *_orig.png
 screenshots/**/*.xcf
 maskable*
+.data/

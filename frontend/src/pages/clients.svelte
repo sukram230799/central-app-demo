@@ -63,7 +63,6 @@
       console.log(clientList);
       clients = clientList.clients;
     } catch (e) {
-      console.error(e);
       errorToast(f7, e);
     } finally {
       loaded = true;

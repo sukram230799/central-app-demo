@@ -74,7 +74,6 @@
       .then((clientDetails) => (client = clientDetails))
       .then(() => dataLoaded())
       .catch((e) => {
-        console.error(e);
         errorToast(f7, e, { defaultTimeout: 2000 });
       })
       .finally(() => {
@@ -193,11 +192,11 @@
       encryption_method: "Encryption",
       channel: "Channel",
       band: { title: "Band", unit: "GHz" },
-      signal_db: "Signal dB",
+      signal_db: { title: "Signal", unit: "dB" },
       signal_strength: "Signal Strength",
       snr: "SNR",
-      speed: "Speed",
-      maxspeed: "Speed (max)",
+      speed: { title: "Speed", unit: "Mbps" },
+      maxspeed: { title: "Speed (max)", unit: "Mbps" },
     },
     Role: {
       user_role: "User Role",

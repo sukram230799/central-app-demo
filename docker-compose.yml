@@ -3,6 +3,9 @@ version: '3.3'
 services:
   mba-svelte:
     build: .
+    env_file: .env
+    volumes:
+      - '.data:/usr/app/.data'
 #    ports: # Add this when not running with Caddy
 #      - '127.0.0.1:26799:26799' 
     restart: 'unless-stopped'

@@ -70,7 +70,6 @@
       .then((deviceDetails) => (device = deviceDetails))
       .then(() => dataLoaded())
       .catch((e) => {
-        console.error(e);
         errorToast(f7, e, { defaultTimeout: 2000 });
       })
       .finally(() => {
@@ -180,7 +179,7 @@
     status: "Status",
     uptime: { title: "Uptime", format: durationFormatter(), multiplier: 1000 },
     usage: "Usage",
-    cpu_utilization: "CPU",
+    cpu_utilization: { title: "CPU", unit: "%" },
     mem_free: { title: "Mem Free", unit: "B", format: formatBytes },
     mem_total: { title: "Mem Total", unit: "B", format: formatBytes },
   };

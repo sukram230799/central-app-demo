@@ -71,9 +71,13 @@
   function getNotificationType(notifiaction) {
     return notifiactionTypes.find((nType) => nType.name == notifiaction.type);
   }
+
+  function loadMore(done) {
+    loadData().then(() => done());
+  }
 </script>
 
-<Page>
+<Page ptr onPtrRefresh={loadMore}>
   <Navbar title="Notifications" backLink="Back" />
   <BlockTitle>Notifications</BlockTitle>
 
@@ -102,7 +106,17 @@
         routeProps={{
           notification: notification,
         }}
-      />
+      >
+        {#if notification.acknowledged}
+          <Icon
+            color
+            slot="after"
+            ios="f7:checkmark_alt"
+            aurora="f7:checkmark_alt"
+            md="material:done"
+          />
+        {/if}
+      </ListItem>
     {/each}
     {#if loaded && !notifications?.length}
       <ListItem>No entries</ListItem>

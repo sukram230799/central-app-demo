@@ -12,9 +12,11 @@
     ListInput,
     Button,
     Progressbar,
+    f7,
   } from "framework7-svelte";
 
   import { central } from "../js/central";
+  import { errorToast } from "../js/operations/error-toast";
 
   export let deviceType;
   export let command = {
@@ -102,7 +104,7 @@ Flags:       a = Airslice policy; A = Airslice app monitoring; c = MBO Cellular 
             serial: serialNumber,
           });
           console.log(tsOutput.status, tsOutput);
-          
+
           if (tsOutput.status === "RUNNING") {
           } else if (tsOutput.status === "COMPLETED") {
             console.log(tsOutput.output);
@@ -119,7 +121,9 @@ Flags:       a = Airslice policy; A = Airslice app monitoring; c = MBO Cellular 
             output = tsOutput;
           }
         }
-      });
+      })
+      .catch((e) => errorToast(f7, e))
+      .finally(() => (running = false));
   }
 
   onMount(() => {

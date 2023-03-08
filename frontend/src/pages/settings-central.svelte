@@ -101,11 +101,7 @@
         if (callback) callback();
       })
       .catch((e) => {
-        console.error(e);
-        f7.toast.show({
-          text: e?.message ? e.message : `Error: ${JSON.stringify(e)}`,
-          closeTimeout: 8000,
-        });
+        errorToast(f7, e);
       })
       .finally(() => f7.preloader.hide());
   }
@@ -120,7 +116,6 @@
         console.log(result);
       })
       .catch((e) => {
-        console.error(e);
         errorToast(f7, e);
       })
       .finally(() => f7.preloader.hide());
@@ -238,7 +233,7 @@
   }
 
   async function importAccount() {
-    let testAccount = { ...account, ...accountImport };
+    let testAccount = { ...account, ...accountImport, id: selectedAccountId };
     try {
       testAccount = await central.testToken(testAccount);
       account = testAccount;
@@ -353,7 +348,7 @@
     }}
   >
     <Page>
-      <Navbar title="QR Export">
+      <Navbar title="QR Import">
         <NavRight>
           <Link popupClose>Close</Link>
         </NavRight>

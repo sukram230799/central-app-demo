@@ -77,7 +77,6 @@
       ]);
       detailsLoaded = true;
     } catch (e) {
-      console.error(e);
       errorToast(f7, e, { defaultTimeout: 2000 });
     } finally {
       groupsLoaded = [...groupsLoaded, ...groupsToLoad];

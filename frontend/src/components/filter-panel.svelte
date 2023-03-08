@@ -156,6 +156,7 @@
           bind:value={$selectedFilterStore.group}
           placeholder="Pease choose..."
         >
+          <option value="" />
           {#each $groupStore as group}
             <option value={group}>{group}</option>
           {/each}
@@ -167,6 +168,7 @@
           bind:value={$selectedFilterStore.label}
           placeholder="Pease choose..."
         >
+          <option value="" />
           {#each $labelStore as label}
             <option value={label.label_name}>{label.label_name}</option>
           {/each}
@@ -178,6 +180,7 @@
           bind:value={$selectedFilterStore.site}
           placeholder="Pease choose..."
         >
+          <option value="" />
           {#each $siteStore as site}
             <option value={site.site_name}>{site.site_name}</option>
           {/each}

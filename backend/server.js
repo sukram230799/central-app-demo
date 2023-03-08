@@ -2,12 +2,10 @@ const express = require('express');
 const webpush = require('web-push');
 const bodyparser = require('body-parser');
 const axios = require('axios').default;
-var cors = require('cors');
 
 const centralBaseUrlObject = require('./central-base-url.json');
 
 const centralBaseUrl = Object.values(centralBaseUrlObject)
-
 
 const vapidDetails = {
     publicKey: process.env.VAPID_PUBLIC_KEY,
@@ -15,15 +13,9 @@ const vapidDetails = {
     subject: process.env.VAPID_SUBJECT
 };
 
+const host = process.env.HOST;
 
-function sendNotifications(subscriptions) {
-    // Create the notification content.
-    const notification = JSON.stringify({
-        title: "Hello, Notifications!",
-        options: {
-            body: `ID: ${Math.floor(Math.random() * 100)}`
-        }
-    });
+function sendNotifications(subscriptions, notification) {
     // Customize how the push service should attempt to deliver the push message.
     // And provide authentication information.
     const options = {
@@ -50,50 +42,50 @@ function sendNotifications(subscriptions) {
     });
 }
 
-subs = {};
-
 const app = express();
 // app.use(cors());
 app.use(bodyparser.json());
 app.use(express.static('www'));
 app.use('/onboard', express.static('onboard'));
 
-app.post('/add-subscription', (request, response) => {
-    if (process.env.NODE_ENV !== "production")
-        console.log(`Subscribing ${request.body.endpoint}`);
-    subs[request.body.endpoint] = request.body
-    response.sendStatus(200);
-});
+app.post('/webhook-register', (request, response) => {
+    try {
+        if (process.env.NODE_ENV !== "production")
+            console.log(`Subscribing ${request.body.endpoint}`);
 
-app.post('/remove-subscription', (request, response) => {
-    if (process.env.NODE_ENV !== "production")
-        console.log(`Unsubscribing ${request.body.endpoint}`);
-    delete subs[request.body.endpoint];
-    response.sendStatus(200);
-});
-
-app.post('/notify-me', (request, response) => {
-    if (process.env.NODE_ENV !== "production")
-        console.log(`Notifying ${request.body.endpoint}`);
-    const subscription =
-        subs[request.body.endpoint];
-    sendNotifications([subscription]);
-    response.sendStatus(200);
-});
-
-app.post('/notify-all', (request, response) => {
-    if (process.env.NODE_ENV !== "production") {
-        console.log('Notifying all subscribers');
-        console.log(subs);
-        console.log(typeof subs);
+        response.send({ url: `https://${host}/webhook/` + Buffer.from(JSON.stringify(request.body)).toString("base64") });
+    } catch (e) {
+        if (process.env.NODE_ENV !== "production")
+            console.error(e);
     }
-    const subscriptions =
-        Object.values(subs);
-    if (subscriptions.length > 0) {
-        sendNotifications(subscriptions);
+});
+
+app.post('/webhook-test', (request, response) => {
+    try {
+        if (process.env.NODE_ENV !== "production")
+            console.log(`Notifying ${request.body.subscription.endpoint}`);
+        sendNotifications([request.body.subscription], JSON.stringify({
+            "timestamp": 1677862473,
+            "nid": 1250,
+            "alert_type": "TEST",
+            "severity": "Major",
+            "details": {
+                "threshold": "20"
+            },
+            "description": "This is a sample notification from the backend. Please ignore this",
+            "text": "This is a sample notification from the backend. Please ignore this",
+            "setting_id": "CID-1250",
+            "device_id": "TEST123456",
+            "state": "Open",
+            "operation": "create",
+            "webhook": null,
+            "cluster_hostname": "internal-ui.central.arubanetworks.com"
+        }));
+
         response.sendStatus(200);
-    } else {
-        response.sendStatus(409);
+    } catch (e) {
+        if (process.env.NODE_ENV !== "production")
+            console.error(e);
     }
 });
 
@@ -101,37 +93,58 @@ function checkIfStringStartsWith(str, substrs) {
     return substrs.some(substr => str.startsWith(substr));
 }
 
-app.post('/api-proxy', async (request, response) => {
-    if (!checkIfStringStartsWith(request?.body?.url, centralBaseUrl))
-        return response.sendStatus(403);
-    if (process.env.NODE_ENV !== "production")
-        console.log(request.body);
-
-    let centralResponse;
+app.post('/webhook/:endpoint', async (request, response) => {
     try {
-        centralResponse = await axios.request({
-            // baseURL: request.body.baseURL,
-            url: request.body.url,
-            data: request.body.data,
-            headers: request.body.headers,
-            params: request.body.params,
-            method: request.body.method,
-        });
         if (process.env.NODE_ENV !== "production")
-            console.log(centralResponse);
+            console.log(request.params.endpoint);
+        const endpoint = JSON.parse(Buffer.from(request.params.endpoint, 'base64').toString('utf-8'));
+        if (process.env.NODE_ENV !== "production")
+            console.log(endpoint);
+
+        sendNotifications([endpoint]);
+        response.sendStatus(200);
     } catch (e) {
         if (process.env.NODE_ENV !== "production")
-            console.error(e)
-        centralResponse = e.response;
+            console.error(e);
     }
+});
 
-    let transformedResponse = {
-        status: centralResponse.status,
-        headers: centralResponse.headers,
-        responseBody: centralResponse.data,
+app.post('/api-proxy', async (request, response) => {
+    try {
+        if (!checkIfStringStartsWith(request?.body?.url, centralBaseUrl))
+            return response.sendStatus(403);
+        if (process.env.NODE_ENV !== "production")
+            console.log(request.body);
+
+        let centralResponse;
+        try {
+            centralResponse = await axios.request({
+                // baseURL: request.body.baseURL,
+                url: request.body.url,
+                data: request.body.data,
+                headers: request.body.headers,
+                params: request.body.params,
+                method: request.body.method,
+            });
+            if (process.env.NODE_ENV !== "production")
+                console.log(centralResponse);
+        } catch (e) {
+            if (process.env.NODE_ENV !== "production")
+                console.error(e);
+            centralResponse = e.response;
+        }
+
+        let transformedResponse = {
+            status: centralResponse.status,
+            headers: centralResponse.headers,
+            responseBody: centralResponse.data,
+        }
+
+        response.send(transformedResponse);
+    } catch (e) {
+        if (process.env.NODE_ENV !== "production")
+            console.error(e);
     }
-
-    response.send(transformedResponse);
 });
 
 app.get('/', (request, response) => {
