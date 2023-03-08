@@ -475,7 +475,14 @@ class Central {
    */
   async listAccessPoints({ filters } = {}) {
     let apsResponse = await this.get('monitoring/v2/aps', {
-      params: filters
+      params: {
+        filters: {
+          ...filters,
+          group: this.filters.group ? this.filters.group : null,
+          site: this.filters.site ? this.filters.site : null,
+          label: this.filters.label ? this.filters.label : null,
+        }
+      }
     });
 
     return this.handleResponse(apsResponse);
@@ -483,15 +490,22 @@ class Central {
 
   /**
    * List Gateways
-   * @param {{params}} param0 Params
-   * @returns {{  "count": number,  "total": 4,  "gateways": []}}
+   * @param {{ filters: {} }} param Filters
+   * @returns {{ count: number,  total: number,  gateways: []}}
    * Get switches You can only specify one of group, label and stack_id parameters. 
    * ---
    * https://developer.arubanetworks.com/aruba-central/reference/apiexternal_controllerget_switches
    */
   async listGateways({ filters } = {}) {
     let gatewaysResponse = await this.get('monitoring/v1/gateways', {
-      params: filters
+      params: {
+        filters: {
+          ...filters,
+          group: this.filters.group ? this.filters.group : null,
+          site: this.filters.site ? this.filters.site : null,
+          label: this.filters.label ? this.filters.label : null,
+        }
+      }
     });
 
     return this.handleResponse(gatewaysResponse);
@@ -505,7 +519,14 @@ class Central {
    */
   async listSwitches({ filters } = {}) {
     let switchesResponse = await this.get('monitoring/v1/switches', {
-      params: filters
+      params: {
+        filters: {
+          ...filters,
+          group: this.filters.group ? this.filters.group : null,
+          site: this.filters.site ? this.filters.site : null,
+          label: this.filters.label ? this.filters.label : null,
+        }
+      }
     });
 
     return this.handleResponse(switchesResponse);
