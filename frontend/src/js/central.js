@@ -414,9 +414,10 @@ class Central {
   }
 
   async listUnifiedClientsAutoFiltered() {
-    // debugger;
     let filters = {
-      group: this.filters.group, site: this.filters.site, label: this.filters.label,
+      group: this.filters.group ? this.filters.group : null,
+      site: this.filters.site ? this.filters.site : null,
+      label: this.filters.label ? this.filters.label : null,
       client_status: this.filters.clientStatus, network: this.filters.network,
       serial: this.filters.serial, swarm_id: this.filters.swarmId, cluster_id: this.filters.clusterId, band: this.filters.band,
       stack_id: this.filters.stackId, os_type: this.filters.osType,
