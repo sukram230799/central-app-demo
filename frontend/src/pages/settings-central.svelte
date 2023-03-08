@@ -348,7 +348,7 @@
     }}
   >
     <Page>
-      <Navbar title="QR Export">
+      <Navbar title="QR Import">
         <NavRight>
           <Link popupClose>Close</Link>
         </NavRight>
