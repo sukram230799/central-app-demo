@@ -435,8 +435,16 @@ class Central {
   async listUnifiedClientsFiltered({ filters }) {
     if (this.filters.clientType === 'both') {
       const [wiredResponse, wirelsessResponse] = await Promise.all([
-        this.listUnifiedClients({ ...filters, client_type: 'WIRED' }),
-        this.listUnifiedClients({ ...filters, client_type: 'WIRELESS' }),
+        this.listUnifiedClients({
+          calculate_total: true,
+          ...filters,
+          client_type: 'WIRED',
+        }),
+        this.listUnifiedClients({
+          calculate_total: true,
+          ...filters,
+          client_type: 'WIRELESS',
+        }),
       ]);
       return {
         count: wiredResponse.count + wirelsessResponse.count,
@@ -448,6 +456,10 @@ class Central {
         ]
       };
     }
+    filters = {
+      calculate_total: true,
+      ...filters,
+    };
     return await this.listUnifiedClients(filters);
   }
 
@@ -476,6 +488,7 @@ class Central {
   async listAccessPoints({ filters } = {}) {
     let apsResponse = await this.get('monitoring/v2/aps', {
       params: {
+        calculate_total: true,
         ...filters,
         group: this.filters.group ? this.filters.group : null,
         site: this.filters.site ? this.filters.site : null,
@@ -497,6 +510,7 @@ class Central {
   async listGateways({ filters } = {}) {
     let gatewaysResponse = await this.get('monitoring/v1/gateways', {
       params: {
+        calculate_total: true,
         ...filters,
         group: this.filters.group ? this.filters.group : null,
         site: this.filters.site ? this.filters.site : null,
@@ -516,6 +530,7 @@ class Central {
   async listSwitches({ filters } = {}) {
     let switchesResponse = await this.get('monitoring/v1/switches', {
       params: {
+        calculate_total: true,
         ...filters,
         group: this.filters.group ? this.filters.group : null,
         site: this.filters.site ? this.filters.site : null,

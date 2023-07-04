@@ -29,6 +29,7 @@
 
   let loaded = false;
   let devices = [];
+  let devicesTotal = 0;
 
   let filters = {};
 
@@ -73,6 +74,8 @@
       central.listSwitches({ filters }),
     ]);
     console.log(deviceLists);
+      devicesTotal =
+        deviceLists[0].total + deviceLists[1].total + deviceLists[2].total;
     devices = [
       ...deviceLists[0].aps,
       ...deviceLists[1].gateways,
@@ -217,10 +220,13 @@
     <ActionsGroup>
       <ActionsButton color="red">Cancel</ActionsButton>
     </ActionsGroup>
-  </Actions>
-  <BlockTitle>Devices</BlockTitle>
+  </Actions>{#if loaded}
+    <BlockTitle>Devices (Total: {devicesTotal})</BlockTitle>
+  {:else}
+    <BlockTitle>Devices (Total: {devicesTotal})</BlockTitle>
+  {/if}
   <List class="search-list">
-    {#if !devices.length}
+    {#if !loaded}
       {#each [{ ios: "material:cable", aurora: "material:cable", md: "material:cable" }, { ios: "material:cable", aurora: "material:cable", md: "material:cable" }, { ios: "f7:wifi", aurora: "f7:wifi", md: "material:wifi" }, { ios: "f7:wifi", aurora: "f7:wifi", md: "material:wifi" }, { ios: "material:router", aurora: "material:router", md: "material:router" }, { ios: "material:router", aurora: "material:router", md: "material:router" }].sort((a, b) => 0.5 - Math.random()) as icon}
         <ListItem
           class={theme.ios

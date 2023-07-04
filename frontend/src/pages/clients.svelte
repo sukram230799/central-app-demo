@@ -23,6 +23,7 @@
 
   let loaded = false;
   let clients = [];
+  let clientsTotal = 0;
   let pinnedClients = [];
 
   export let filters = {};
@@ -61,6 +62,7 @@
     try {
       const clientList = await loadDataSwitcher();
       console.log(clientList);
+      clientsTotal = clientList.total;
       clients = clientList.clients;
     } catch (e) {
       errorToast(f7, e);
@@ -184,7 +186,11 @@
       {/each}
     </List>
   {/if}
+  {#if loaded}
+    <BlockTitle>Clients (Total: {clientsTotal})</BlockTitle>
+  {:else}
   <BlockTitle>Clients</BlockTitle>
+  {/if}
   <List class="search-list">
     {#if !loaded}
       {#each [{ ios: "f7:logo_android", aurora: "f7:logo_android", md: "material:android" }, { ios: "f7:logo_ios", aurora: "f7:logo_ios", md: "f7:logo_ios" }, { ios: "f7:logo_windows", aurora: "f7:logo_windows", md: "f7:logo_windows" }, { ios: "f7:logo_macos", aurora: "f7:logo_macos", md: "f7:logo_macos" }, { ios: "f7:logo_google", aurora: "f7:logo_google", md: "f7:logo_google" }, { ios: "f7:wifi", aurora: "f7:wifi", md: "material:wifi" }, { ios: "material:cable", aurora: "material:cable", md: "material:cable" }].sort((a, b) => 0.5 - Math.random()) as icons}
