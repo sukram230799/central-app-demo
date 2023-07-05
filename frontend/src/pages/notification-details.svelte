@@ -10,8 +10,6 @@
     Block,
     BlockTitle,
     Searchbar,
-    Row,
-    Col,
   } from "framework7-svelte";
 
   import { onDestroy, onMount } from "svelte";
@@ -98,7 +96,10 @@
   // Custom per category handler
   const entries = {
     Details: {
-      description: { title: "Description", asFooter: true },
+      description: {
+        suppress: true,
+        title: "Description",
+      },
       created_timestamp: {
         title: "Date Created",
         format: formatDate,
@@ -191,6 +192,14 @@
       disableButton={!theme.aurora}
     />
   </Navbar>
+
+  <BlockTitle>Description</BlockTitle>
+
+  <Block strong>
+    {#each notification.description.split("\n") as description_line}
+      {description_line.replaceAll(/^ /gi, "\xa0")}<br />
+    {/each}
+  </Block>
 
   <DetailsHandler {getHandler} loadClass="" details={notification} />
 
