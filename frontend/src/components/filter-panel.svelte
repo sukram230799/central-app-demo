@@ -76,16 +76,19 @@
       currentAccountIdStoreUnsub = currentAccountIdStore.subscribe(
         (accountId) => {
           const siteCacheStoreUnsub = siteCacheStore.subscribe((value) => {
-            if (!value[accountId]?.time)
-              central.listSites().finally(() => siteCacheStoreUnsub());
+            central
+              .listSites() // Get current list of sites
+              .finally(() => siteCacheStoreUnsub());
           });
           const labelCacheStoreUnsub = labelCacheStore.subscribe((value) => {
-            if (!value[accountId]?.time)
-              central.listLabels().finally(() => labelCacheStoreUnsub());
+            central
+              .listLabels() // Get current list of labels
+              .finally(() => labelCacheStoreUnsub());
           });
           const groupCacheStoreUnsub = groupCacheStore.subscribe((value) => {
-            if (!value[accountId]?.time)
-              central.listGroups().finally(() => groupCacheStoreUnsub());
+            central
+              .listGroups() // Get current list of groups
+              .finally(() => groupCacheStoreUnsub());
           });
         }
       );
