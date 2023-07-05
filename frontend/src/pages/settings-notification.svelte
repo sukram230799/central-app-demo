@@ -25,12 +25,12 @@
 
   webhookStore.subscribe((wid) => (noWID = !wid));
 
-  function registerServiceWorker() {
-    return push.registerServiceWorker().catch((e) => errorToast(f7, e));
+  function registerServiceWorkerDEV() {
+    return push.registerServiceWorkerDEV().catch((e) => errorToast(f7, e));
   }
 
-  function unregisterServiceWorker() {
-    return push.unregisterServiceWorker().catch((e) => errorToast(f7, e));
+  function unregisterServiceWorkerDEV() {
+    return push.unregisterServiceWorkerDEV().catch((e) => errorToast(f7, e));
   }
 
   function subscribeToPush() {
@@ -62,7 +62,7 @@
       .notifyMe()
       .then(() =>
         f7.toast.show({
-          text: "Success! You should receive a notification from the backend. Use Test Central Notification to test the full path.",
+          text: "Success! You should receive a notification from the backend. Use Test Central Notification to test the full chain.",
           closeTimeout: 5000,
         })
       )
@@ -93,11 +93,11 @@
     {#if debug}
       <Row>
         <Col
-          ><Button raised onClick={registerServiceWorker}>Register SW</Button
+          ><Button raised onClick={registerServiceWorkerDEV}>Register SW</Button
           ></Col
         >
         <Col>
-          <Button raised onClick={unregisterServiceWorker}>
+          <Button raised onClick={unregisterServiceWorkerDEV}>
             Unregister SW
           </Button>
         </Col>
