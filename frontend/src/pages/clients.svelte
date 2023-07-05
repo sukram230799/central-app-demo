@@ -35,6 +35,8 @@
           pinnedClients = Object.values(pinnedClientsResult);
         })
       );
+
+      // Load all clients
       loadData();
     })
   );
@@ -200,7 +202,7 @@
             : "skeleton-text skeleton-effect-wave"}
           footer="00:00:00:00:00:00 - 192.168.10.100"
           title="Name of Device"
-          header="CN20304050 - Access Point"
+          header="CN20304050 - Access Point - Role"
           href="#"
         >
           <Icon ios={icons.ios} aurora={icons.aurora} md={icons.md} />
@@ -211,7 +213,7 @@
       <ListItem
         footer={`${client.macaddr} – ${client.ip_address}`}
         title={client.name ? client.name : client.macaddr}
-        header={`${client.associated_device} – ${client.associated_device_name}`}
+        header={`${client.associated_device} – ${client.associated_device_name} – ${client.user_role}`}
         href="/clients/details/"
         routeProps={{
           clientMAC: client.macaddr,
