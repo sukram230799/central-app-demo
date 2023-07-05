@@ -191,7 +191,7 @@
   {#if loaded}
     <BlockTitle>Clients (Total: {clientsTotal})</BlockTitle>
   {:else}
-  <BlockTitle>Clients</BlockTitle>
+    <BlockTitle>Clients</BlockTitle>
   {/if}
   <List class="search-list">
     {#if !loaded}

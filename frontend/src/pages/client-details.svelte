@@ -51,28 +51,37 @@
         )
       );
 
+      // Normally the full details are already provided via routProps.
+      // If the partial flag is set the previous view did not have all data.
+      // This is the case for pinnedClients
       if (client.partial) {
         loaded = false;
       } else {
         loaded = true;
         loadClass = "";
-        dataLoaded();
+        transfromData();
       }
+      // Refresh/Load all client data
       loadData();
     })
   );
 
+  // Remove all subscriptions
   onDestroy(() => {
     subscriptions.forEach((subscription) => subscription());
     subscriptions = [];
   });
 
+  /**
+   * Load or refresh all client data.
+   * @returns {Promise} Resolves after done
+   */
   function loadData() {
     return central
       .ready(1)
       .then(() => central.getClientDetails({ macaddr: clientMAC }))
       .then((clientDetails) => (client = clientDetails))
-      .then(() => dataLoaded())
+      .then(() => transfromData())
       .catch((e) => {
         errorToast(f7, e, { defaultTimeout: 2000 });
       })
@@ -82,7 +91,11 @@
       });
   }
 
-  function dataLoaded() {
+  // Transform loaded data.
+  // Split into handled entries and unhandled entries
+  // handled will be displayed with own description,
+  // While unhandled will display the field name
+  function transfromData() {
     console.log(client);
     handledEntries = Object.keys(
       Object.assign({}, ...Object.values(getHandler()))
@@ -104,6 +117,7 @@
     }, {});
   }
 
+  // Dummy Data
   const wirelessClient = {
     associated_device: "CNG0AP01FK",
     associated_device_mac: "80:8d:b7:aa:aa:aa",
@@ -177,6 +191,8 @@
     vlan: 1,
   };
 
+  // Entry handling
+  // Custom per clientType handler
   const entriesWireless = {
     "Client Info": {
       name: "Name",
@@ -260,6 +276,10 @@
     },
   };
 
+  /**
+   * Get the correct handler by clientType
+   * @returns {} Entry Handler
+   */
   function getHandler() {
     switch (clientType) {
       case "WIRELESS":
@@ -269,6 +289,8 @@
     }
     return {};
   }
+
+  // Actions
 
   async function disconnectClient() {
     await disconnectClientHandler(f7, client);
@@ -300,6 +322,7 @@
     }
   }
 
+  // More data loading
   function loadMore(done) {
     loadData().then(() => done());
   }
