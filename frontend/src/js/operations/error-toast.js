@@ -5,9 +5,9 @@ function errorToast(f7, e, { defaultTimeout } = { defaultTimeout: 8000 }) {
       text: e.options.responseBody.description,
       closeTimeout: defaultTimeout,
     });
-  else if (e?.name === 'AxiosError') {
+  else if (e?.name === 'AxiosError' || e?.name === 'HTTP Error') {
     f7.toast.show({
-      text: "HTTPError: " + e.message,
+      text: "HTTP Error: " + e.message,
       closeTimeout: defaultTimeout,
     });
   }
