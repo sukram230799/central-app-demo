@@ -10,8 +10,6 @@
     Block,
     BlockTitle,
     Searchbar,
-    Row,
-    Col,
   } from "framework7-svelte";
 
   import { onDestroy, onMount } from "svelte";
@@ -21,6 +19,7 @@
   import { errorToast } from "../js/operations/error-toast";
   import { durationFormatter } from "human-readable";
   import { formatBytes, formatDate, formatYesNo } from "../js/formatter";
+  import { central } from "../js/central";
 
   export let notification = {};
   let notificationUnhandled = {};
@@ -60,7 +59,7 @@
   let notHandledEntries = [];
 
   // Dummy Data
-  const dummyAlert = {
+  const dummyNotification = {
     acknowledged: false,
     created_timestamp: 1677145316.0,
     customer_id: "da3...",
@@ -97,16 +96,19 @@
   // Custom per category handler
   const entries = {
     Details: {
-      description: { title: "Details", asFooter: true },
+      description: {
+        suppress: true,
+        title: "Description",
+      },
       created_timestamp: {
         title: "Date Created",
-        format: durationFormatter(),
-        multiplier: 1,
+        format: formatDate,
+        multiplier: 1000,
       },
       timestamp: {
         title: "Date",
-        format: durationFormatter(),
-        multiplier: 1,
+        format: formatDate,
+        multiplier: 1000,
       },
       acknowledged: { title: "Acknowledged", format: formatYesNo },
       severity: "Severity",
@@ -128,11 +130,53 @@
   }
 
   // Actions
+  function toggleAcknowledged() {
+    return central
+      .ready()
+      .then(() => f7.preloader.show())
+      .then(() =>
+        central.acknowledgeNotification({
+          notification_id: notification.id,
+          acknowledged: !notification.acknowledged,
+        })
+      )
+      .then(() => {
+        notification.acknowledged = !notification.acknowledged;
+        f7.toast.show({
+          text: notification.acknowledged ? "Acknowledged" : "Reopened",
+          closeTimeout: 2000,
+        });
+      })
+      .catch((e) => {
+        if (
+          e?.options?.responseBody?.description ===
+          "Alert reopen is not supported"
+        )
+          f7.toast.show({
+            text: "Alert reopen currently not supported by Central API",
+            closeTimeout: 2000,
+          });
+        else errorToast(f7, e);
+      })
+      .finally(() => f7.preloader.hide());
+  }
 </script>
 
 <Page>
   <Navbar title={notification.type} backLink="Back">
     <NavRight>
+      <Link
+        iconIos={notification.acknowledged
+          ? "f7:eye_fill"
+          : "f7:eye_slash_fill"}
+        iconAurora={notification.acknowledged
+          ? "f7:eye_fill"
+          : "f7:eye_slash_fill"}
+        iconMd={notification.acknowledged
+          ? "material:visibility"
+          : "material:visibility_off"}
+        onClick={toggleAcknowledged}
+      />
       <Link
         searchbarEnable=".searchbar-details"
         iconIos="f7:search"
@@ -148,6 +192,14 @@
       disableButton={!theme.aurora}
     />
   </Navbar>
+
+  <BlockTitle>Description</BlockTitle>
+
+  <Block strong>
+    {#each notification.description.split("\n") as description_line}
+      {description_line.replaceAll(/^ /gi, "\xa0")}<br />
+    {/each}
+  </Block>
 
   <DetailsHandler {getHandler} loadClass="" details={notification} />
 

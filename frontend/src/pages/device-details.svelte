@@ -43,17 +43,25 @@
 
   onMount(() =>
     f7ready(() => {
+      // Normally the full details are already provided via routProps.
+      // If the partial flag is set the previous view did not have all data.
+      // This is the case for pinnedClients
       if (device.partial) {
         loaded = false;
       } else {
         loaded = true;
         loadClass = "";
-        dataLoaded();
+        transformData();
       }
+      // Refresh/Load all device data
       loadData();
     })
   );
 
+  /**
+   * Load or refresh all device data.
+   * @returns {Promise} Resolves after done
+   */
   function loadData() {
     return central
       .ready(1)
@@ -68,9 +76,8 @@
         }
       })
       .then((deviceDetails) => (device = deviceDetails))
-      .then(() => dataLoaded())
+      .then(() => transformData())
       .catch((e) => {
-        console.error(e);
         errorToast(f7, e, { defaultTimeout: 2000 });
       })
       .finally(() => {
@@ -79,8 +86,17 @@
       });
   }
 
-  function dataLoaded() {
+  // Transform loaded data.
+  // Split into handled entries and unhandled entries
+  // handled will be displayed with own description,
+  // While unhandled will display the field name
+  function transformData() {
     console.log(device);
+    // Fix central naming inconsistency
+    if ("site_name" in device) {
+      device["site"] = device["site_name"];
+      delete device["site_name"];
+    }
     handledEntries = Object.keys(
       Object.assign({}, ...Object.values(getHandler()))
     );
@@ -101,6 +117,7 @@
     }, {});
   }
 
+  // Dummy Data
   const deviceAP = {
     ap_deployment_mode: "IAP",
     ap_group: null,
@@ -169,6 +186,8 @@
     usage: 1112664,
   };
 
+  // Entry handling
+  // Reused handlers
   const entryGroupSiteLabel = {
     group_name: "Group Name",
     labels: "Labels",
@@ -180,11 +199,12 @@
     status: "Status",
     uptime: { title: "Uptime", format: durationFormatter(), multiplier: 1000 },
     usage: "Usage",
-    cpu_utilization: "CPU",
+    cpu_utilization: { title: "CPU", unit: "%" },
     mem_free: { title: "Mem Free", unit: "B", format: formatBytes },
     mem_total: { title: "Mem Total", unit: "B", format: formatBytes },
   };
 
+  // Custom per deviceType handler
   const entriesAP = {
     Details: {
       name: "Name",
@@ -244,6 +264,10 @@
     Status: { ...entryStatus, ap_count: "AP Count" },
   };
 
+  /**
+   * Get the correct handler by deviceType
+   * @returns {} Entry Handler
+   */
   function getHandler() {
     switch (deviceType) {
       case "IAP":
@@ -256,6 +280,8 @@
     return {};
   }
 
+  // Actions
+  
   async function rebootDevice() {
     await rebootDeviceHandler(f7, device);
   }
@@ -266,6 +292,7 @@
     ledBlinking = await blinkLEDHandler(f7, device.serial, ledBlinking);
   }
 
+  // More data loading
   async function loadMore(done) {
     loadData().then(() => done());
   }

@@ -9,10 +9,12 @@
 
 {#each Object.entries(getHandler()) as [title, data]}
   <BlockTitle>{title}</BlockTitle>
-  <List class="search-list">
+  <List mediaList class="search-list">
     {#each Object.entries(data) as [key, description]}
       {#if typeof description === "object"}
-        {#if description.asTitle}
+        {#if description.suppress}
+          <!---->
+        {:else if description.asTitle}
           <ListItem
             class={loadClass}
             title={unitHumanReadable(
@@ -36,6 +38,21 @@
               ? description.routeProps(details)
               : undefined}
             footer={unitHumanReadable(
+              details[key],
+              description.unit,
+              description.format,
+              description.multiplier
+            )}
+          />
+        {:else if description.asText}
+          <ListItem
+            class={loadClass}
+            title={description.title}
+            href={description.href}
+            routeProps={description.routeProps
+              ? description.routeProps(details)
+              : undefined}
+            text={unitHumanReadable(
               details[key],
               description.unit,
               description.format,

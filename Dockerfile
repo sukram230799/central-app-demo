@@ -26,7 +26,7 @@ RUN npm run build
 
 FROM node:18
 
-WORKDIR /usr/src/app
+WORKDIR /usr/app
 
 COPY ./backend/package*.json ./
 

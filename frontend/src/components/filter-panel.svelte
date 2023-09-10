@@ -76,16 +76,19 @@
       currentAccountIdStoreUnsub = currentAccountIdStore.subscribe(
         (accountId) => {
           const siteCacheStoreUnsub = siteCacheStore.subscribe((value) => {
-            if (!value[accountId]?.time)
-              central.listSites().finally(() => siteCacheStoreUnsub());
+            central
+              .listSites() // Get current list of sites
+              .finally(() => siteCacheStoreUnsub());
           });
           const labelCacheStoreUnsub = labelCacheStore.subscribe((value) => {
-            if (!value[accountId]?.time)
-              central.listLabels().finally(() => labelCacheStoreUnsub());
+            central
+              .listLabels() // Get current list of labels
+              .finally(() => labelCacheStoreUnsub());
           });
           const groupCacheStoreUnsub = groupCacheStore.subscribe((value) => {
-            if (!value[accountId]?.time)
-              central.listGroups().finally(() => groupCacheStoreUnsub());
+            central
+              .listGroups() // Get current list of groups
+              .finally(() => groupCacheStoreUnsub());
           });
         }
       );
@@ -156,6 +159,7 @@
           bind:value={$selectedFilterStore.group}
           placeholder="Pease choose..."
         >
+          <option value="" />
           {#each $groupStore as group}
             <option value={group}>{group}</option>
           {/each}
@@ -167,6 +171,7 @@
           bind:value={$selectedFilterStore.label}
           placeholder="Pease choose..."
         >
+          <option value="" />
           {#each $labelStore as label}
             <option value={label.label_name}>{label.label_name}</option>
           {/each}
@@ -178,6 +183,7 @@
           bind:value={$selectedFilterStore.site}
           placeholder="Pease choose..."
         >
+          <option value="" />
           {#each $siteStore as site}
             <option value={site.site_name}>{site.site_name}</option>
           {/each}

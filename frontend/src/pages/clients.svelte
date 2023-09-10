@@ -23,6 +23,7 @@
 
   let loaded = false;
   let clients = [];
+  let clientsTotal = 0;
   let pinnedClients = [];
 
   export let filters = {};
@@ -34,6 +35,8 @@
           pinnedClients = Object.values(pinnedClientsResult);
         })
       );
+
+      // Load all clients
       loadData();
     })
   );
@@ -61,9 +64,9 @@
     try {
       const clientList = await loadDataSwitcher();
       console.log(clientList);
+      clientsTotal = clientList.total;
       clients = clientList.clients;
     } catch (e) {
-      console.error(e);
       errorToast(f7, e);
     } finally {
       loaded = true;
@@ -185,7 +188,11 @@
       {/each}
     </List>
   {/if}
-  <BlockTitle>Clients</BlockTitle>
+  {#if loaded}
+    <BlockTitle>Clients (Total: {clientsTotal})</BlockTitle>
+  {:else}
+    <BlockTitle>Clients</BlockTitle>
+  {/if}
   <List class="search-list">
     {#if !loaded}
       {#each [{ ios: "f7:logo_android", aurora: "f7:logo_android", md: "material:android" }, { ios: "f7:logo_ios", aurora: "f7:logo_ios", md: "f7:logo_ios" }, { ios: "f7:logo_windows", aurora: "f7:logo_windows", md: "f7:logo_windows" }, { ios: "f7:logo_macos", aurora: "f7:logo_macos", md: "f7:logo_macos" }, { ios: "f7:logo_google", aurora: "f7:logo_google", md: "f7:logo_google" }, { ios: "f7:wifi", aurora: "f7:wifi", md: "material:wifi" }, { ios: "material:cable", aurora: "material:cable", md: "material:cable" }].sort((a, b) => 0.5 - Math.random()) as icons}
@@ -195,7 +202,7 @@
             : "skeleton-text skeleton-effect-wave"}
           footer="00:00:00:00:00:00 - 192.168.10.100"
           title="Name of Device"
-          header="CN20304050 - Access Point"
+          header="CN20304050 - Access Point - Role"
           href="#"
         >
           <Icon ios={icons.ios} aurora={icons.aurora} md={icons.md} />
@@ -206,7 +213,7 @@
       <ListItem
         footer={`${client.macaddr} – ${client.ip_address}`}
         title={client.name ? client.name : client.macaddr}
-        header={`${client.associated_device} – ${client.associated_device_name}`}
+        header={`${client.associated_device} – ${client.associated_device_name} – ${client.user_role}`}
         href="/clients/details/"
         routeProps={{
           clientMAC: client.macaddr,

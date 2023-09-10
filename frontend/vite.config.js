@@ -52,6 +52,13 @@ module.exports = async function () {
       host: true,
       port: 25799,
       proxy: {
+        '^/webhook.*': {
+          target: 'http://localhost:26799',
+          changeOrigin: true,
+          configure: (proxy, options) => {
+            // proxy will be an instance of 'http-proxy'
+          },
+        },
         '/api-proxy': {
           target: 'http://localhost:26799',
           changeOrigin: true,

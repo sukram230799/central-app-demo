@@ -7,6 +7,7 @@ function formatDate(value) {
 }
 
 function formatBytes(bytes, decimals) {
+  if (bytes === undefined || bytes === null) return "";
   if (bytes == 0) return "0 Bytes";
   var k = 1024,
     dm = decimals || 2,

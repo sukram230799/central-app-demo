@@ -29,6 +29,7 @@
 
   let loaded = false;
   let devices = [];
+  let devicesTotal = 0;
 
   let filters = {};
 
@@ -40,6 +41,9 @@
 
   onMount(() =>
     f7ready(() => {
+      // Reset checkbox states
+      selectedDevices = [];
+
       subscriptions.push(
         groupStore.subscribe((groupsList) => (groups = groupsList)),
         selectedFilterStore.subscribe(
@@ -47,6 +51,7 @@
         )
       );
 
+      // Load all devices
       loadData();
     })
   );
@@ -56,6 +61,11 @@
     subscriptions = [];
   });
 
+  /**
+   * Filter to only available filters
+   * @param allFilters
+   * @returns {} available filters
+   */
   function filterTranslator(allFilters) {
     return {
       group: allFilters.group,
@@ -66,20 +76,21 @@
 
   async function loadData() {
     try {
-    await central.ready(3);
-    const deviceLists = await Promise.all([
-      central.listAccessPoints({ filters }),
-      central.listGateways({ filters }),
-      central.listSwitches({ filters }),
-    ]);
-    console.log(deviceLists);
-    devices = [
-      ...deviceLists[0].aps,
-      ...deviceLists[1].gateways,
-      ...deviceLists[2].switches,
-    ];
+      await central.ready(3);
+      const deviceLists = await Promise.all([
+        central.listAccessPoints({ filters }),
+        central.listGateways({ filters }),
+        central.listSwitches({ filters }),
+      ]);
+      console.log(deviceLists);
+      devicesTotal =
+        deviceLists[0].total + deviceLists[1].total + deviceLists[2].total;
+      devices = [
+        ...deviceLists[0].aps,
+        ...deviceLists[1].gateways,
+        ...deviceLists[2].switches,
+      ];
     } catch (e) {
-      console.error(e);
       errorToast(f7, e);
     } finally {
       loaded = true;
@@ -118,6 +129,8 @@
     if (selectedDevices.includes(serial))
       selectedDevices.splice(selectedDevices.indexOf(serial), 1);
     else selectedDevices.push(serial);
+    // Add svelte reactivity
+    selectedDevices = [...selectedDevices];
   }
 
   function moveDeviceClick(device) {
@@ -149,13 +162,7 @@
             f7.toast.show({ text: message, closeTimeout: 2000 });
           })
           .catch((e) => {
-            console.error(e);
-            f7.toast.show({
-              text: e?.options?.responseBody?.description
-                ? e.options.responseBody.description
-                : JSON.stringify(e),
-              closeTimeout: 2000,
-            });
+            errorToast(f7, e, { defaultTimeout: 2000 });
           })
           .finally(() => {
             loadData();
@@ -218,10 +225,13 @@
     <ActionsGroup>
       <ActionsButton color="red">Cancel</ActionsButton>
     </ActionsGroup>
-  </Actions>
-  <BlockTitle>Devices</BlockTitle>
+  </Actions>{#if loaded}
+    <BlockTitle>Devices (Total: {devicesTotal})</BlockTitle>
+  {:else}
+    <BlockTitle>Devices (Total: {devicesTotal})</BlockTitle>
+  {/if}
   <List class="search-list">
-    {#if !devices.length}
+    {#if !loaded}
       {#each [{ ios: "material:cable", aurora: "material:cable", md: "material:cable" }, { ios: "material:cable", aurora: "material:cable", md: "material:cable" }, { ios: "f7:wifi", aurora: "f7:wifi", md: "material:wifi" }, { ios: "f7:wifi", aurora: "f7:wifi", md: "material:wifi" }, { ios: "material:router", aurora: "material:router", md: "material:router" }, { ios: "material:router", aurora: "material:router", md: "material:router" }].sort((a, b) => 0.5 - Math.random()) as icon}
         <ListItem
           class={theme.ios
@@ -277,5 +287,8 @@
         {/if}
       </ListItem>
     {/each}
+    {#if loaded && !devices?.length}
+      <ListItem>No entries</ListItem>
+    {/if}
   </List>
 </Page>

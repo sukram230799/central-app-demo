@@ -1,8 +1,9 @@
 import axios from 'axios';
+import { get } from 'svelte/store';
 import {
   currentAccountStore, accountsStore,
   selectedFilterStore, selectedFilterDefaults, timeRanges,
-  groupCacheStore, labelCacheStore, siteCacheStore,
+  groupCacheStore, labelCacheStore, siteCacheStore, currentAccountIdStore, notificationSettingsStore, webhookStore,
 } from './svelte-store.js';
 
 // const proxy = `${window.location.origin}/api-proxy`;
@@ -119,6 +120,16 @@ class Central {
    */
   async patch(path, options = {}) {
     return await this.request(path, { ...options, method: 'PATCH' });
+  }
+
+  /**
+ * Send PUT request via proxy
+ * @param {string} path Path to request from central api
+ * @param {{ data: {}, headers: {}, params: {} }} options Options to pass to central
+ * @returns {Object}
+ */
+  async put(path, options = {}) {
+    return await this.request(path, { ...options, method: 'PUT' });
   }
 
   /**
@@ -403,9 +414,10 @@ class Central {
   }
 
   async listUnifiedClientsAutoFiltered() {
-    // debugger;
     let filters = {
-      group: this.filters.group, site: this.filters.site, label: this.filters.label,
+      group: this.filters.group ? this.filters.group : null,
+      site: this.filters.site ? this.filters.site : null,
+      label: this.filters.label ? this.filters.label : null,
       client_status: this.filters.clientStatus, network: this.filters.network,
       serial: this.filters.serial, swarm_id: this.filters.swarmId, cluster_id: this.filters.clusterId, band: this.filters.band,
       stack_id: this.filters.stackId, os_type: this.filters.osType,
@@ -423,8 +435,16 @@ class Central {
   async listUnifiedClientsFiltered({ filters }) {
     if (this.filters.clientType === 'both') {
       const [wiredResponse, wirelsessResponse] = await Promise.all([
-        this.listUnifiedClients({ ...filters, client_type: 'WIRED' }),
-        this.listUnifiedClients({ ...filters, client_type: 'WIRELESS' }),
+        this.listUnifiedClients({
+          calculate_total: true,
+          ...filters,
+          client_type: 'WIRED',
+        }),
+        this.listUnifiedClients({
+          calculate_total: true,
+          ...filters,
+          client_type: 'WIRELESS',
+        }),
       ]);
       return {
         count: wiredResponse.count + wirelsessResponse.count,
@@ -436,6 +456,10 @@ class Central {
         ]
       };
     }
+    filters = {
+      calculate_total: true,
+      ...filters,
+    };
     return await this.listUnifiedClients(filters);
   }
 
@@ -463,7 +487,13 @@ class Central {
    */
   async listAccessPoints({ filters } = {}) {
     let apsResponse = await this.get('monitoring/v2/aps', {
-      params: filters
+      params: {
+        calculate_total: true,
+        ...filters,
+        group: this.filters.group ? this.filters.group : null,
+        site: this.filters.site ? this.filters.site : null,
+        label: this.filters.label ? this.filters.label : null,
+      }
     });
 
     return this.handleResponse(apsResponse);
@@ -471,15 +501,21 @@ class Central {
 
   /**
    * List Gateways
-   * @param {{params}} param0 Params
-   * @returns {{  "count": number,  "total": 4,  "gateways": []}}
+   * @param {{ filters: {} }} param Filters
+   * @returns {{ count: number,  total: number,  gateways: []}}
    * Get switches You can only specify one of group, label and stack_id parameters. 
    * ---
    * https://developer.arubanetworks.com/aruba-central/reference/apiexternal_controllerget_switches
    */
   async listGateways({ filters } = {}) {
     let gatewaysResponse = await this.get('monitoring/v1/gateways', {
-      params: filters
+      params: {
+        calculate_total: true,
+        ...filters,
+        group: this.filters.group ? this.filters.group : null,
+        site: this.filters.site ? this.filters.site : null,
+        label: this.filters.label ? this.filters.label : null,
+      }
     });
 
     return this.handleResponse(gatewaysResponse);
@@ -493,7 +529,13 @@ class Central {
    */
   async listSwitches({ filters } = {}) {
     let switchesResponse = await this.get('monitoring/v1/switches', {
-      params: filters
+      params: {
+        calculate_total: true,
+        ...filters,
+        group: this.filters.group ? this.filters.group : null,
+        site: this.filters.site ? this.filters.site : null,
+        label: this.filters.label ? this.filters.label : null,
+      }
     });
 
     return this.handleResponse(switchesResponse);
@@ -929,9 +971,12 @@ class Central {
   }
 
   /**
-   * 
+   * List notifications
    * @param {{ customer_id, group, label, serial, site, from_timestamp, to_timestamp, severity, type, search, calculate_total: boolean, ack: boolean, fields, offset: int, limit: int }} params 
    * @returns {{"count":1,"total":84,"notifications":[{"id":"AWLTCw983zA1xiLvI9DF","severity":"Major","customer_id":"f28b6bc3e46c42a88bc27ff4713496fa","device_id":"SN1000012","details":{},"nid":"4","settings_id":"f28b6bc3e46c42a88bc27ff4713496fa-4","timestamp":1523958870,"group_name":"IAP 5GHz","labels":["dual_5GHz"],"type":"AP disconnected","acknowledged":false,"description":"AP with Name IAP_345_1 and MAC address c8:b5:ad:c3:b2:02 disconnected","state":"Open","acknowledged_by":"user1","acknowledged_timestamp":1523958870,"created_timestamp":1523958870}]}}
+   * Get notifications. You can only specify one of group, label parameters.
+   * ---
+   * https://developer.arubanetworks.com/aruba-central/reference/apinotifications_external_apiget_notifications_api
    */
   async listNotifications(params = {}) {
     let response = await this.get('central/v1/notifications', {
@@ -940,6 +985,185 @@ class Central {
 
     return this.handleResponse(response)
   }
+
+  /**
+   * Acknowledge Notifications by ID List / All
+   * @param {{notificationIds: [string]}} param0 
+   * @returns 
+   * Update notifications. This is used for acknowledging a list of notifications. This is an async operation.
+   * ---
+   * https://developer.arubanetworks.com/aruba-central/reference/apinotifications_external_apiacknowledge_notifications
+   */
+  async acknowledgeNotifications({ notificationIds }) {
+    let response = await this.post('central/v1/notifications', { data: notificationIds });
+
+    return this.handleResponse(response);
+  }
+
+  /**
+   * Acknowledge Notification
+   * @param {{ notification_id: string, acknowledged: boolean }} param 
+   * @param {boolean} param.acknowledged Notification acknowledgement status. Currently acknowledge is only supported and unacknowledge is not supported.
+   * @returns 
+   * Update a notification. This is used for acknowledging a notification.
+   * 
+   * ---
+   * https://developer.arubanetworks.com/aruba-central/reference/apinotifications_external_apiacknowledge_notification
+   */
+  async acknowledgeNotification({ notification_id, acknowledged }) {
+    let response = await this.patch(`central/v1/notifications/${notification_id}`, { data: { acknowledged: acknowledged } });
+
+    return this.handleResponse(response);
+  }
+
+  /* NOTIFICATION SETTINGS */
+
+  /**
+   * List Notification Settings
+   * @param {{ search: string, limit: int, offset: int, sort}} params
+   * @returns {{"count":1,"settings":[{"setting_id":"201610195243-1254","type":"CONNECTED_CLIENTS","rules":[{"severity":"Critical","delivery_options":["Email"],"emails":["someone@something.com","sometwo@something.com"],"webhooks":["e829a0f6-1e36-42fe-bafd-631443cbd581","e26450be-4dac-435b-ac01-15d8f9667eb8"],"group":["group-1","group-2"],"label":["label-1","label-2"],"site":["Arizona-Site","California-2"],"device_id":["SN7323721","SN8462537"],"transform_func":"percentage","conditions":[{"expression":{"value":50,"operator":">="},"severity":"Warning"}],"filters":[{"key":"band","values":"5 GHz","operator":"in"}],"duration":10,"aggr_context":"swarm","value":"string"}],"active":true,"created_ts":1523609395.009575,"created_by":"someone@something.com","updated_ts":1523612330.82353,"updated_by":"someone@something.com"}]}} 
+   * Get a list of settings
+   * ---
+   * https://developer.arubanetworks.com/aruba-central/reference/apinotifications_external_apiget_settings_api
+   */
+  async listNotificationSettings(params = {}) {
+    let response = await this.get('central/v1/notifications/settings', { params });
+
+    let result = this.handleResponse(response);
+
+    notificationSettingsStore.update(result.settings);
+
+    return result;
+  }
+
+  /**
+   * Add Notification Setting
+   * @param {{ type: string, rules: Array, active:boolean = true }} param0 
+   * @returns {{ "result": "201610195243-1252" }}
+   * Add Notification Setting
+   * PLEASE DO REFRESH WITH `listNotificationSettings`
+   * ---
+   * https://developer.arubanetworks.com/aruba-central/reference/apinotifications_external_apiadd_setting_api
+   */
+  async addNotificationSetting({ type, rules, active = true }) {
+    let response = await this.post('central/v1/notifications/settings', {
+      data: {
+        type, rules, active
+      }
+    })
+
+    return this.handleResponse(response)
+  }
+
+  /**
+   * Delete Notification Setting
+   * @param {{setting_id: string}} param0 
+   * @returns 
+   * Delete Notification Setting
+   * PLEASE DO REFRESH WITH `listNotificationSettings`
+   * ---
+   * https://developer.arubanetworks.com/aruba-central/reference/apinotifications_external_apidelete_setting_api
+   */
+  async deleteNotificationSetting({ settings_id }) {
+    let response = await this.delete(`central/v1/notifications/settings/${settings_id}`);
+
+    return this.handleResponse(response)
+  }
+
+  /**
+   * Update Notification Settings
+   * @param {{ settings_id: string, setting: { type: string, rules: Array, active:boolean = true } }} param0 
+   * @returns 
+   * Update Notification Settings
+   * ---
+   * https://developer.arubanetworks.com/aruba-central/reference/apinotifications_external_apiupdate_setting_api
+   */
+  async updateNotificationSetting({ settings_id, setting }) {
+    let response = await this.put(`central/v1/notifications/settings/${settings_id}`, { data: setting });
+
+    return this.handleResponse(response)
+  }
+
+
+  /* WEBHOOKS */
+
+  /**
+   * List webhooks
+   * @returns {{ "count": 1,  "settings": [{"wid": "e26450be-4dac-435b-ac01-15d8f9667eb8","name": "AAA","updated_ts": 1523956927,"urls": ["https://example.org/webhook1","https://example.org/webhook1"],"secure_token": {"token": "KEu5ZPTi44UO4MnMiOqz","ts": 1573461177}}]}}
+   * Get a list of webhooks
+   * ---
+   * https://developer.arubanetworks.com/aruba-central/reference/apidispatcher_external_apiget_webhooks_api
+   * */
+  async listWebhooks() {
+    let response = await this.get('central/v1/webhooks');
+
+    return this.handleResponse(response);
+  }
+
+  generateWebhookName() {
+    return `Central Toolkit - ${get(currentAccountIdStore)}`
+  }
+
+  /**
+   * Add Webhook
+   * @param {{ url: string}} 
+   * @returns {{ name: string, wid: string }}
+   * Add webhook
+   * ---
+   * https://developer.arubanetworks.com/aruba-central/reference/apidispatcher_external_apiadd_webhook_api
+   */
+  async addWebhook({ url }) {
+    let response = await this.post('central/v1/webhooks', {
+      data: {
+        name: this.generateWebhookName(),
+        urls: [url]
+      }
+    });
+
+    return this.handleResponse(response);
+  }
+
+  /**
+   * Update webhook settings
+   * @param {{ wid: string, url: string}} 
+   * @returns {{ data: { url: string} }}
+   * Update webhook settings
+   * ---
+   * https://developer.arubanetworks.com/aruba-central/reference/apidispatcher_external_apiupdate_webhook_api
+   */
+  async updateWebhook({ wid, url }) {
+    let response = await this.put(`central/v1/webhooks/${wid}`, {
+      data: {
+        name: `Central Toolkit - ${get(currentAccountIdStore)}`,
+        urls: [url]
+      }
+    });
+
+    return this.handleResponse(response);
+  }
+
+  /**
+   * Delete Webhook
+   * @param {{ wid: string}}
+   * @returns {{"wid": "e26450be-4dac-435b-ac01-15d8f9667eb8"}}
+   * Delete Webhook
+   * ---
+   * https://developer.arubanetworks.com/aruba-central/reference/apidispatcher_external_apidelete_webhook_api
+   */
+  async deleteWebhook({ wid }) {
+    let response = await this.delete(`central/v1/webhooks/${wid}`);
+
+    return this.handleResponse(response);
+  }
+
+  /** Test Webhook */
+  async testWebhook({ wid } = {}) {
+    if (!wid) wid = get(webhookStore);
+    let response = await this.get(`central/v1/webhooks/${wid}/ping`)
+
+    return this.handleResponse(response);
+  }
+
 }
 
 export const central = new Central();
